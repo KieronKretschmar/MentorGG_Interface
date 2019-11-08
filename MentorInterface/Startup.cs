@@ -10,9 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNet.Security.OpenId;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+using MentorInterface.Authentication;
 
 namespace MentorInterface
 {
@@ -30,15 +28,6 @@ namespace MentorInterface
         {
             services.AddControllers();
             services.AddApiVersioning();
-
-            Task handler(OpenIdAuthenticatedContext context)
-            {
-                System.Diagnostics.Debug.WriteLine("AUTH");
-                System.Diagnostics.Debug.WriteLine(context.Identity.Name);
-
-                // Required
-                return Task.FromResult<object>(null);
-            };
             
             // Add Steam OpenID 2.0
             // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId.Steam
@@ -58,7 +47,7 @@ namespace MentorInterface
             .AddSteam(options =>
             {
                 options.ApplicationKey = "655E147019BFCCB80F90E06B17F9AA41";
-                options.Events.OnAuthenticated += handler;         
+                options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
             });
 
         }
