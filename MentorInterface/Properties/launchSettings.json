@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "v1.0/Test",
+      "launchUrl": "v1.0/Verify",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -20,7 +20,7 @@
     "MentorInterface": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "v1.0/Test",
+      "launchUrl": "v1.0/Verify",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
