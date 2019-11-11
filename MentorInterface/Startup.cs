@@ -38,7 +38,7 @@ namespace MentorInterface
             var steamApplicationKey = authentication.GetSection("SteamApplicationKey").Value;
             if(steamApplicationKey == null)
             {
-                throw new System.ArgumentException("SteamApplicationKey is missing, check `appsettings.json`");
+                throw new ArgumentException("SteamApplicationKey is missing, check `appsettings.json`");
             }
 
             services.AddAuthentication(options =>
