@@ -28,10 +28,18 @@ namespace MentorInterface
         {
             services.AddControllers();
             services.AddApiVersioning();
-            
+
             // Add Steam OpenID 2.0
             // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId.Steam
             // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId
+
+            // Load the Authentication Section from `appsettings.json` and confirm the entry exists.
+            var authentication = Configuration.GetSection("Authentication");
+            var steamApplicationKey = authentication.GetSection("SteamApplicationKey").Value;
+            if(steamApplicationKey == null)
+            {
+                throw new System.ArgumentException("SteamApplicationKey is missing, check `appsettings.json`");
+            }
 
             services.AddAuthentication(options =>
             {
@@ -46,7 +54,7 @@ namespace MentorInterface
 
             .AddSteam(options =>
             {
-                options.ApplicationKey = "655E147019BFCCB80F90E06B17F9AA41";
+                options.ApplicationKey = steamApplicationKey;
                 options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
             });
 
