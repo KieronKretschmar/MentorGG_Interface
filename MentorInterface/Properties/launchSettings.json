@@ -14,6 +14,7 @@
       "launchBrowser": true,
       "launchUrl": "v1.0/Verify",
       "environmentVariables": {
+        "STEAM_API_KEY": "655E147019BFCCB80F90E06B17F9AA41",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
