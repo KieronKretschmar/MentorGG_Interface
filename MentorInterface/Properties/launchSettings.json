@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "v1.0/Verify",
+      "launchUrl": "/swagger/",
       "environmentVariables": {
         "STEAM_API_KEY": "655E147019BFCCB80F90E06B17F9AA41",
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -21,7 +21,7 @@
     "MentorInterface": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "v1.0/Verify",
+      "launchUrl": "/swagger/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

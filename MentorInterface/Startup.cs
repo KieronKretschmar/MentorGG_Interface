@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNet.Security.OpenId;
 using MentorInterface.Authentication;
+using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 
 namespace MentorInterface
 {
@@ -36,7 +38,15 @@ namespace MentorInterface
             // LetsEncrypt
             services.AddLetsEncrypt();
 
-            // Add Steam OpenID 2.0
+            #region Swagger
+            services.AddSwaggerGen(options =>
+            {
+                OpenApiInfo interface_info = new OpenApiInfo { Title = "Mentor Interface", Version = "v1", };
+                options.SwaggerDoc("v1", interface_info);
+            });
+            #endregion
+
+            #region Steam Authentication
             // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId.Steam
             // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId
 
@@ -63,6 +73,7 @@ namespace MentorInterface
                 options.ApplicationKey = steamApplicationKey;
                 options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
             });
+            #endregion
 
         }
 
@@ -79,6 +90,15 @@ namespace MentorInterface
             {
                 app.UseHttpsRedirection();
             }
+
+            #region Swagger
+            app.UseSwagger();
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mentor Interface");
+            });
+            #endregion
 
 
             app.UseRouting();
