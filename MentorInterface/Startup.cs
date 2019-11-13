@@ -34,8 +34,6 @@ namespace MentorInterface
         {
             services.AddControllers();
             services.AddApiVersioning();
-
-            // LetsEncrypt
             services.AddLetsEncrypt();
 
             #region Swagger
