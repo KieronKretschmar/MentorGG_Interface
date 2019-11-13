@@ -14,3 +14,9 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/out .
 ENTRYPOINT ["dotnet", "MentorInterface.dll"]
+
+# Enable HTTPS
+#ENV ASPNETCORE_URLS="https://+;http://+"
+
+# Enable Development Mode
+# ENV ASPNETCORE_ENVIRONMENT="Development"
