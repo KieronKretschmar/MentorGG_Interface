@@ -12,10 +12,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MentorInterface.Controllers
 {
+    /// <summary>
+    /// Controller for Authenticating with Steam OpenID 2.0
+    /// </summary>
     [Route("[controller]")]
     public class AuthenticationController : Controller
     {
-        // GET: <controller>/signin
+        /// <summary>
+        /// Create a sign in session with Steam OpenID 2.0
+        /// </summary>
+        /// <param name="returnUrl">Where to return to once successfully authenticated.</param>
+        /// <returns></returns>
         [HttpGet("signin/{returnUrl?}")]
         public IActionResult SteamSignIn(string returnUrl = "/")
         {
@@ -26,7 +33,11 @@ namespace MentorInterface.Controllers
                 authentication_provider);
         }
 
-        // POST <controller>/signout
+        /// <summary>
+        /// Sign out of the current session.
+        /// </summary>
+        /// <param name="returnUrl">Where to return to once successfully signed out.</param>
+        /// <returns></returns>
         [HttpPost("signout/{returnUrl?}")]
         public IActionResult SignOut(string returnUrl = "/")
         {

@@ -13,11 +13,20 @@ using AspNet.Security.OpenId;
 using MentorInterface.Authentication;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
 
 namespace MentorInterface
 {
+    /// <summary>
+    /// Congifure the WebApi's enviroment.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Extend and apply a supplied configuration.
+        /// </summary>
+        /// <param name="configuration">Configuration</param>
         public Startup(IConfiguration configuration)
         {
             Configuration = new ConfigurationBuilder()
@@ -26,10 +35,16 @@ namespace MentorInterface
                 .Build();
         }
 
+        /// <summary>
+        /// Current configuration.
+        /// </summary>
         public IConfiguration Configuration { get; }
 
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// Add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -41,6 +56,11 @@ namespace MentorInterface
             {
                 OpenApiInfo interface_info = new OpenApiInfo { Title = "Mentor Interface", Version = "v1", };
                 options.SwaggerDoc("v1", interface_info);
+
+                // Generate documentation based on the Docstrings provided.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
             });
             #endregion
 
@@ -75,7 +95,11 @@ namespace MentorInterface
 
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// Configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 

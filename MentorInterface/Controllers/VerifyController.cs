@@ -10,11 +10,17 @@ using System.Security.Claims;
 
 namespace MentorInterface.Controllers
 {
+    /// <summary>
+    /// Controller for Verifying Authentication
+    /// </summary>
     [ApiVersion("1.0")]
     [Route("v{version:apiVersion}/[controller]")]
     public class VerifyController : Controller
     {
-        // GET: v<version>/<controller>
+        /// <summary>
+        /// Verify that the caller is Authenticated.
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         [HttpGet]
         public IActionResult Get()
