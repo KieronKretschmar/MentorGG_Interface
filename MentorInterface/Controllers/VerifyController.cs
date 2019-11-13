@@ -30,7 +30,8 @@ namespace MentorInterface.Controllers
             {
                 return BadRequest();
             }
-            return Content($"{identity.Name} has been successfully authenticated.");
+            return Content(
+                $"Name: {identity.Name}, AuthType: {identity.AuthenticationType}, Claims: {identity.Claims}");
         }
     }
 }
