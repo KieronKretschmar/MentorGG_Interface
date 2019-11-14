@@ -102,17 +102,21 @@ namespace MentorInterface
 
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultScheme = "OpenID.Steam";
             })
 
-            .AddCookie(options =>
+            .AddCookie(
+                authenticationScheme: "OpenID.Steam",
+                options =>
             {
+                options.Cookie.Name = "OpenID Steam Cookie";
                 options.LoginPath = "/authentication/signin";
                 options.LogoutPath = "/authentication/signout";
             })
 
             .AddSteam(options =>
             {
+                options.SignInScheme = "OpenID.Steam";
                 options.ApplicationKey = steamApplicationKey;
                 options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
             });
