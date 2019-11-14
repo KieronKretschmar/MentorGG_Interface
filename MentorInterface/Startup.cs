@@ -15,6 +15,9 @@ using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
+using Microsoft.AspNetCore.Identity;
+using MentorInterface.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace MentorInterface
 {
@@ -50,6 +53,28 @@ namespace MentorInterface
             services.AddControllers();
             services.AddApiVersioning();
             services.AddLetsEncrypt();
+
+            #region Identity
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseMySql("server=localhost;userid=mentor_interface;password=mentorgg;database=users;persistsecurityinfo=True");
+            });
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = "Identity.Cookie";
+                options.LoginPath = "/authentication/signin";
+                options.LogoutPath = "/authentication/signout";
+            });
+
+
+            #endregion
+
 
             #region Swagger
             services.AddSwaggerGen(options =>
