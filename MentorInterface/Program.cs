@@ -30,6 +30,15 @@ namespace MentorInterface
         /// <returns></returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(options =>
+                {
+                    //options.ClearProviders();
+                    options.AddConsole(o => 
+                    {
+                        o.TimestampFormat = "[HH:mm:ss]";
+                        }
+                    );
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

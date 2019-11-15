@@ -4,8 +4,11 @@
  * for more information concerning the license and the contributors participating to this project.
  */
 
+using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MentorInterface.Authentication;
 using MentorInterface.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace MentorInterface.Controllers
 {
@@ -22,6 +26,8 @@ namespace MentorInterface.Controllers
     [Route("[controller]")]
     public class AuthenticationController : Controller
     {
+        private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<AuthenticationController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
@@ -30,10 +36,14 @@ namespace MentorInterface.Controllers
         /// </summary>
         public AuthenticationController(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AuthenticationController> logger,
+            IAuthenticationService authenticationService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
+            _authenticationService = authenticationService;
         }
 
         /// <summary>
@@ -45,9 +55,9 @@ namespace MentorInterface.Controllers
         {
             var props = new AuthenticationProperties {
                 
-                RedirectUri = Url.Action("ExternalLoginCallback", "Authentication", new { ReturnUrl = returnUrl}),
+                RedirectUri = Url.Action("SteamLoginCallback", "Authentication", new { ReturnUrl = returnUrl}),
             };
-            return new ChallengeResult("Steam", props);
+            return new ChallengeResult(MentorAuthenticationSchemes.STEAM, props);
         }
 
         /// <summary>
@@ -55,30 +65,56 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="returnUrl"></param>
         /// <returns></returns>
-        public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
+        /// 
+        /// Ignore this Endpoint from Swagger Documentation.
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<ActionResult> SteamLoginCallback(string returnUrl)
         {
-            AuthenticateResult result = await HttpContext.RequestServices.GetRequiredService<IAuthenticationService>().AuthenticateAsync(HttpContext, "OpenID.Steam");
-            System.Diagnostics.Debug.WriteLine(result.Succeeded);
-            System.Diagnostics.Debug.WriteLine(result.Ticket.Properties.Items);
-            System.Diagnostics.Debug.WriteLine(result.Ticket.AuthenticationScheme);
-            System.Diagnostics.Debug.WriteLine(result.Ticket.Principal.Claims);
-            System.Diagnostics.Debug.WriteLine(result.Ticket.Properties.Parameters);
-            System.Diagnostics.Debug.WriteLine(result.Principal.Claims);
-            System.Diagnostics.Debug.WriteLine(result.Principal.Identity);
+            // Get the Authentication Result
+            AuthenticateResult result = await _authenticationService
+                .AuthenticateAsync(HttpContext, MentorAuthenticationSchemes.STEAM);
 
-            AuthenticateResult result = await HttpContext.RequestServices.GetRequiredService<OpenIdAuthenticationExtensions>()
+            //AuthenticateResult id_result = await _authenticationService
+            //    .AuthenticateAsync(HttpContext, IdentityConstants.ExternalScheme);
 
-            foreach (var claim in User.Claims)
+            ClaimsIdentity result_identity = result.Principal.Identity as ClaimsIdentity;
+            var result_claim = result_identity.Claims.First();
+
+            // Get the steam community URL
+            // steamcommunity.com/openid/id/76561198004197138
+            var steam_claim = result_claim.Value;
+
+            // Extract the SteamID
+            long steamID;
+            try
             {
-                System.Diagnostics.Debug.WriteLine(claim);
+                long.TryParse(steam_claim.Split('/').Last(), out steamID);
+                _logger.LogInformation($"Successful SteamID Retreival {steamID}");
             }
-            //var claimsPrincipal = await HttpContext.Authentication.AuthenticateAsync("ExternalCookie");
-            var identity = User.Identity as ClaimsIdentity;
-            if (identity == null)
+            catch (Exception exception)
             {
-                return BadRequest();
+                _logger.LogError(exception, "Failed to retreive SteamID");
+                return StatusCode(500);
             }
-            return Content("");
+
+            
+
+            // Attempt to Login
+
+            // Create User
+            var user = new ApplicationUser(steamID);
+            var create_result = await _userManager.CreateAsync(user);
+
+            if (create_result.Succeeded)
+            {
+                var login_result = _userManager.AddLoginAsync(user, new UserLoginInfo("Steam", steam_claim, user.SteamID.ToString()));
+                if (login_result.IsCompletedSuccessfully)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                }
+            }
+
+            return Redirect(returnUrl);
         }
 
         /// <summary>

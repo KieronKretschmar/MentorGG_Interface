@@ -18,6 +18,7 @@ using System.IO;
 using Microsoft.AspNetCore.Identity;
 using MentorInterface.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace MentorInterface
 {
@@ -62,31 +63,15 @@ namespace MentorInterface
             });
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    options.Cookie.Name = "Identity.Cookie";
-            //    options.LoginPath = "/authentication/signin";
-            //    options.LogoutPath = "/authentication/signout";
-            //});
-
-
-            #endregion
-
-
-            #region Swagger
-            services.AddSwaggerGen(options =>
+            services.ConfigureApplicationCookie(options =>
             {
-                OpenApiInfo interface_info = new OpenApiInfo { Title = "Mentor Interface", Version = "v1", };
-                options.SwaggerDoc("v1", interface_info);
-
-                // Generate documentation based on the Docstrings provided.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                options.IncludeXmlComments(xmlPath);
+                options.Cookie.Name = "Identity.Cookie";
+                options.LoginPath = "/authentication/login";
+                options.LogoutPath = "/authentication/signout";
             });
+
             #endregion
 
             #region Steam Authentication
@@ -100,28 +85,28 @@ namespace MentorInterface
                 //throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = "OpenID.Steam";
-            })
-
-            .AddCookie(
-                authenticationScheme: "OpenID.Steam",
-                options =>
-            {
-                options.Cookie.Name = "OpenID Steam Cookie";
-                options.LoginPath = "/authentication/signin";
-                options.LogoutPath = "/authentication/signout";
-            })
-
-            .AddSteam(options =>
-            {
-                options.SignInScheme = "OpenID.Steam";
-                options.ApplicationKey = steamApplicationKey;
-                options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
-            });
+            services
+                .AddAuthentication(defaultScheme: MentorAuthenticationSchemes.STEAM)
+                .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
+                {
+                    options.ApplicationKey = steamApplicationKey;
+                    options.SaveTokens = true;
+                    options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
+                });
             #endregion
 
+            #region Swagger
+            services.AddSwaggerGen(options =>
+            {
+                OpenApiInfo interface_info = new OpenApiInfo { Title = "Mentor Interface", Version = "v1", };
+                options.SwaggerDoc("v1", interface_info);
+
+                // Generate documentation based on the Docstrings provided.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
+            #endregion
 
         }
 
@@ -151,7 +136,6 @@ namespace MentorInterface
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mentor Interface");
             });
             #endregion
-
 
             app.UseRouting();
 

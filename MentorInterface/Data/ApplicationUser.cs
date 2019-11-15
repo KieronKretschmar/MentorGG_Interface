@@ -14,6 +14,15 @@ namespace MentorInterface.Data
         /// <summary>
         /// SteamID
         /// </summary>
-        public string SteamID { get; set; }
+        public long SteamID { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ApplicationUser(long steamID) : base() 
+        {
+            SteamID = steamID;
+            UserName = "test";
+        }
     }
 }
