@@ -21,8 +21,7 @@ namespace MentorInterface.Authentication
             System.Diagnostics.Debug.WriteLine("AUTH");
             System.Diagnostics.Debug.WriteLine(context.Identity.Name);
 
-            // Required
-            return Task.FromResult<object>(null);
+            return Task.CompletedTask;
         }
     }
 }

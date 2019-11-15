@@ -65,12 +65,12 @@ namespace MentorInterface
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Identity.Cookie";
-                options.LoginPath = "/authentication/signin";
-                options.LogoutPath = "/authentication/signout";
-            });
+            //services.ConfigureApplicationCookie(options =>
+            //{
+            //    options.Cookie.Name = "Identity.Cookie";
+            //    options.LoginPath = "/authentication/signin";
+            //    options.LogoutPath = "/authentication/signout";
+            //});
 
 
             #endregion
@@ -97,7 +97,7 @@ namespace MentorInterface
             var steamApplicationKey = Configuration.GetSection("STEAM_API_KEY").Value;
             if(steamApplicationKey == null)
             {
-                throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
+                //throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
 
             services.AddAuthentication(options =>
@@ -121,6 +121,7 @@ namespace MentorInterface
                 options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
             });
             #endregion
+
 
         }
 
@@ -154,7 +155,9 @@ namespace MentorInterface
 
             app.UseRouting();
 
+            // Who is the user?
             app.UseAuthentication();
+            // Is the user allowed to perform this action?
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
