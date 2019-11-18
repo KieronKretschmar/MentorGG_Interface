@@ -30,8 +30,14 @@ namespace MentorInterface.Controllers
             {
                 return BadRequest();
             }
+
+            string claims_string = "";
+            foreach (Claim c in identity.Claims)
+            {
+                claims_string += c.Value + ", ";
+            }
             return Content(
-                $"Name: {identity.Name}, AuthType: {identity.AuthenticationType}, Claims: {identity.Claims}");
+                $"Name: {identity.Name}, AuthType: {identity.AuthenticationType}, Claims: {claims_string}");
         }
     }
 }
