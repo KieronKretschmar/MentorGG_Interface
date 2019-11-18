@@ -5,6 +5,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -50,22 +51,32 @@ namespace MentorInterface.Controllers
         /// 
         /// </summary>
         /// <returns></returns>
-        [HttpGet("login/{returnUrl?}")]
-        public IActionResult Login(string returnUrl = "/")
+        [HttpGet("steam_signin/{returnUrl?}")]
+        public IActionResult SteamSignIn(string returnUrl = "/")
         {
             var props = new AuthenticationProperties {
-                
-                RedirectUri = Url.Action("SteamLoginCallback", "Authentication", new { ReturnUrl = returnUrl}),
+                RedirectUri = Url.Action("SteamLoginCallback", "Authentication",
+                new { ReturnUrl = returnUrl}),
             };
             return new ChallengeResult(MentorAuthenticationSchemes.STEAM, props);
         }
 
         /// <summary>
-        /// 
+        /// Sign out of the current session.
         /// </summary>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Where to return to once successfully signed out.</param>
         /// <returns></returns>
-        /// 
+        [HttpPost("steam_signout/{returnUrl?}")]
+        public IActionResult SteamSignOut(string returnUrl = "/")
+        {
+            // Instruct the cookies middleware to delete the local cookie created
+            // when the user agent is redirected from the external identity provider
+            // after a successful authentication flow (e.g Google or Facebook).
+            return SignOut(
+                new AuthenticationProperties { RedirectUri = returnUrl },
+                MentorAuthenticationSchemes.STEAM);
+        }
+
         /// Ignore this Endpoint from Swagger Documentation.
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult> SteamLoginCallback(string returnUrl)
@@ -74,78 +85,57 @@ namespace MentorInterface.Controllers
             AuthenticateResult result = await _authenticationService
                 .AuthenticateAsync(HttpContext, MentorAuthenticationSchemes.STEAM);
 
-            //AuthenticateResult id_result = await _authenticationService
-            //    .AuthenticateAsync(HttpContext, IdentityConstants.ExternalScheme);
-
             ClaimsIdentity result_identity = result.Principal.Identity as ClaimsIdentity;
-            var result_claim = result_identity.Claims.First();
+            Claim steam_claim = result_identity.Claims.First();
 
-            // Get the steam community URL
-            // steamcommunity.com/openid/id/76561198004197138
-            var steam_claim = result_claim.Value;
+            var claim_users = await _userManager.GetUsersForClaimAsync(steam_claim);
+            if (claim_users.Any())
+            {
+                ApplicationUser existing_user = claim_users.First();
+                try
+                {
+                    // This call will gather all claims regarding this user and attempt to sign in.
+                    await _signInManager.SignInAsync(existing_user, isPersistent: true);
+                    return Redirect(returnUrl);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "SignIn failed for a ApplicationUser with an attached Claim");
+                    return StatusCode(500);
+                }
+            }
 
-            // Extract the SteamID
-            long steamID;
+            // Create a new ApplicationUser
+            ApplicationUser new_user;
             try
             {
-                long.TryParse(steam_claim.Split('/').Last(), out steamID);
-                _logger.LogInformation($"Successful SteamID Retreival {steamID}");
+                new_user = new ApplicationUser(community_url: steam_claim.Value);
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                _logger.LogError(exception, "Failed to retreive SteamID");
+                _logger.LogError(e, "Failed to create new user from Steam Community URL");
                 return StatusCode(500);
             }
 
-            
-
-            // Attempt to Login
-
-            // Create User
-            var user = new ApplicationUser(steamID);
-            var create_result = await _userManager.CreateAsync(user);
-
-            if (create_result.Succeeded)
+            // Attempt to add the new user to the connected data store.
+            var create_new_user_result = await _userManager.CreateAsync(new_user);
+            if (create_new_user_result.Succeeded)
             {
-                var login_result = _userManager.AddLoginAsync(user, new UserLoginInfo("Steam", steam_claim, user.SteamID.ToString()));
-                if (login_result.IsCompletedSuccessfully)
+                // Assign the steam claim to the user
+                var claim_result = await _userManager.AddClaimAsync(new_user, steam_claim);
+                if (claim_result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    await _signInManager.SignInAsync(new_user, isPersistent: true);
                 }
+            }
+            else
+            {
+                string errors = create_new_user_result.Errors.ToString();
+                _logger.LogError("Error creating User: " + errors);
             }
 
             return Redirect(returnUrl);
         }
 
-        /// <summary>
-        /// Create a sign in session with Steam OpenID 2.0
-        /// </summary>
-        /// <param name="returnUrl">Where to return to once successfully authenticated.</param>
-        /// <returns></returns>
-        [HttpGet("signin/{returnUrl?}")]
-        public IActionResult SteamSignIn(string returnUrl = "/")
-        {
-            // Authentication provider is defined in ``Startup.cs``
-            string authentication_provider = "Steam";
-            return Challenge(
-                new AuthenticationProperties { RedirectUri = returnUrl },
-                authentication_provider);
-        }
-
-        /// <summary>
-        /// Sign out of the current session.
-        /// </summary>
-        /// <param name="returnUrl">Where to return to once successfully signed out.</param>
-        /// <returns></returns>
-        [HttpPost("signout/{returnUrl?}")]
-        public IActionResult SignOut(string returnUrl = "/")
-        {
-            // Instruct the cookies middleware to delete the local cookie created
-            // when the user agent is redirected from the external identity provider
-            // after a successful authentication flow (e.g Google or Facebook).
-            return SignOut(
-                new AuthenticationProperties { RedirectUri = returnUrl },
-                CookieAuthenticationDefaults.AuthenticationScheme);
-        }
     }
 }

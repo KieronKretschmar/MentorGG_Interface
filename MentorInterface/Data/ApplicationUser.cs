@@ -22,7 +22,20 @@ namespace MentorInterface.Data
         public ApplicationUser(long steamID) : base() 
         {
             SteamID = steamID;
-            UserName = "test";
+            UserName = steamID.ToString();
+        }
+
+        /// <summary>
+        /// Create a user from a Steam community URL.
+        /// pattern: "steamcommunity.com/openid/id/76561198004197138"
+        /// </summary>
+        /// <param name="community_url"></param>
+        public ApplicationUser(string community_url) : base()
+        {
+            long steamID;
+            long.TryParse(community_url.Split('/').Last(), out steamID);
+            SteamID = steamID;
+            UserName = steamID.ToString();
         }
     }
 }

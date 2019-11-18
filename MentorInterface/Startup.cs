@@ -54,9 +54,8 @@ namespace MentorInterface
             services.AddControllers();
             services.AddApiVersioning();
             services.AddLetsEncrypt();
-
+            
             #region Identity
-
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseMySql("server=localhost;userid=mentor_interface;password=mentorgg;database=users;persistsecurityinfo=True");
@@ -65,13 +64,20 @@ namespace MentorInterface
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = "Identity.Cookie";
-                options.LoginPath = "/authentication/login";
-                options.LogoutPath = "/authentication/signout";
-            });
+            services
+                .ConfigureApplicationCookie(options =>
+                {
+                    options.Cookie.Name = "MentorInterface.Identity";
+                    options.LoginPath = "/authentication/steam_signin";
+                    options.LogoutPath = "/authentication/steam_signout";
 
+                    // Event is fired when a user successfully proves their Identity when accessing a resource
+                    options.Events.OnValidatePrincipal += AuthenticationHandler.OnValidated;
+                })
+                .ConfigureExternalCookie(options => 
+                {
+                    options.Cookie.Name = "MentorInterface.External";   
+                });
             #endregion
 
             #region Steam Authentication
@@ -82,7 +88,7 @@ namespace MentorInterface
             var steamApplicationKey = Configuration.GetSection("STEAM_API_KEY").Value;
             if(steamApplicationKey == null)
             {
-                //throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
+                throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
 
             services
@@ -90,7 +96,7 @@ namespace MentorInterface
                 .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
                 {
                     options.ApplicationKey = steamApplicationKey;
-                    options.SaveTokens = true;
+                    options.CallbackPath = "/steam-authentication-consumer";
                     options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
                 });
             #endregion
