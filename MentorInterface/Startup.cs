@@ -54,7 +54,7 @@ namespace MentorInterface
             services.AddControllers();
             services.AddApiVersioning();
             services.AddLetsEncrypt();
-            
+
             #region Identity
             services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -68,15 +68,11 @@ namespace MentorInterface
                 .ConfigureApplicationCookie(options =>
                 {
                     options.Cookie.Name = "MentorInterface.Identity";
-                    options.LoginPath = "/authentication/steam_signin";
-                    options.LogoutPath = "/authentication/steam_signout";
+                    options.LoginPath = "/authentication/signin/steam";
+                    options.LogoutPath = "/authentication/signout/steam";
 
-                    // Event is fired when a user successfully proves their Identity when accessing a resource
+                    // Fired when a user successfully proves their Identity when accessing a protected resource
                     options.Events.OnValidatePrincipal += AuthenticationHandler.OnValidated;
-                })
-                .ConfigureExternalCookie(options => 
-                {
-                    options.Cookie.Name = "MentorInterface.External";   
                 });
             #endregion
 
@@ -127,7 +123,7 @@ namespace MentorInterface
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             if (!env.IsDevelopment())
             {
                 app.UseHttpsRedirection();

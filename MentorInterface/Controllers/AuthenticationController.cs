@@ -1,22 +1,12 @@
-﻿/*
- * Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
- * See https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers
- * for more information concerning the license and the contributors participating to this project.
- */
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using MentorInterface.Authentication;
 using MentorInterface.Data;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MentorInterface.Controllers
@@ -27,83 +17,103 @@ namespace MentorInterface.Controllers
     [Route("[controller]")]
     public class AuthenticationController : Controller
     {
-        private readonly IAuthenticationService _authenticationService;
-        private readonly ILogger<AuthenticationController> _logger;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AuthenticationController> logger;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
+        private string controllerName => this.ControllerContext.RouteData.Values["controller"].ToString();
+
+        #region Public Methods
         /// <summary>
         /// Constructor
         /// </summary>
         public AuthenticationController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AuthenticationController> logger,
-            IAuthenticationService authenticationService)
+            ILogger<AuthenticationController> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
-            _authenticationService = authenticationService;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+            this.logger = logger;
         }
 
         /// <summary>
-        /// 
+        /// Sign in with Steams OpenID service.
         /// </summary>
+        /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        [HttpGet("steam_signin/{returnUrl?}")]
+        [HttpGet("signin/steam/")]
         public IActionResult SteamSignIn(string returnUrl = "/")
         {
-            var props = new AuthenticationProperties {
-                RedirectUri = Url.Action("SteamLoginCallback", "Authentication",
-                new { ReturnUrl = returnUrl}),
-            };
+            var redirectUrl = Url.Action(
+                nameof(SteamLoginCallback),
+                controllerName,
+                new { ReturnUrl = returnUrl });
+            var props = signInManager.ConfigureExternalAuthenticationProperties(
+                provider: MentorAuthenticationSchemes.STEAM,
+                redirectUrl: redirectUrl);
+
             return new ChallengeResult(MentorAuthenticationSchemes.STEAM, props);
         }
 
         /// <summary>
         /// Sign out of the current session.
         /// </summary>
-        /// <param name="returnUrl">Where to return to once successfully signed out.</param>
+        /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        [HttpPost("steam_signout/{returnUrl?}")]
-        public IActionResult SteamSignOut(string returnUrl = "/")
+        [HttpGet("signout/")]
+        public IActionResult SignOut(string returnUrl = "/")
         {
-            // Instruct the cookies middleware to delete the local cookie created
-            // when the user agent is redirected from the external identity provider
-            // after a successful authentication flow (e.g Google or Facebook).
             return SignOut(
                 new AuthenticationProperties { RedirectUri = returnUrl },
-                MentorAuthenticationSchemes.STEAM);
+                IdentityConstants.ApplicationScheme);
         }
 
-        /// Ignore this Endpoint from Swagger Documentation.
+        /// <summary>
+        /// Steam Login callback, log in existing users and register new users.
+        /// </summary>
+        /// <param name="returnUrl">Return Url</param>
+        /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult> SteamLoginCallback(string returnUrl)
+        [HttpGet("callback/steam/")]
+        public async Task<ActionResult> SteamLoginCallback(string returnUrl = "/")
         {
-            // Get the Authentication Result
-            AuthenticateResult result = await _authenticationService
-                .AuthenticateAsync(HttpContext, MentorAuthenticationSchemes.STEAM);
+            var loginInfo = await signInManager.GetExternalLoginInfoAsync();
 
-            ClaimsIdentity result_identity = result.Principal.Identity as ClaimsIdentity;
-            Claim steam_claim = result_identity.Claims.First();
+            var result = await signInManager.ExternalLoginSignInAsync(
+                loginInfo.LoginProvider,
+                loginInfo.ProviderKey,
+                isPersistent: false);
 
-            var claim_users = await _userManager.GetUsersForClaimAsync(steam_claim);
-            if (claim_users.Any())
+            if (result.Succeeded)
             {
-                ApplicationUser existing_user = claim_users.First();
-                try
-                {
-                    // This call will gather all claims regarding this user and attempt to sign in.
-                    await _signInManager.SignInAsync(existing_user, isPersistent: true);
-                    return Redirect(returnUrl);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "SignIn failed for a ApplicationUser with an attached Claim");
-                    return StatusCode(500);
-                }
+                return Redirect(returnUrl);
             }
+            else
+            {
+                return await RegisterSteamUser(loginInfo, returnUrl);
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Register and sign in a new User, Logged in from Steam.
+        /// </summary>
+        /// <param name="loginInfo">Steam Login Info</param>
+        /// <param name="returnUrl">Return Url</param>
+        /// <returns></returns>
+        private async Task<ActionResult> RegisterSteamUser(ExternalLoginInfo loginInfo, string returnUrl = "/")
+        {
+            ClaimsIdentity result_identity = loginInfo.Principal.Identity as ClaimsIdentity;
+
+            // Explictly return the corrent claim associated with the SteamID.
+            Claim steam_claim = result_identity.Claims.Single(o =>
+            {
+                return o.Value.Contains("openid/id");
+            });
 
             // Create a new ApplicationUser
             ApplicationUser new_user;
@@ -113,29 +123,27 @@ namespace MentorInterface.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Failed to create new user from Steam Community URL");
+                logger.LogError(e, "Failed to create new user from Steam Community URL");
                 return StatusCode(500);
             }
 
             // Attempt to add the new user to the connected data store.
-            var create_new_user_result = await _userManager.CreateAsync(new_user);
+            var create_new_user_result = await userManager.CreateAsync(new_user);
             if (create_new_user_result.Succeeded)
             {
-                // Assign the steam claim to the user
-                var claim_result = await _userManager.AddClaimAsync(new_user, steam_claim);
-                if (claim_result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(new_user, isPersistent: true);
-                }
+                await userManager.AddLoginAsync(new_user, loginInfo);
+                await signInManager.SignInAsync(new_user, isPersistent: true);
             }
             else
             {
                 string errors = create_new_user_result.Errors.ToString();
-                _logger.LogError("Error creating User: " + errors);
+                logger.LogError("Error creating User: " + errors);
             }
 
             return Redirect(returnUrl);
         }
 
+        #endregion
     }
+
 }
