@@ -12,18 +12,6 @@ namespace MentorInterface.Authentication
     /// </summary>
     public class AuthenticationHandler
     {
-        /// <summary>
-        /// Handle a successful authentication challenge.
-        /// </summary>
-        /// <param name="context">OpenIdAuthenticatedContext</param>
-        /// <returns></returns>
-        public static Task HandleSuccess(OpenIdAuthenticatedContext context)
-        {
-            System.Diagnostics.Debug.WriteLine("AUTH");
-            System.Diagnostics.Debug.WriteLine(context.Identity.Name);
-
-            return Task.CompletedTask;
-        }
 
         /// <summary>
         /// Handle a OnValidated event.

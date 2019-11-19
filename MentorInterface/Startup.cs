@@ -96,8 +96,7 @@ namespace MentorInterface
                 .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
                 {
                     options.ApplicationKey = steamApplicationKey;
-                    options.CallbackPath = "/steam-authentication-consumer";
-                    options.Events.OnAuthenticated += AuthenticationHandler.HandleSuccess;
+                    options.CallbackPath = "/openid/callback/steam";
                 });
             #endregion
 
