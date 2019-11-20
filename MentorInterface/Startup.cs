@@ -141,6 +141,7 @@ namespace MentorInterface
 
             app.UseSwaggerUI(options =>
             {
+                options.RoutePrefix = "docs";
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mentor Interface");
             });
             #endregion
