@@ -56,10 +56,18 @@ namespace MentorInterface
             services.AddLetsEncrypt();
 
             #region Identity
-            services.AddDbContext<ApplicationDbContext>(options =>
+            var mySqlConnectionString = Configuration.GetSection("USER_DB_CONNECTION").Value;
+            if (mySqlConnectionString == null)
             {
-                options.UseMySql("server=localhost;userid=mentor_interface;password=mentorgg;database=users;persistsecurityinfo=True");
-            });
+                throw new ArgumentException("MySqlConnectionString is missing, configure the `USER_DB_CONNECTION` enviroment variable.");
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    options.UseMySql(mySqlConnectionString);
+                });
+            }
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
