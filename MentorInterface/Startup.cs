@@ -85,16 +85,14 @@ namespace MentorInterface
             #endregion
 
             #region Steam Authentication
-            // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId.Steam
-            // https://github.com/aspnet-contrib/AspNet.Security.OpenId.Providers/tree/dev/src/AspNet.Security.OpenId
-
             // Load the Authentication Section and confirm the entry exists.
             var steamApplicationKey = Configuration.GetSection("STEAM_API_KEY").Value;
-            if(steamApplicationKey == null)
+            if (steamApplicationKey == null)
             {
                 throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
-
+            else
+            {
             services
                 .AddAuthentication(defaultScheme: MentorAuthenticationSchemes.STEAM)
                 .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
@@ -102,6 +100,7 @@ namespace MentorInterface
                     options.ApplicationKey = steamApplicationKey;
                     options.CallbackPath = "/openid/callback/steam";
                 });
+            }
             #endregion
 
             #region Swagger
