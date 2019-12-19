@@ -119,7 +119,7 @@ namespace MentorInterface.Controllers
             ApplicationUser new_user;
             try
             {
-                new_user = new ApplicationUser(community_url: steam_claim.Value);
+                new_user = ApplicationUserFactory.FromCommunityUrl(community_url: steam_claim.Value);
             }
             catch (Exception e)
             {

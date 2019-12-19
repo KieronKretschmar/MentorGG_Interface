@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 namespace MentorInterface.Data
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="options"></param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -22,15 +22,20 @@ namespace MentorInterface.Data
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="builder"></param>
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            // Customize the ASP.NET Identity model and override the defaults if needed.
-            // For example, you can rename the ASP.NET Identity table names and more.
-            // Add your customizations after calling base.OnModelCreating(builder);
+
+            builder.Entity<ApplicationUser>(user =>
+                {
+                    user.Property(x => x.SteamId).IsRequired();
+                    user.Property(x => x.Registration).IsRequired();
+                }
+            );
+
         }
     }
 }
