@@ -21,6 +21,6 @@ A REST API providing authentication and access to the Mentor Engine
 ## Enviroment Variables
 
 - `STEAM_API_KEY` : Steam application key for OpenID authentication. [*]
-- `USER_DB_CONNECTION` : Connection string for the User Database. [*]
+- `MYSQL_CONNECTIONSTRING` : Connection string for the User Database. [*]
 
 [*] *Required*
