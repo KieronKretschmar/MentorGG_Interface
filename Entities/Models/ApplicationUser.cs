@@ -29,7 +29,7 @@ namespace Entities.Models
         }
 
         /// <summary>
-        /// Helper function to create a new Applciation User from a Steam Id.
+        /// Helper function to create a new Application User from a Steam Id.
         ///
         /// Exists to provide a consistent factory interface.
         /// </summary>
