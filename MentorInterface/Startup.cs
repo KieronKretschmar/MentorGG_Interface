@@ -56,7 +56,7 @@ namespace MentorInterface
 
             #region Identity
 
-            // if a connectionString is set use mysql, else use InMemory
+            // Connect to the user database.
             var connString = Configuration.GetValue<string>("MYSQL_CONNECTIONSTRING");
             if (connString != null)
             {
