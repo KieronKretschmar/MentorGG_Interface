@@ -109,7 +109,7 @@ namespace MentorInterface.Controllers
         {
             ClaimsIdentity result_identity = loginInfo.Principal.Identity as ClaimsIdentity;
 
-            // Explictly return the corrent claim associated with the SteamID.
+            // Explictly return the corrent claim associated with the SteamId.
             Claim steam_claim = result_identity.Claims.Single(o =>
             {
                 return o.Value.Contains("openid/id");

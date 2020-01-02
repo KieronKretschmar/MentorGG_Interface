@@ -47,7 +47,7 @@ namespace Entities.Models
     public class ApplicationUser : IdentityUser<int>
     {
         /// <summary>
-        /// SteamID
+        /// SteamId
         /// </summary>
         public long SteamId { get; set; }
 
@@ -57,7 +57,7 @@ namespace Entities.Models
         public DateTime Registration { get; set; }
 
         /// <summary>
-        /// Create a user from a SteamID.
+        /// Create a user from a SteamId.
         /// </summary>
         public ApplicationUser(long steamId) : base()
         {
