@@ -101,7 +101,13 @@ namespace MentorInterface
             }
             else
             {
-                //throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
+                // Ignore this Exception in the Development context.
+                var msg = "SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.";
+                Console.WriteLine(msg);
+                if (Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") != Environments.Development)
+                {
+                    throw new ArgumentException(msg);
+                }
             }
             #endregion
 
