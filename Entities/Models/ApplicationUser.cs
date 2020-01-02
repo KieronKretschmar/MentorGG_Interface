@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
-namespace MentorInterface.Data
+namespace Entities.Models
 {
 
     /// <summary>
@@ -19,8 +17,7 @@ namespace MentorInterface.Data
         /// <param name="community_url"></param>
         public static ApplicationUser FromCommunityUrl(string community_url)
         {
-            long steamId;
-            long.TryParse(community_url.Split('/').Last(), out steamId);
+            long.TryParse(community_url.Split('/').Last(), out long steamId);
             return new ApplicationUser(steamId);
         }
 

@@ -15,10 +15,9 @@ using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
-using Microsoft.AspNetCore.Identity;
-using MentorInterface.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using Entities.Models;
+using Database;
 
 namespace MentorInterface
 {
@@ -56,21 +55,24 @@ namespace MentorInterface
             services.AddLetsEncrypt();
 
             #region Identity
-            var mySqlConnectionString = Configuration.GetSection("USER_DB_CONNECTION").Value;
-            if (mySqlConnectionString == null)
+
+            // if a connectionString is set use mysql, else use InMemory
+            var connString = Configuration.GetValue<string>("MYSQL_CONNECTIONSTRING");
+            if (connString != null)
             {
-                throw new ArgumentException("MySqlConnectionString is missing, configure the `USER_DB_CONNECTION` enviroment variable.");
+                services.AddDbContext<ApplicationContext>(o =>
+                {
+                    o.UseMySql(connString);
+                });
             }
             else
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
-                {
-                    options.UseMySql(mySqlConnectionString);
-                });
+                throw new ArgumentException("MySqlConnectionString is missing, configure the `MYSQL_CONNECTIONSTRING` enviroment variable.");
             }
 
+
             services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationContext>();
 
             services
                 .ConfigureApplicationCookie(options =>
@@ -86,20 +88,20 @@ namespace MentorInterface
 
             #region Steam Authentication
             // Load the Authentication Section and confirm the entry exists.
-            var steamApplicationKey = Configuration.GetSection("STEAM_API_KEY").Value;
-            if (steamApplicationKey == null)
+            var steamApplicationKey = Configuration.GetValue<string>("STEAM_API_KEY");
+            if (steamApplicationKey != null)
             {
-                throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
+                services
+                    .AddAuthentication(defaultScheme: MentorAuthenticationSchemes.STEAM)
+                    .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
+                    {
+                        options.ApplicationKey = steamApplicationKey;
+                        options.CallbackPath = "/openid/callback/steam";
+                    });
             }
             else
             {
-            services
-                .AddAuthentication(defaultScheme: MentorAuthenticationSchemes.STEAM)
-                .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
-                {
-                    options.ApplicationKey = steamApplicationKey;
-                    options.CallbackPath = "/openid/callback/steam";
-                });
+                //throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
             #endregion
 
@@ -141,7 +143,7 @@ namespace MentorInterface
 
             app.UseSwaggerUI(options =>
             {
-                options.RoutePrefix = "docs";
+                options.RoutePrefix = "swagger";
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mentor Interface");
             });
             #endregion
