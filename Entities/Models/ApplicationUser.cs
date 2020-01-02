@@ -17,8 +17,15 @@ namespace Entities.Models
         /// <param name="community_url"></param>
         public static ApplicationUser FromCommunityUrl(string community_url)
         {
-            long.TryParse(community_url.Split('/').Last(), out long steamId);
-            return new ApplicationUser(steamId);
+            var success = long.TryParse(community_url.Split('/').Last(), out long steamId);
+            if (success) {
+                return new ApplicationUser(steamId);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid / Malformed [ community_url ] provided");
+            }
+
         }
 
         /// <summary>
