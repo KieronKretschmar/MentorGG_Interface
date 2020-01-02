@@ -1,0 +1,81 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Mentor Interface",
+    "version": "v1"
+  },
+  "paths": {
+    "/Authentication/signin/steam": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign in with Steams OpenID service.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "description": "Return Url",
+            "schema": {
+              "type": "string",
+              "default": "/"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Authentication/signout": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign out of the current session.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "description": "Return Url",
+            "schema": {
+              "type": "string",
+              "default": "/"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v{version}/Verify": {
+      "get": {
+        "tags": [
+          "Verify"
+        ],
+        "summary": "Verify that the caller is Authenticated.",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": { }
+}
