@@ -14,8 +14,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger/",
       "environmentVariables": {
+        "MYSQL_CONNECTIONSTRING": "server=localhost;userid=mentor_interface;password=mentorgg;database=users;persistsecurityinfo=True",
         "STEAM_API_KEY": "655E147019BFCCB80F90E06B17F9AA41",
-        "USER_DB_CONNECTION": "server=localhost;userid=mentor_interface;password=mentorgg;database=users;persistsecurityinfo=True",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

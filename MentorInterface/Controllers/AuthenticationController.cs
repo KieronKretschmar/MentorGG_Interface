@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Entities.Models;
 using MentorInterface.Authentication;
-using MentorInterface.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -109,7 +109,7 @@ namespace MentorInterface.Controllers
         {
             ClaimsIdentity result_identity = loginInfo.Principal.Identity as ClaimsIdentity;
 
-            // Explictly return the corrent claim associated with the SteamID.
+            // Explictly return the corrent claim associated with the SteamId.
             Claim steam_claim = result_identity.Claims.Single(o =>
             {
                 return o.Value.Contains("openid/id");
@@ -119,7 +119,7 @@ namespace MentorInterface.Controllers
             ApplicationUser new_user;
             try
             {
-                new_user = new ApplicationUser(community_url: steam_claim.Value);
+                new_user = ApplicationUserFactory.FromCommunityUrl(community_url: steam_claim.Value);
             }
             catch (Exception e)
             {
