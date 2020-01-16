@@ -58,7 +58,6 @@ namespace MentorInterface
         {
             services.AddControllers();
             services.AddApiVersioning();
-            services.AddLetsEncrypt();
 
             #region Identity
 
