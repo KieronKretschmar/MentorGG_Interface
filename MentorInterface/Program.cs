@@ -41,6 +41,10 @@ namespace MentorInterface
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseUrls(
+                        "http://*:80",
+                        $"http://*:{Startup.METRICS_PORT}");
+
                     webBuilder.UseStartup<Startup>();
                 });
     }

@@ -18,6 +18,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Entities.Models;
 using Database;
+using Prometheus;
 
 namespace MentorInterface
 {
@@ -31,6 +32,11 @@ namespace MentorInterface
         /// Amount of times to attempt a successful MySQL connection on startup.
         /// </summary>
         const int MYSQL_RETRY_LIMIT = 3;
+
+        /// <summary>
+        /// Port to scrape metrics from at `/metrics`
+        /// </summary>
+        public const int METRICS_PORT = 9913;
 
         /// <summary>
         /// Extend and apply a supplied configuration.
@@ -174,6 +180,7 @@ namespace MentorInterface
                 endpoints.MapControllers();
             });
 
+            app.UseMetricServer(METRICS_PORT);
         }
     }
 }

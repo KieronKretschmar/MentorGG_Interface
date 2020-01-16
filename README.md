@@ -24,3 +24,8 @@ A REST API providing authentication and access to the Mentor Engine
 - `MYSQL_CONNECTIONSTRING` : Connection string for the User Database. [*]
 
 [*] *Required*
+
+
+## Monitoring / Prometheus
+
+Collect metrics on port `9913` (Defined in `Startup.cs:METRICS_PORT`) at `/metrics`
