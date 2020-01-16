@@ -1,22 +1,37 @@
+# ===============
+# BUILD IMAGE
+# ===============
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
+
+WORKDIR /app/Entities
+COPY ./Entities/*.csproj ./
+RUN dotnet restore
+
+WORKDIR /app/Database
+COPY ./Database/*.csproj ./
+RUN dotnet restore
+
+WORKDIR /app/MentorInterface
 COPY ./MentorInterface/*.csproj ./
 RUN dotnet restore
 
 # Copy everything else and build
-COPY ./MentorInterface/ ./
-RUN dotnet publish -c Release -o out
+WORKDIR /app
+COPY ./MentorInterface/ ./MentorInterface
+COPY ./Database/ ./Database
+COPY ./Entities ./Entities
 
-# Build runtime image
+RUN dotnet publish MentorInterface/ -c Release -o out
+
+# ===============
+# RUNTIME IMAGE
+# ===============
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
 WORKDIR /app
+
 COPY --from=build /app/out .
 ENTRYPOINT ["dotnet", "MentorInterface.dll"]
 
-# Enable HTTPS
-#ENV ASPNETCORE_URLS="https://+;http://+"
-
-# Enable Development Mode
-# ENV ASPNETCORE_ENVIRONMENT="Development"
