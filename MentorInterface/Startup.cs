@@ -26,6 +26,12 @@ namespace MentorInterface
     /// </summary>
     public class Startup
     {
+
+        /// <summary>
+        /// Amount of times to attempt a successful MySQL connection on startup.
+        /// </summary>
+        const int MYSQL_RETRY_LIMIT = 3;
+
         /// <summary>
         /// Extend and apply a supplied configuration.
         /// </summary>
@@ -62,7 +68,10 @@ namespace MentorInterface
             {
                 services.AddDbContext<ApplicationContext>(o =>
                 {
-                    o.UseMySql(connString);
+                    o.UseMySql(connString, sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(MYSQL_RETRY_LIMIT);
+                    });
                 });
             }
             else
