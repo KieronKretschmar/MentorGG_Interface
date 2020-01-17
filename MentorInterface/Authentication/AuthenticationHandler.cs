@@ -20,8 +20,7 @@ namespace MentorInterface.Authentication
         /// <returns></returns>
         public static Task OnValidated(CookieValidatePrincipalContext context)
         {
-            System.Diagnostics.Debug.WriteLine("A User has been validated");
-            System.Diagnostics.Debug.WriteLine(context.Principal.Identity.Name);
+            System.Diagnostics.Debug.WriteLine($"[ {context.Principal.Identity.Name} ] has successfully made an Authorized request");
             return Task.CompletedTask;
         }
     }
