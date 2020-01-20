@@ -23,7 +23,7 @@ namespace Entities.Models
             }
             else
             {
-                throw new ArgumentException("Invalid / Malformed [ community_url ] provided");
+                throw new ArgumentException($"Invalid / Malformed - Community Url provided: [ {community_url} ]");
             }
 
         }
