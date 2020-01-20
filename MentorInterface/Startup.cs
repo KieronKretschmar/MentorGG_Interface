@@ -70,11 +70,13 @@ namespace MentorInterface
             services.AddHttpClient("sharing-code-gatherer", c =>
             {
                 c.BaseAddress = new Uri("sharing-code-gatherer.default.svc.cluster.local");
+                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
             services.AddHttpClient("faceit-match-gatherer", c =>
             {
                 c.BaseAddress = new Uri("faceit-match-gatherer.default.svc.cluster.local");
+                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
             #endregion
