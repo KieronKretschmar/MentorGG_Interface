@@ -14,7 +14,7 @@ namespace MentorInterface.Controllers
     /// Controller for Verifying Authentication
     /// </summary>
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/[controller]")]
+    [Route("v{version:apiVersion}/verify")]
     public class VerifyController : Controller
     {
         /// <summary>

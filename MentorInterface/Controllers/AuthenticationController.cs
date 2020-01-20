@@ -14,7 +14,7 @@ namespace MentorInterface.Controllers
     /// <summary>
     /// Controller for Authenticating with Steam OpenID 2.0
     /// </summary>
-    [Route("[controller]")]
+    [Route("authentication")]
     public class AuthenticationController : Controller
     {
         private readonly ILogger<AuthenticationController> logger;
@@ -42,7 +42,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        [HttpGet("signin/steam/")]
+        [HttpGet("signin/steam")]
         public IActionResult SteamSignIn(string returnUrl = "/")
         {
             var redirectUrl = Url.Action(
@@ -61,7 +61,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        [HttpGet("signout/")]
+        [HttpGet("signout")]
         public IActionResult SignOut(string returnUrl = "/")
         {
             return SignOut(
@@ -75,7 +75,7 @@ namespace MentorInterface.Controllers
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
-        [HttpGet("callback/steam/")]
+        [HttpGet("callback/steam")]
         public async Task<ActionResult> SteamLoginCallback(string returnUrl = "/")
         {
             var loginInfo = await signInManager.GetExternalLoginInfoAsync();
