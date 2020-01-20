@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Entities.Models;
 using Database;
 using Prometheus;
+using MentorInterface.Helpers;
 
 namespace MentorInterface
 {
@@ -67,15 +68,15 @@ namespace MentorInterface
 
             #region HTTP Clients
 
-            services.AddHttpClient("sharing-code-gatherer", c =>
+            services.AddHttpClient(ConnectedServices.SharingCodeGatherer, c =>
             {
-                c.BaseAddress = new Uri("sharing-code-gatherer.default.svc.cluster.local");
+                c.BaseAddress = new Uri(ConnectedServices.SharingCodeGatherer.DNSAddress);
                 c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
-            services.AddHttpClient("faceit-match-gatherer", c =>
+            services.AddHttpClient(ConnectedServices.FaceitMatchGatherer, c =>
             {
-                c.BaseAddress = new Uri("faceit-match-gatherer.default.svc.cluster.local");
+                c.BaseAddress = new Uri(ConnectedServices.FaceitMatchGatherer.DNSAddress);
                 c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
