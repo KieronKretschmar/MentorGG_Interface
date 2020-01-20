@@ -65,6 +65,20 @@ namespace MentorInterface
             services.AddControllers();
             services.AddApiVersioning();
 
+            #region HTTP Clients
+
+            services.AddHttpClient("sharing-code-gatherer", c =>
+            {
+                c.BaseAddress = new Uri("sharing-code-gatherer.default.svc.cluster.local");
+            });
+
+            services.AddHttpClient("faceit-match-gatherer", c =>
+            {
+                c.BaseAddress = new Uri("faceit-match-gatherer.default.svc.cluster.local");
+            });
+
+            #endregion
+
             #region Identity
 
             // Connect to the user database.
