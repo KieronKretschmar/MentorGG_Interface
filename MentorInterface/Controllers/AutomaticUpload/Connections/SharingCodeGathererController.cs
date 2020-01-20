@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,19 @@ namespace MentorInterface.Controllers.AutomaticUpload
     [Route("v{version:apiVersion}/automatic-upload/connections/valve")]
     public class SharingCodeGathererController : ControllerBase
     {
+        /// <summary>
+        /// Http Client Factory
+        /// </summary>
+        private readonly IHttpClientFactory _clientFactory;
+
+        /// <summary>
+        /// Create the controller and inject the HTTPClient factory.
+        /// </summary>
+        public SharingCodeGathererController(IHttpClientFactory clientFactory)
+        {
+            _clientFactory = clientFactory;
+        }
+
         /// <summary>
         /// Query SharingCodeGatherer for all information pertaining to the current user.
         /// </summary>
