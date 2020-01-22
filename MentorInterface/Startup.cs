@@ -70,13 +70,13 @@ namespace MentorInterface
 
             services.AddHttpClient(ConnectedServices.SharingCodeGatherer, c =>
             {
-                c.BaseAddress = new Uri(ConnectedServices.SharingCodeGatherer.DNSAddress);
+                c.BaseAddress = new Uri($"http://{ConnectedServices.SharingCodeGatherer.DNSAddress}");
                 c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
             services.AddHttpClient(ConnectedServices.FaceitMatchGatherer, c =>
             {
-                c.BaseAddress = new Uri(ConnectedServices.FaceitMatchGatherer.DNSAddress);
+                c.BaseAddress = new Uri($"http://{ConnectedServices.FaceitMatchGatherer.DNSAddress}");
                 c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
