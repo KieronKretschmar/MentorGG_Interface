@@ -94,7 +94,8 @@ namespace MentorInterface
                     {
                         sqlOptions.EnableRetryOnFailure(MYSQL_RETRY_LIMIT);
                     });
-                });
+
+                }, ServiceLifetime.Scoped);
             }
             else
             {
