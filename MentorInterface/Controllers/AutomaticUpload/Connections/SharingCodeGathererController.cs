@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Entities.Models;
+using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace MentorInterface.Controllers.AutomaticUpload
@@ -15,19 +19,32 @@ namespace MentorInterface.Controllers.AutomaticUpload
     /// </summary>
     [ApiVersion("1.0")]
     [Route("v{version:apiVersion}/automatic-upload/connections/valve")]
-    public class SharingCodeGathererController : ControllerBase
+    public class SharingCodeGathererController : ForwardController
     {
+        /// <summary>
+        /// Logger.
+        /// </summary>
+        public ILogger<SharingCodeGathererController> _logger;
+
         /// <summary>
         /// Http Client Factory
         /// </summary>
         private readonly IHttpClientFactory _clientFactory;
 
         /// <summary>
+        /// User Manager
+        /// </summary>
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
-        public SharingCodeGathererController(IHttpClientFactory clientFactory)
-        {
+        public SharingCodeGathererController(
+            IHttpClientFactory clientFactory,
+            UserManager<ApplicationUser> userManager)
+        {;
             _clientFactory = clientFactory;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -37,21 +54,42 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [Authorize]
         [HttpGet]
         [SwaggerOperation(Tags = new[] { "Connections" })]
-        public IActionResult Status()
+        public async Task<IActionResult> StatusAsync()
         {
-            return StatusCode(501);
+            var user = await _userManager.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"/api/Users/{user.SteamId}");
+
+            return await ForwardHttpRequest(client, message);
         }
 
         /// <summary>
         /// Query SharingCodeGather to create a connection with the Valve API for the current user.
         /// </summary>
         /// <returns></returns>
+        ///
         [Authorize]
         [HttpPost]
         [SwaggerOperation(Tags = new[] { "Connections" })]
-        public IActionResult ConnectUser(string steamAuthToken, string lastKnownSharingCode)
+        public async Task<IActionResult> ConnectUserAsync(string steamAuthToken, string lastKnownSharingCode)
         {
-            return StatusCode(501);
+            var user = await _userManager.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+
+            var parameters = new Dictionary<string, string>()
+                {
+                    {"steamAuthToken", steamAuthToken},
+                    {"lastKnownSharingCode", lastKnownSharingCode}
+                };
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Post,
+                QueryHelpers.AddQueryString($"/api/Users/{user.SteamId}", parameters));
+
+            return await ForwardHttpRequest(client, message);
         }
 
         /// <summary>
@@ -61,9 +99,16 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [Authorize]
         [HttpDelete]
         [SwaggerOperation(Tags = new[] { "Connections" })]
-        public IActionResult DisconnectUser()
+        public async Task<IActionResult> DisconnectUserAsync()
         {
-            return StatusCode(501);
+            var user = await _userManager.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Delete,
+                $"/api/Users/{user.SteamId}");
+
+            return await ForwardHttpRequest(client, message);
         }
 
     }
