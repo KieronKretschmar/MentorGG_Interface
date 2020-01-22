@@ -17,9 +17,9 @@ namespace MentorInterface.Controllers
     [Route("authentication")]
     public class AuthenticationController : Controller
     {
-        private readonly ILogger<AuthenticationController> logger;
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly ILogger<AuthenticationController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         private string controllerName => this.ControllerContext.RouteData.Values["controller"].ToString();
 
@@ -32,9 +32,9 @@ namespace MentorInterface.Controllers
             SignInManager<ApplicationUser> signInManager,
             ILogger<AuthenticationController> logger)
         {
-            this.userManager = userManager;
-            this.signInManager = signInManager;
-            this.logger = logger;
+            this._userManager = userManager;
+            this._signInManager = signInManager;
+            this._logger = logger;
         }
 
         /// <summary>
@@ -46,10 +46,10 @@ namespace MentorInterface.Controllers
         public IActionResult SteamSignIn(string returnUrl = "/")
         {
             var redirectUrl = Url.Action(
-                nameof(SteamLoginCallback),
+                nameof(SteamLoginCallbackAsync),
                 controllerName,
                 new { ReturnUrl = returnUrl });
-            var props = signInManager.ConfigureExternalAuthenticationProperties(
+            var props = _signInManager.ConfigureExternalAuthenticationProperties(
                 provider: MentorAuthenticationSchemes.STEAM,
                 redirectUrl: redirectUrl);
 
@@ -76,11 +76,11 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("callback/steam")]
-        public async Task<ActionResult> SteamLoginCallback(string returnUrl = "/")
+        public async Task<ActionResult> SteamLoginCallbackAsync(string returnUrl = "/")
         {
-            var loginInfo = await signInManager.GetExternalLoginInfoAsync();
+            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
 
-            var result = await signInManager.ExternalLoginSignInAsync(
+            var result = await _signInManager.ExternalLoginSignInAsync(
                 loginInfo.LoginProvider,
                 loginInfo.ProviderKey,
                 isPersistent: false);
@@ -91,7 +91,7 @@ namespace MentorInterface.Controllers
             }
             else
             {
-                return await RegisterSteamUser(loginInfo, returnUrl);
+                return await RegisterSteamUserAsync(loginInfo, returnUrl);
             }
         }
 
@@ -105,39 +105,39 @@ namespace MentorInterface.Controllers
         /// <param name="loginInfo">Steam Login Info</param>
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        private async Task<ActionResult> RegisterSteamUser(ExternalLoginInfo loginInfo, string returnUrl = "/")
+        private async Task<ActionResult> RegisterSteamUserAsync(ExternalLoginInfo loginInfo, string returnUrl = "/")
         {
-            ClaimsIdentity result_identity = loginInfo.Principal.Identity as ClaimsIdentity;
+            ClaimsIdentity loginIdentity = loginInfo.Principal.Identity as ClaimsIdentity;
 
             // Explictly return the corrent claim associated with the SteamId.
-            Claim steam_claim = result_identity.Claims.Single(o =>
+            Claim steamClaim = loginIdentity.Claims.Single(o =>
             {
                 return o.Value.Contains("openid/id");
             });
 
             // Create a new ApplicationUser
-            ApplicationUser new_user;
+            ApplicationUser newUser;
             try
             {
-                new_user = ApplicationUserFactory.FromCommunityUrl(community_url: steam_claim.Value);
+                newUser = ApplicationUserFactory.FromCommunityUrl(community_url: steamClaim.Value);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to create new user from Steam Community URL");
+                _logger.LogError(e, "Failed to create new user from Steam Community URL");
                 return StatusCode(500);
             }
 
             // Attempt to add the new user to the connected data store.
-            var create_new_user_result = await userManager.CreateAsync(new_user);
-            if (create_new_user_result.Succeeded)
+            var newUserCreationResult = await _userManager.CreateAsync(newUser);
+            if (newUserCreationResult.Succeeded)
             {
-                await userManager.AddLoginAsync(new_user, loginInfo);
-                await signInManager.SignInAsync(new_user, isPersistent: true);
+                await _userManager.AddLoginAsync(newUser, loginInfo);
+                await _signInManager.SignInAsync(newUser, isPersistent: true);
             }
             else
             {
-                string errors = create_new_user_result.Errors.ToString();
-                logger.LogError("Error creating User: " + errors);
+                string errors = newUserCreationResult.Errors.ToString();
+                _logger.LogError("Error creating User: " + errors);
             }
 
             return Redirect(returnUrl);
