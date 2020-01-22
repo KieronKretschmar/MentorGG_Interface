@@ -123,7 +123,7 @@ namespace MentorInterface
             if (steamApplicationKey != null)
             {
                 services
-                    .AddAuthentication(defaultScheme: MentorAuthenticationSchemes.STEAM)
+                    .AddAuthentication()
                     .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
                     {
                         options.ApplicationKey = steamApplicationKey;

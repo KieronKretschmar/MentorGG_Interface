@@ -21,8 +21,6 @@ namespace MentorInterface.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        private string controllerName => this.ControllerContext.RouteData.Values["controller"].ToString();
-
         #region Public Methods
         /// <summary>
         /// Constructor
@@ -45,10 +43,7 @@ namespace MentorInterface.Controllers
         [HttpGet("signin/steam")]
         public IActionResult SteamSignIn(string returnUrl = "/")
         {
-            var redirectUrl = Url.Action(
-                nameof(SteamLoginCallbackAsync),
-                controllerName,
-                new { ReturnUrl = returnUrl });
+            var redirectUrl = $"/authentication/callback/steam?returnUrl={returnUrl}";
             var props = _signInManager.ConfigureExternalAuthenticationProperties(
                 provider: MentorAuthenticationSchemes.STEAM,
                 redirectUrl: redirectUrl);
@@ -80,12 +75,12 @@ namespace MentorInterface.Controllers
         {
             var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
 
-            var result = await _signInManager.ExternalLoginSignInAsync(
+            var signInAttempt = await _signInManager.ExternalLoginSignInAsync(
                 loginInfo.LoginProvider,
                 loginInfo.ProviderKey,
                 isPersistent: false);
 
-            if (result.Succeeded)
+            if (signInAttempt.Succeeded)
             {
                 return Redirect(returnUrl);
             }
