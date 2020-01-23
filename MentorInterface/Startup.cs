@@ -113,8 +113,6 @@ namespace MentorInterface
                     options.LoginPath = "/authentication/signin/steam";
                     options.LogoutPath = "/authentication/signout/steam";
 
-                    // Fired when a user successfully proves their Identity when accessing a protected resource
-                    options.Events.OnValidatePrincipal += AuthenticationHandler.OnValidated;
                 });
             #endregion
 
