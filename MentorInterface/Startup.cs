@@ -29,6 +29,9 @@ namespace MentorInterface
     public class Startup
     {
 
+        private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") != Environments.Development;
+
+
         /// <summary>
         /// Amount of times to attempt a successful MySQL connection on startup.
         /// </summary>
@@ -97,9 +100,21 @@ namespace MentorInterface
 
                 }, ServiceLifetime.Scoped);
             }
+            // Use InMemoryDatabase if the connectionstring is not set in a DEV enviroment
+            else if (IsDevelopment)
+            {
+                services.AddDbContext<ApplicationContext>(o =>
+                {
+                    o.UseInMemoryDatabase("MyTemporaryDatabase");
+
+                }, ServiceLifetime.Scoped);
+
+                Console.WriteLine("WARNING: Using InMemoryDatabase!");
+            }
             else
             {
-                throw new ArgumentException("MySqlConnectionString is missing, configure the `MYSQL_CONNECTIONSTRING` enviroment variable.");
+                throw new ArgumentException(
+                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTIONSTRING` enviroment variable.");
             }
 
 
@@ -129,15 +144,14 @@ namespace MentorInterface
                         options.CallbackPath = "/openid/callback/steam";
                     });
             }
+            // If in a DEV context, warn, dont throw.
+            else if (IsDevelopment)
+            {
+                Console.WriteLine("WARNING: `STEAM_API_KEY` is missing!");
+            }
             else
             {
-                // Ignore this Exception in the Development context.
-                var msg = "SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.";
-                Console.WriteLine(msg);
-                if (Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") != Environments.Development)
-                {
-                    throw new ArgumentException(msg);
-                }
+                throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
             #endregion
 
