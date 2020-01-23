@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Entities.Models;
+using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -15,7 +18,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
     /// </summary>
     [ApiVersion("1.0")]
     [Route("v{version:apiVersion}/automatic-upload/")]
-    public class LookForMatchesController : ControllerBase
+    public class LookForMatchesController : ForwardController
     {
         /// <summary>
         /// Http Client Factory
@@ -23,11 +26,19 @@ namespace MentorInterface.Controllers.AutomaticUpload
         private readonly IHttpClientFactory _clientFactory;
 
         /// <summary>
+        /// User Manager
+        /// </summary>
+        private readonly UserManager<ApplicationUser> _userMananger;
+
+        /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
-        public LookForMatchesController(IHttpClientFactory clientFactory)
+        public LookForMatchesController(
+            IHttpClientFactory clientFactory,
+            UserManager<ApplicationUser> userManager)
         {
             _clientFactory = clientFactory;
+            _userMananger = userManager;
         }
 
         /// <summary>
@@ -37,9 +48,16 @@ namespace MentorInterface.Controllers.AutomaticUpload
 
         [Authorize]
         [HttpPost("faceit/look")]
-        public IActionResult FaceIt()
+        public async Task<IActionResult> FaceItAsync()
         {
-            return StatusCode(501);
+            var user = await _userMananger.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"/api/Users/{user.SteamId}/LookForMatches");
+
+            return await ForwardHttpRequest(client, message);
         }
 
         /// <summary>
@@ -48,9 +66,16 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// <returns></returns>
         [Authorize]
         [HttpPost("valve/look")]
-        public IActionResult Valve()
+        public async Task<IActionResult> ValveAsync()
         {
-            return StatusCode(501);
+            var user = await _userMananger.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"/api/Users/{user.SteamId}/LookForMatches");
+
+            return await ForwardHttpRequest(client, message);
         }
 
     }
