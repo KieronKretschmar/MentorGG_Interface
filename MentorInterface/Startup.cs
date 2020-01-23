@@ -121,6 +121,9 @@ namespace MentorInterface
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationContext>();
 
+            #endregion
+
+            #region Application Cookie
             services
                 .ConfigureApplicationCookie(options =>
                 {
@@ -128,6 +131,19 @@ namespace MentorInterface
                     options.LoginPath = "/authentication/signin/steam";
                     options.LogoutPath = "/authentication/signout/steam";
 
+                    // Return 401 OR 403 instead of redirecting to LoginPath
+                    options.Events = new CookieAuthenticationEvents
+                    {
+                        OnRedirectToLogin = async (context) => {
+                            context.Response.StatusCode = 401;
+                            await Task.CompletedTask;
+                        },
+
+                        OnRedirectToAccessDenied = async (context) => {
+                            context.Response.StatusCode = 403;
+                            await Task.CompletedTask;
+                        },
+                    };
                 });
             #endregion
 
