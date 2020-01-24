@@ -61,7 +61,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"/api/Users/{user.SteamId}");
+                $"/users/{user.SteamId}");
 
             return await ForwardHttpRequest(client, message);
         }
@@ -87,7 +87,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                QueryHelpers.AddQueryString($"/api/Users/{user.SteamId}", parameters));
+                QueryHelpers.AddQueryString($"/users/{user.SteamId}", parameters));
 
             return await ForwardHttpRequest(client, message);
         }
@@ -106,7 +106,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Delete,
-                $"/api/Users/{user.SteamId}");
+                $"/users/{user.SteamId}");
 
             return await ForwardHttpRequest(client, message);
         }

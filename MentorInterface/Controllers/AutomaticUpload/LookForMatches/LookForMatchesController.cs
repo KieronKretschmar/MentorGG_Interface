@@ -73,7 +73,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"/api/Users/{user.SteamId}/LookForMatches");
+                $"/users/{user.SteamId}/look-for-matches");
 
             return await ForwardHttpRequest(client, message);
         }
