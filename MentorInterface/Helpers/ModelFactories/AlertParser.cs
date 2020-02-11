@@ -29,6 +29,11 @@ namespace MentorInterface.Helpers.ModelFactories
                 return true;
             }
 
+            if(value == null)
+            {
+                return false;
+            }
+
             throw new ArgumentException($"Unexpected value, cannot parse {value}!");
 
         }
