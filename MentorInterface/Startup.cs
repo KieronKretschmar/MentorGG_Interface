@@ -29,7 +29,7 @@ namespace MentorInterface
     public class Startup
     {
 
-        private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") != Environments.Development;
+        private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == Environments.Development;
 
 
         /// <summary>
