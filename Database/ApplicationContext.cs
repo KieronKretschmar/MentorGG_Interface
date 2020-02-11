@@ -16,6 +16,7 @@ namespace Database
     {
         #region Paddle
         public DbSet<PaddleUser> PaddleUser { get; set; }
+        public DbSet<PaddlePlan> PaddlePlan { get; set; }
 
         public DbSet<SubscriptionCreated> SubscriptionCreated { get; set; }
         public DbSet<SubscriptionUpdated> SubscriptionUpdated { get; set; }
@@ -58,15 +59,26 @@ namespace Database
 
 
             // Required Fields
-            builder.Entity<ApplicationUser>(user =>
+            builder.Entity<ApplicationUser>(b =>
                 {
-                    user.Property(x => x.SteamId).IsRequired();
-                    user.Property(x => x.Registration).IsRequired();
+                    b.Property(x => x.SteamId).IsRequired();
+                    b.Property(x => x.Registration).IsRequired();
                 }
             );
 
             // Paddle
             builder.Entity<PaddleUser>(b => b.Property(x => x.Id).ValueGeneratedOnAdd());
+
+            builder.Entity<PaddlePlan>(b =>
+                {
+                    b.HasKey(x => x.PlanId);
+
+                    b.HasOne(x => x.Role)
+                        .WithMany(x => x.PaddlePlan)
+                        .HasForeignKey(x => x.RoleId)
+                        .IsRequired();
+                }
+            );
 
             builder.Entity<SubscriptionCreated>(b => b.HasKey(x => x.AlertId));
             builder.Entity<SubscriptionUpdated>(b => b.HasKey(x => x.AlertId));

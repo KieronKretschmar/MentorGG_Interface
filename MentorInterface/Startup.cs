@@ -20,6 +20,7 @@ using Entities.Models;
 using Database;
 using Prometheus;
 using MentorInterface.Helpers;
+using Microsoft.AspNetCore.Identity;
 
 namespace MentorInterface
 {
@@ -193,9 +194,8 @@ namespace MentorInterface
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -229,6 +229,26 @@ namespace MentorInterface
             });
 
             app.UseMetricServer(METRICS_PORT);
+
+            CreateRoles(serviceProvider);
+        }
+
+        /// <summary>
+        /// Create the User roles, if not present.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        private void CreateRoles(IServiceProvider serviceProvider)
+        {
+            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            string[] roleNames = { "Premium", "Elite" };
+            foreach (var roleName in roleNames)
+            {
+                if (!roleMananger.RoleExistsAsync(roleName).Result)
+                {
+                    roleMananger.CreateAsync(new ApplicationRole(roleName)).Wait();
+                }
+            }
         }
     }
+
 }
