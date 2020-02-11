@@ -1,7 +1,11 @@
 ﻿using Entities.Models;
+using Entities.Models.Paddle;
+using Entities.Models.Paddle.Alerts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Database
 {
@@ -10,6 +14,20 @@ namespace Database
     /// </summary>
     public class ApplicationContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
+        #region Paddle
+        public DbSet<PaddleUser> PaddleUser { get; set; }
+
+        public DbSet<SubscriptionCreated> SubscriptionCreated { get; set; }
+        public DbSet<SubscriptionUpdated> SubscriptionUpdated { get; set; }
+        public DbSet<SubscriptionCancelled> SubscriptionCancelled { get; set; }
+
+        public DbSet<SubscriptionPaymentSucceeded> SubscriptionPaymentSucceeded { get; set; }
+        public DbSet<SubscriptionPaymentFailed> SubscriptionPaymentFailed { get; set; }
+        public DbSet<SubscriptionPaymentRefunded> SubscriptionPaymentRefunded { get; set; }
+
+        #endregion
+
+
         /// <summary>
         ///
         /// </summary>
@@ -47,8 +65,35 @@ namespace Database
                 }
             );
 
+            // Paddle
+            builder.Entity<PaddleUser>(b => b.Property(x => x.Id).ValueGeneratedOnAdd());
 
+            builder.Entity<SubscriptionCreated>(b => b.HasKey(x => x.AlertId));
+            builder.Entity<SubscriptionUpdated>(b => b.HasKey(x => x.AlertId));
+            builder.Entity<SubscriptionCancelled>(b => b.HasKey(x => x.AlertId));
 
+            builder.Entity<SubscriptionPaymentFailed>(b => b.HasKey(x => x.AlertId));
+            builder.Entity<SubscriptionPaymentRefunded>(b => b.HasKey(x => x.AlertId));
+            builder.Entity<SubscriptionPaymentSucceeded>(b => b.HasKey(x => x.AlertId));
+        }
+
+        public void UpdatePaddleUser(PaddleUser user)
+        {
+            // Get the existing user by the UserId
+            PaddleUser existingUser = PaddleUser.Single(
+                x => x.UserId == user.UserId);
+
+            // Iterate over each property and assign each field in the
+            // existing user -  Except the PK (Id)
+            foreach (var prop in user.GetType().GetProperties())
+            {
+                if (prop.Name == "Id")
+                    continue;
+
+                prop.SetValue(existingUser, prop.GetValue(user));
+            }
+
+            SaveChanges();
         }
     }
 }
