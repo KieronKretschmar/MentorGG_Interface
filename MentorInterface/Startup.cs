@@ -21,6 +21,7 @@ using Database;
 using Prometheus;
 using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Identity;
+using Entities.Models.Paddle;
 
 namespace MentorInterface
 {
@@ -231,6 +232,7 @@ namespace MentorInterface
             app.UseMetricServer(METRICS_PORT);
 
             CreateRoles(serviceProvider);
+            CreatePaddlePlanRoleBindings(serviceProvider);
         }
 
         /// <summary>
@@ -247,6 +249,28 @@ namespace MentorInterface
                 {
                     roleMananger.CreateAsync(new ApplicationRole(roleName)).Wait();
                 }
+            }
+        }
+
+        private void CreatePaddlePlanRoleBindings(IServiceProvider serviceProvider)
+        {
+            var applicationContext = serviceProvider.GetRequiredService<ApplicationContext>();
+            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+
+            var role = roleMananger.FindByNameAsync("Premium").Result;
+            int planId = 100;
+
+            PaddlePlan roleBind = new PaddlePlan
+            {
+                Role = role,
+                RoleId = role.Id,
+                PlanId = planId,
+
+            };
+            if (!applicationContext.PaddlePlan.Any(x => x.PlanId == planId))
+            {
+                applicationContext.PaddlePlan.Add(roleBind);
+                applicationContext.SaveChanges();
             }
         }
     }
