@@ -85,6 +85,8 @@ namespace Database
                 {
                     b.HasKey(x => x.PlanId);
 
+                    // A PaddlePlan can have ONE ApplicationRole
+                    // An ApplicationRole can have MANY PaddlePlanss
                     b.HasOne(x => x.Role)
                         .WithMany(x => x.PaddlePlan)
                         .HasForeignKey(x => x.RoleId)
