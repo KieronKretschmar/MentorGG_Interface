@@ -18,7 +18,7 @@ namespace Entities.Models.Paddle
         public int PlanId { get; set; }
 
         /// <summary>
-        /// RoleId
+        /// RoleId associated with this Paddle Plan
         /// </summary>
         public int RoleId { get; set; }
 
