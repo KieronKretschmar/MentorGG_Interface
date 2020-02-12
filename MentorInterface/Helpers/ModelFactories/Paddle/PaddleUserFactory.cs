@@ -2,6 +2,7 @@
 using Entities.Models.Paddle.Alerts;
 using MentorInterface.Helpers.ModelFactories;
 using MentorInterface.Helpers.ModelFactories.Paddle;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
 {
     public static class PaddleUserFactory
     {
+
         public static PaddleUser FromAlert(Dictionary<string, string> values)
         {
             try
@@ -24,6 +26,9 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     SubscriptionPlanId = values["subscription_plan_id"],
                     UpdateUrl = values["update_url"],
                     CancelUrl = values["cancel_url"],
+                    Passthrough = values["passthrough"],
+
+                    SteamId = SteamIdFromPassthrough(values["passthrough"])
                 };
             }
             catch (Exception ex)
@@ -46,7 +51,10 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     SubscriptionId = user.SubscriptionId,
                     SubscriptionPlanId = user.SubscriptionPlanId,
                     UpdateUrl = user.UpdateUrl,
-                    CancelUrl = user.CancelUrl
+                    CancelUrl = user.CancelUrl,
+                    Passthrough = user.Passthrough,
+
+                    SteamId = SteamIdFromPassthrough(user.Passthrough)
                 };
             }
             catch (Exception ex)
@@ -69,13 +77,23 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     SubscriptionId = alert.SubscriptionId,
                     SubscriptionPlanId = alert.SubscriptionPlanId,
                     UpdateUrl = null,
-                    CancelUrl = null
+                    CancelUrl = null,
+                    Passthrough = alert.Passthrough,
+
+                    SteamId = SteamIdFromPassthrough(alert.Passthrough)
                 };
             }
             catch (Exception ex)
             {
                 throw new AlertParseException("Failed to create PaddleUser", ex);
             }
+        }
+
+        private static long SteamIdFromPassthrough(string passthrough)
+        {
+            JObject jsonObj = JObject.Parse(passthrough);
+            long steamId = jsonObj.Value<long>("SteamId");
+            return steamId;
         }
     }
 }

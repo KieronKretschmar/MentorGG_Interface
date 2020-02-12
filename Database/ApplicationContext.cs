@@ -67,7 +67,19 @@ namespace Database
             );
 
             // Paddle
-            builder.Entity<PaddleUser>(b => b.Property(x => x.Id).ValueGeneratedOnAdd());
+            builder.Entity<PaddleUser>(b =>
+                {
+                    b.Property(x => x.Id).ValueGeneratedOnAdd();
+
+                    // A PaddleUser can have ONE ApplicationUser
+                    // An ApplicationUser can have MANY PaddleUsers
+                    b.HasOne(x => x.User)
+                        .WithMany(x => x.PaddleUser)
+                        .HasForeignKey(x => x.SteamId)
+                        .HasPrincipalKey(x => x.SteamId)
+                        .IsRequired();
+                }
+            );
 
             builder.Entity<PaddlePlan>(b =>
                 {

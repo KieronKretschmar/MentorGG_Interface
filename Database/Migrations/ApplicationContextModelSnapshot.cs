@@ -614,8 +614,14 @@ namespace Database.Migrations
                     b.Property<bool>("MarketingConsent")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("Passthrough")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<long>("SteamId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SubscriptionId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -630,6 +636,8 @@ namespace Database.Migrations
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SteamId");
 
                     b.ToTable("PaddleUser");
                 });
@@ -738,6 +746,16 @@ namespace Database.Migrations
                     b.HasOne("Entities.Models.ApplicationRole", "Role")
                         .WithMany("PaddlePlan")
                         .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Models.Paddle.PaddleUser", b =>
+                {
+                    b.HasOne("Entities.Models.ApplicationUser", "User")
+                        .WithMany("PaddleUser")
+                        .HasForeignKey("SteamId")
+                        .HasPrincipalKey("SteamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

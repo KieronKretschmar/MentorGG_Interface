@@ -17,5 +17,7 @@
         string CancelUrl { get; set; }
 
         string UpdateUrl { get; set; }
+
+        string Passthrough { get; set; }
     }
 }
