@@ -10,7 +10,7 @@ namespace Entities.Models.Paddle
         /// <summary>
         /// Navigational Property
         /// </summary>
-        public ApplicationUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         public int Id { get; set; }
 

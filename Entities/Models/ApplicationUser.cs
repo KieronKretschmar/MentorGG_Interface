@@ -51,7 +51,7 @@ namespace Entities.Models
         /// <summary>
         /// Navigational Property
         /// </summary>
-        public ICollection<PaddleUser> PaddleUser { get; set; }
+        public virtual ICollection<PaddleUser> PaddleUser { get; set; }
 
         /// <summary>
         /// SteamId

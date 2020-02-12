@@ -10,7 +10,7 @@ namespace Entities.Models.Paddle
         /// <summary>
         /// Navigational Property
         /// </summary>
-        public ApplicationRole Role { get; set; }
+        public virtual ApplicationRole Role { get; set; }
 
         /// <summary>
         /// PlanId provided by Paddle to Identity the Subscription
