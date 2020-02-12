@@ -240,7 +240,7 @@ namespace MentorInterface
         private void CreateRoles(IServiceProvider serviceProvider)
         {
             var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            string[] roleNames = { "Premium", "Elite" };
+            string[] roleNames = { "Premium", "Ultimate" };
             foreach (var roleName in roleNames)
             {
                 if (!roleMananger.RoleExistsAsync(roleName).Result)
