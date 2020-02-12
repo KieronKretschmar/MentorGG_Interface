@@ -10,7 +10,7 @@
 
         string SubscriptionId { get; set; }
 
-        string SubscriptionPlanId { get; set; }
+        int SubscriptionPlanId { get; set; }
 
         string Status { get; set; }
 

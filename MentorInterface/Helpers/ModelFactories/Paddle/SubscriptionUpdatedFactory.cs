@@ -48,8 +48,8 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     Status = values["status"],
                     OldStatus = values["old_status"],
                     SubscriptionId = values["subscription_id"],
-                    SubscriptionPlanId = values["subscription_plan_id"],
-                    OldSubscriptionPlanId = values["old_subscription_plan_id"]
+                    SubscriptionPlanId = int.Parse(values["subscription_plan_id"]),
+                    OldSubscriptionPlanId = int.Parse(values["old_subscription_plan_id"])
                 };
             }
             catch (Exception ex)

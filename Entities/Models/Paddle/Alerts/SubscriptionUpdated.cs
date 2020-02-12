@@ -59,8 +59,8 @@ namespace Entities.Models.Paddle.Alerts
         public string OldStatus { get; set; }
 
 
-        public string SubscriptionPlanId { get; set; }
-        public string OldSubscriptionPlanId { get; set; }
+        public int SubscriptionPlanId { get; set; }
+        public int OldSubscriptionPlanId { get; set; }
 
     }
 }

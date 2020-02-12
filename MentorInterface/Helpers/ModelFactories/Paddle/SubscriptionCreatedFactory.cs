@@ -25,7 +25,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     Source =                values["source"],
                     Status =                values["status"],
                     SubscriptionId =        values["subscription_id"],
-                    SubscriptionPlanId =    values["subscription_plan_id"],
+                    SubscriptionPlanId =    int.Parse(values["subscription_plan_id"]),
                     UnitPrice =             values["unit_price"],
                     UserId =                values["user_id"],
                     UpdateUrl =             values["update_url"]

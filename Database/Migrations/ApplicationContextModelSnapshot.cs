@@ -207,8 +207,8 @@ namespace Database.Migrations
                     b.Property<string>("SubscriptionId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UnitPrice")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -278,8 +278,8 @@ namespace Database.Migrations
                     b.Property<string>("SubscriptionPaymentId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UnitPrice")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -548,8 +548,8 @@ namespace Database.Migrations
                     b.Property<string>("OldStatus")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("OldSubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("OldSubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("OldUnitPrice")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -569,8 +569,8 @@ namespace Database.Migrations
                     b.Property<string>("SubscriptionId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -626,8 +626,8 @@ namespace Database.Migrations
                     b.Property<string>("SubscriptionId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
