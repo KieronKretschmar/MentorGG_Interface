@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database;
+using Entities.Models;
 using Entities.Models.Paddle;
 using Entities.Models.Paddle.Alerts;
 using MentorInterface.Helpers.ModelFactories;
 using MentorInterface.Helpers.ModelFactories.Paddle;
 using MentorInterface.Payment;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -24,17 +27,21 @@ namespace MentorInterface.Controllers
 
         readonly WebhookVerifier _webhookVerifier;
         private readonly ILogger<Webhooks> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationContext _applicationContext;
 
         /// <summary>
         ///
         /// </summary>
-        public Webhooks(ILogger<Webhooks> logger,
+        public Webhooks(
+            ILogger<Webhooks> logger,
+            UserManager<ApplicationUser> userManager,
             ApplicationContext applicationContext)
         {
 
             _webhookVerifier = new WebhookVerifier("x");
             _logger = logger;
+            _userManager = userManager;
             _applicationContext = applicationContext;
         }
 
@@ -129,10 +136,28 @@ namespace MentorInterface.Controllers
                 return StatusCode(400);
             }
 
-            var newUser = PaddleUserFactory.FromAlert(alert);
-            _applicationContext.PaddleUser.Add(newUser);
+            var newPaddleUser = PaddleUserFactory.FromAlert(alert);
 
+            _applicationContext.PaddleUser.Add(newPaddleUser);
+
+            // Saving the changes must happen here to get the associated ApplicationUser from
+            // the Database..  ╭∩╮(Ο_Ο)╭∩╮
             _applicationContext.SaveChanges();
+
+            // Find the assoicated ApplicationRole for this PaddlePlan
+            var role = _applicationContext.PaddlePlan
+                .Where(x => x.PlanId == newPaddleUser.SubscriptionPlanId)
+                .Select(x => x.Role)
+                .Single();
+
+            // Find the assoicated ApplicationUser for this PaddleUser
+            var user = _applicationContext.PaddleUser
+                .Where(x => x.Id == newPaddleUser.Id)
+                .Select(x => x.User)
+                .Single();
+
+            _userManager.AddToRoleAsync(user, role.Name).Wait();
+
             return StatusCode(200);
         }
 
