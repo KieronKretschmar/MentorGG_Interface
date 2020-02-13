@@ -25,6 +25,12 @@ namespace MentorInterface.Helpers
             "faceit-match-gatherer",
             "faceit-match-gatherer.default.svc.cluster.local");
 
+        /// <summary>
+        /// Match Retriever
+        /// </summary>
+        public static ConnectedService MatchRetriever = new ConnectedService(
+            "match-retriever",
+            "match-retriever.default.svc.cluster.local");
     }
 
 
