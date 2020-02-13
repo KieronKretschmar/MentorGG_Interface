@@ -97,6 +97,11 @@ namespace MentorInterface
                 c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
             });
 
+            services.AddHttpClient(ConnectedServices.MatchRetriever, c =>
+            {
+                c.BaseAddress = new Uri($"http://{ConnectedServices.MatchRetriever.DNSAddress}"); //TODO: Port
+                c.DefaultRequestHeaders.Add("User-Agent", "MatchRetriever");
+            });
             #endregion
 
             #region Identity
