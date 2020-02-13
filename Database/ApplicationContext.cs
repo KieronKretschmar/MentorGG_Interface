@@ -75,8 +75,8 @@ namespace Database
                     // An ApplicationUser can have MANY PaddleUsers
                     b.HasOne(x => x.User)
                         .WithMany(x => x.PaddleUser)
-                        .HasForeignKey(x => x.SteamId)
-                        .HasPrincipalKey(x => x.SteamId)
+                        .HasForeignKey(x => x.ApplicationUserId)
+                        .HasPrincipalKey(x => x.Id)
                         .IsRequired();
                 }
             );

@@ -36,9 +36,9 @@ namespace Entities.Models.Paddle
         public string Passthrough { get; set; }
 
         /// <summary>
-        /// SteamId associated with this PaddleUser.
+        /// ApplicationUser associated with this PaddleUser.
         /// Devrived from Passthrough
         /// </summary>
-        public long SteamId { get; set; }
+        public int ApplicationUserId { get; set; }
     }
 }
