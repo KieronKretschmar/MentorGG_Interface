@@ -10,7 +10,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{73F41D80-50EB-438D-B5D3-D28E129F6D0F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentorInterfaceTests", "MentorInterfaceTests\MentorInterfaceTests.csproj", "{842291EF-EF8C-4C3F-BD7F-268BDEEDC475}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
