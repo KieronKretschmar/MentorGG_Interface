@@ -37,13 +37,13 @@ namespace Entities.Models.Paddle.Alerts
 
         public string Source { get; set; }
 
-        public string SubscriptionId { get; set; }
+        public int SubscriptionId { get; set; }
 
         public int SubscriptionPlanId { get; set; }
 
         public string UnitPrice { get; set; }
 
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public string UpdateUrl { get; set; }
 

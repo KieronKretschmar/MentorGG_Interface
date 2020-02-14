@@ -37,7 +37,7 @@ namespace Entities.Models.Paddle.Alerts
 
         public string Status { get; set; }
 
-        public string SubscriptionId { get; set; }
+        public int SubscriptionId { get; set; }
 
         public int SubscriptionPlanId { get; set; }
 
@@ -51,7 +51,7 @@ namespace Entities.Models.Paddle.Alerts
 
         public string OrderId { get; set; }
 
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public string AttemptNumber { get; set; }
 

@@ -2,13 +2,13 @@
 {
     public interface IPaddleUser
     {
-        string UserId { get; set; }
+        int UserId { get; set; }
 
         string Email { get; set; }
 
         bool MarketingConsent { get; set; }
 
-        string SubscriptionId { get; set; }
+        int SubscriptionId { get; set; }
 
         int SubscriptionPlanId { get; set; }
 

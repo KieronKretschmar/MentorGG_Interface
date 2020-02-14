@@ -29,11 +29,11 @@ namespace Entities.Models.Paddle.Alerts
 
         public string Passthrough { get; set; }
 
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public string UpdateUrl { get; set; }
 
-        public string SubscriptionId { get; set; }
+        public int SubscriptionId { get; set; }
 
         public DateTime PausedAt { get; set; }
         public DateTime PausedFrom { get; set; }

@@ -14,13 +14,13 @@ namespace Entities.Models.Paddle
 
         public int Id { get; set; }
 
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public string Email { get; set; }
 
         public bool MarketingConsent { get; set; }
 
-        public string SubscriptionId { get; set; }
+        public int SubscriptionId { get; set; }
 
         public int SubscriptionPlanId { get; set; }
 
