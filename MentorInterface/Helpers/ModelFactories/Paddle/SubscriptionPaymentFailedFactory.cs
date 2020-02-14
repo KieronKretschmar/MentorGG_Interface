@@ -26,14 +26,14 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     Passthrough =                   values["passthrough"],
                     Quantity =                      values["quantity"],
                     Status =                        values["status"],
-                    SubscriptionId =                values["subscription_id"],
+                    SubscriptionId =                int.Parse(values["subscription_id"]),
                     SubscriptionPlanId =            int.Parse(values["subscription_plan_id"]),
                     UnitPrice =                     values["unit_price"],
                     UpdateUrl =                     values["update_url"],
                     SubscriptionPaymentId =         values["subscription_payment_id"],
                     Installments =                  values["installments"],
                     OrderId =                       values["order_id"],
-                    UserId =                        values["user_id"],
+                    UserId =                        int.Parse(values["user_id"]),
                     AttemptNumber =                 values["attempt_number"],
                 };
             }

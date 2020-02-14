@@ -18,17 +18,17 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
             {
                 return new PaddleUser
                 {
-                    UserId = values["user_id"],
+                    UserId = int.Parse(values["user_id"]),
                     Email = values["email"],
                     MarketingConsent = AlertParser.ParseBool(values["marketing_consent"]),
                     Status = values["status"],
-                    SubscriptionId = values["subscription_id"],
+                    SubscriptionId = int.Parse(values["subscription_id"]),
                     SubscriptionPlanId = int.Parse(values["subscription_plan_id"]),
                     UpdateUrl = values["update_url"],
                     CancelUrl = values["cancel_url"],
                     Passthrough = values["passthrough"],
 
-                    SteamId = SteamIdFromPassthrough(values["passthrough"])
+                    ApplicationUserId = ApplicationUserIdFromPassthrough(values["passthrough"])
                 };
             }
             catch (Exception ex)
@@ -54,7 +54,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     CancelUrl = user.CancelUrl,
                     Passthrough = user.Passthrough,
 
-                    SteamId = SteamIdFromPassthrough(user.Passthrough)
+                    ApplicationUserId = ApplicationUserIdFromPassthrough(user.Passthrough)
                 };
             }
             catch (Exception ex)
@@ -75,12 +75,12 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     MarketingConsent = alert.MarketingConsent,
                     Status = alert.Status,
                     SubscriptionId = alert.SubscriptionId,
-                    SubscriptionPlanId = int.Parse(alert.SubscriptionPlanId),
+                    SubscriptionPlanId = alert.SubscriptionPlanId,
                     UpdateUrl = null,
                     CancelUrl = null,
                     Passthrough = alert.Passthrough,
 
-                    SteamId = SteamIdFromPassthrough(alert.Passthrough)
+                    ApplicationUserId = ApplicationUserIdFromPassthrough(alert.Passthrough)
                 };
             }
             catch (Exception ex)
@@ -89,11 +89,11 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
             }
         }
 
-        private static long SteamIdFromPassthrough(string passthrough)
+        private static int ApplicationUserIdFromPassthrough(string passthrough)
         {
             JObject jsonObj = JObject.Parse(passthrough);
-            long steamId = jsonObj.Value<long>("SteamId");
-            return steamId;
+            int applicationUserId = jsonObj.Value<int>("ApplicationUserId");
+            return applicationUserId;
         }
     }
 }

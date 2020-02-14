@@ -33,7 +33,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     EventTime = DateTime.Parse(values["event_time"]),
                     MarketingConsent = AlertParser.ParseBool(values["marketing_consent"]),
                     Passthrough = values["passthrough"],
-                    UserId = values["user_id"],
+                    UserId = int.Parse(values["user_id"]),
                     UpdateUrl = values["update_url"],
                     PausedAt = pausedAt,
                     PausedFrom = pausedFrom,
@@ -47,7 +47,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     OldNextBillDate = DateTime.Parse(values["old_next_bill_date"]),
                     Status = values["status"],
                     OldStatus = values["old_status"],
-                    SubscriptionId = values["subscription_id"],
+                    SubscriptionId = int.Parse(values["subscription_id"]),
                     SubscriptionPlanId = int.Parse(values["subscription_plan_id"]),
                     OldSubscriptionPlanId = int.Parse(values["old_subscription_plan_id"])
                 };

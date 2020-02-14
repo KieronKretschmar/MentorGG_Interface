@@ -15,7 +15,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                 return new SubscriptionPaymentSucceeded
                 {
                     AlertId = int.Parse(values["alert_id"]),
-                    BalanceCurrency = values["balance_curreny"],
+                    BalanceCurrency = values["balance_currency"],
                     BalanceEarnings = values["balance_earnings"],
                     BalanceFee = values["balance_fee"],
                     BalanceGross = values["balance_gross"],
@@ -30,7 +30,7 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     EventTime = DateTime.Parse(values["event_time"]),
                     Fee = values["fee"],
                     InitialPayment = values["initial_payment"],
-                    Instalments = values["installments"],
+                    Instalments = values["instalments"],
                     MarketingConsent = AlertParser.ParseBool(values["marketing_consent"]),
                     NextBillDate = DateTime.Parse(values["next_bill_date"]),
                     NextPaymentAmount = values["next_payment_amount"],

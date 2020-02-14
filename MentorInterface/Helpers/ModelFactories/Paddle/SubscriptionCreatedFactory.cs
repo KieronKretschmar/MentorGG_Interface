@@ -24,10 +24,10 @@ namespace MentorInterface.Helpers.ModelFactories.Paddle
                     Quantity =              values["quantity"],
                     Source =                values["source"],
                     Status =                values["status"],
-                    SubscriptionId =        values["subscription_id"],
+                    SubscriptionId =        int.Parse(values["subscription_id"]),
                     SubscriptionPlanId =    int.Parse(values["subscription_plan_id"]),
                     UnitPrice =             values["unit_price"],
-                    UserId =                values["user_id"],
+                    UserId =                int.Parse(values["user_id"]),
                     UpdateUrl =             values["update_url"]
                 };
             }
