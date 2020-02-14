@@ -55,7 +55,7 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         [HttpPost("paddle")]
         [Consumes("application/x-www-form-urlencoded")]
-        public IActionResult HandleAlert([FromForm]Dictionary<string, string> rawAlert)
+        public async Task<IActionResult> HandleAlertAsync([FromForm]Dictionary<string, string> rawAlert)
         {
             string alertName;
             try
@@ -78,35 +78,92 @@ namespace MentorInterface.Controllers
             {
                 switch (alertName)
                 {
+                    #region Subscription Created
                     case AlertType.SubscriptionCreated:
                         var createdAlert = SubscriptionCreatedFactory.FromAlert(rawAlert);
-                        return CreateSubscription(createdAlert);
+                        
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionCreated.Any(x => x.AlertId == createdAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {createdAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return await CreateSubscriptionAsync(createdAlert);
+                    #endregion
 
+                    #region Subscription Updated
                     case AlertType.SubscriptionUpdated:
                         var updatedAlert = SubscriptionUpdatedFactory.FromAlert(rawAlert);
-                        return UpdateSubscription(updatedAlert);
 
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionUpdated.Any(x => x.AlertId == updatedAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {updatedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return await UpdateSubscriptionAsync(updatedAlert);
+                    #endregion
+
+                    #region Subscription Cancelled
                     case AlertType.SubscriptionCancelled:
                         var cancelledAlert = SubscriptionCancelledFactory.FromAlert(rawAlert);
-                        return CancelSubscription(cancelledAlert);
 
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionCancelled.Any(x => x.AlertId == cancelledAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {cancelledAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return CancelSubscription(cancelledAlert);
+                    #endregion
+
+                    #region GROUP: Subscription Payments
+                    #region Subscription Payment Succeded
                     case AlertType.SubscriptionPaymentSucceded:
                         var paymentSucceededAlert = SubscriptionPaymentSucceededFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentSucceeded.Any(x => x.AlertId == paymentSucceededAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentSucceededAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
                         _applicationContext.SubscriptionPaymentSucceeded.Add(paymentSucceededAlert);
                         _applicationContext.SaveChanges();
                         return StatusCode(200);
+                    #endregion
 
+                    #region Subscription Payment Failed
                     case AlertType.SubscriptionPaymentFailed:
                         var paymentFailedAlert = SubscriptionPaymentFailedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentFailed.Any(x => x.AlertId == paymentFailedAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentFailedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
                         _applicationContext.SubscriptionPaymentFailed.Add(paymentFailedAlert);
                         _applicationContext.SaveChanges();
                         return StatusCode(200);
+                    #endregion
 
+                    #region Subscription Payment Refunded
                     case AlertType.SubscriptionPaymentRefunded:
                         var paymentRefundedAlert = SubscriptionPaymentRefundedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentRefunded.Any(x => x.AlertId == paymentRefundedAlert.AlertId))
+                        {   
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentRefundedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
                         _applicationContext.SubscriptionPaymentRefunded.Add(paymentRefundedAlert);
                         _applicationContext.SaveChanges();
                         return StatusCode(200);
+                    #endregion
+
+                    #endregion
 
                     default:
                         return StatusCode(501);
@@ -125,7 +182,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private IActionResult CreateSubscription(SubscriptionCreated alert)
+        private async Task<IActionResult> CreateSubscriptionAsync(SubscriptionCreated alert)
         {
             _applicationContext.SubscriptionCreated.Add(alert);
 
@@ -169,7 +226,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private IActionResult UpdateSubscription(SubscriptionUpdated alert)
+        private async Task<IActionResult> UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
             _applicationContext.SubscriptionUpdated.Add(alert);
 
