@@ -190,6 +190,15 @@ namespace MentorInterface
             }
             #endregion
 
+            #region Cors
+            services.AddCors(o => o.AddPolicy("AllowAny", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
+            #endregion
+
             #region Swagger
             services.AddSwaggerGen(options =>
             {
@@ -223,6 +232,8 @@ namespace MentorInterface
             {
                 app.UseHttpsRedirection();
             }
+
+            app.UseCors("AllowAny");
 
             #region Swagger
             app.UseSwagger();
