@@ -239,13 +239,13 @@ namespace MentorInterface
         }
 
         /// <summary>
-        /// Create the User roles, if not present.
+        /// Create the ApplicationRoles, if not present.
         /// </summary>
         /// <param name="serviceProvider"></param>
         private void CreateRoles(IServiceProvider serviceProvider)
         {
             var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            string[] roleNames = { "Premium", "Ultimate" };
+            string[] roleNames = { Roles.Premium, Roles.Ultimate };
             foreach (var roleName in roleNames)
             {
                 if (!roleMananger.RoleExistsAsync(roleName).Result)
@@ -255,26 +255,36 @@ namespace MentorInterface
             }
         }
 
+        /// <summary>
+        /// Create the binds between PaddlePlanIds and Application Roles.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
         private void CreatePaddlePlanRoleBindings(IServiceProvider serviceProvider)
         {
             var applicationContext = serviceProvider.GetRequiredService<ApplicationContext>();
             var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-            var role = roleMananger.FindByNameAsync("Premium").Result;
-            int planId = 100;
-
-            PaddlePlan roleBind = new PaddlePlan
+            var paddleRoleBinds = new PaddleRoleBind[]
             {
-                Role = role,
-                RoleId = role.Id,
-                PlanId = planId,
-
+                new PaddleRoleBind(583755, Roles.Premium),
+                new PaddleRoleBind(583756, Roles.Ultimate),
             };
-            if (!applicationContext.PaddlePlan.Any(x => x.PlanId == planId))
+
+            foreach (var roleBind in paddleRoleBinds)
             {
-                applicationContext.PaddlePlan.Add(roleBind);
-                applicationContext.SaveChanges();
+                if (!applicationContext.PaddlePlan.Any(x => x.PlanId == roleBind.PlanId))
+                {
+                    var role = roleMananger.FindByNameAsync(roleBind.RoleName).Result;
+                    var paddlePlan = new PaddlePlan
+                    {
+                        Role = role,
+                        PlanId = roleBind.PlanId,
+                    };
+
+                    applicationContext.PaddlePlan.Add(paddlePlan);
+                }
             }
+            applicationContext.SaveChanges();
         }
     }
 
