@@ -102,24 +102,5 @@ namespace Database
             builder.Entity<SubscriptionPaymentRefunded>(b => b.HasKey(x => x.AlertId));
             builder.Entity<SubscriptionPaymentSucceeded>(b => b.HasKey(x => x.AlertId));
         }
-
-        public void UpdatePaddleUser(PaddleUser user)
-        {
-            // Get the existing user by the UserId
-            PaddleUser existingUser = PaddleUser.Single(
-                x => x.UserId == user.UserId);
-
-            // Iterate over each property and assign each field in the
-            // existing user -  Except the PK (Id)
-            foreach (var prop in user.GetType().GetProperties())
-            {
-                if (prop.Name == "Id")
-                    continue;
-
-                prop.SetValue(existingUser, prop.GetValue(user));
-            }
-
-            SaveChanges();
-        }
     }
 }

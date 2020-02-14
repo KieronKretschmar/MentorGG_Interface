@@ -22,6 +22,7 @@ using Prometheus;
 using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Entities.Models.Paddle;
+using MentorInterface.Payment;
 
 namespace MentorInterface
 {
@@ -70,6 +71,8 @@ namespace MentorInterface
         {
             services.AddControllers();
             services.AddApiVersioning();
+
+            services.AddTransient<PaddleUserMananger>();
 
             #region HTTP Clients
 
