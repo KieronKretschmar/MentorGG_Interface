@@ -44,14 +44,14 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [HttpGet("match/{matchId}")]
+        [HttpGet("watch/match/{matchId}")]
         public async Task<IActionResult> MatchAsync(long matchId)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"/v1/public/match/{matchId}");
+                $"/v1/public/watch/match/{matchId}");
 
             return await ForwardHttpRequest(client, message);
         }
@@ -59,14 +59,14 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [HttpGet("match/{matchId}/round/{round}")]
+        [HttpGet("watch/match/{matchId}/round/{round}")]
         public async Task<IActionResult> RoundAsync(long matchId, int round, DemoViewerQuality quality = DemoViewerQuality.Low)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"/v1/public/match/{matchId}/round/{round}?quality={quality}");
+                $"/v1/public/watch/match/{matchId}/round/{round}?quality={quality}");
             //TODO: add parameters to uri, set defaults in matchretriever
 
             return await ForwardHttpRequest(client, message);
