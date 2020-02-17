@@ -22,6 +22,8 @@ namespace MentorInterface.Paddle
 
         private string PublicKey { get; }
 
+        private const string SignatureKey = "p_signature";
+
         /// <summary>
         /// Initialize with a public key provided by Paddle.
         /// </summary>
@@ -38,14 +40,19 @@ namespace MentorInterface.Paddle
         /// </summary>
         public bool IsAlertValid(Dictionary<string, string> alert)
         {
+            if (!alert.ContainsKey(SignatureKey)){
+                return false;
+            }
+
             PhpSerializer serializer = new PhpSerializer();
-            byte[] signature = Convert.FromBase64String(alert["p_signature"] ?? "");
+
+            byte[] signature = Convert.FromBase64String(alert[SignatureKey] ?? "");
 
             SortedDictionary<string, dynamic> sorted = new SortedDictionary<string, dynamic>();
             foreach (string key in alert.Keys)
             {
                 var val = alert[key] ?? "";
-                if (key != "p_signature")
+                if (key != SignatureKey)
                 {
                     sorted.Add(key, val);
                 }
