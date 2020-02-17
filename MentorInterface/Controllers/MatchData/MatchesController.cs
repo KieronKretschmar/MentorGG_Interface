@@ -48,13 +48,13 @@ namespace MentorInterface.Controllers.MatchData
         [ValidateMatchIds]
         [Authorize]
         [HttpGet("single/{steamId}/matches")]
-        public async Task<IActionResult> MatchesAsync(long steamId, string matchIds, int offset = 0)
+        public async Task<IActionResult> MatchesAsync(long steamId, string matchIds, int count, int offset = 0)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/matches?matchIds={matchIds}&offset={offset}");
+                $"v1/public/single/{steamId}/matches?matchIds={matchIds}&count={count}&offset={offset}");
 
             return await ForwardHttpRequest(client, message);
         }
