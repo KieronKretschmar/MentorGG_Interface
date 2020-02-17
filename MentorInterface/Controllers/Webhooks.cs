@@ -8,6 +8,7 @@ using Entities.Models.Paddle;
 using Entities.Models.Paddle.Alerts;
 using MentorInterface.Helpers.ModelFactories;
 using MentorInterface.Helpers.ModelFactories.Paddle;
+using MentorInterface.Paddle;
 using MentorInterface.Payment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -38,13 +39,13 @@ namespace MentorInterface.Controllers
             ILogger<Webhooks> logger,
             UserManager<ApplicationUser> userManager,
             PaddleUserMananger paddleUserMananger,
+            WebhookVerifier webhookVerifier,
             ApplicationContext applicationContext)
         {
-
-            _webhookVerifier = new WebhookVerifier("x");
             _logger = logger;
             _userManager = userManager;
             _paddleUserMananger = paddleUserMananger;
+            _webhookVerifier = webhookVerifier;
             _applicationContext = applicationContext;
         }
 
@@ -70,8 +71,7 @@ namespace MentorInterface.Controllers
             // Confirm the alert is valid
             if (!_webhookVerifier.IsAlertValid(rawAlert))
             {
-                // Signature mismatch
-                return StatusCode(401);
+                return StatusCode(403, "Signature mismatch");
             }
 
             try

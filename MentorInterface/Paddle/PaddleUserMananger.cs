@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MentorInterface.Payment
+namespace MentorInterface.Paddle
 {
     public class PaddleUserMananger
     {
@@ -46,7 +46,6 @@ namespace MentorInterface.Payment
                 prop.SetValue(existingUser, prop.GetValue(userInfo));
 
             }
-            //Context.Update(existingUser);
 
             return (await _applicationContext.SaveChangesAsync()) > 0;
         }

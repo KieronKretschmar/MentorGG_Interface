@@ -23,6 +23,7 @@ using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Entities.Models.Paddle;
 using MentorInterface.Payment;
+using MentorInterface.Paddle;
 
 namespace MentorInterface
 {
@@ -72,7 +73,17 @@ namespace MentorInterface
             services.AddControllers();
             services.AddApiVersioning();
 
+            #region Paddle
+
             services.AddTransient<PaddleUserMananger>();
+            services.AddTransient<WebhookVerifier>(x =>
+                {
+                    return new WebhookVerifier(
+                        File.ReadAllText("Paddle/PaddlePublicKey.pem"));
+                }
+            );
+
+            #endregion
 
             #region HTTP Clients
 
