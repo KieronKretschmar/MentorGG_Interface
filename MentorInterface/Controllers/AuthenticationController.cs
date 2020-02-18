@@ -78,7 +78,7 @@ namespace MentorInterface.Controllers
             var signInAttempt = await _signInManager.ExternalLoginSignInAsync(
                 loginInfo.LoginProvider,
                 loginInfo.ProviderKey,
-                isPersistent: false);
+                isPersistent: true);
 
             if (signInAttempt.Succeeded)
             {
