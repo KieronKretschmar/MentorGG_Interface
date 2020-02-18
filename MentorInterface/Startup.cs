@@ -256,7 +256,7 @@ namespace MentorInterface
         private void CreateRoles(IServiceProvider serviceProvider)
         {
             var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            string[] roleNames = { Roles.Premium, Roles.Ultimate };
+            string[] roleNames = { Subscriptions.Premium, Subscriptions.Ultimate };
             foreach (var roleName in roleNames)
             {
                 if (!roleMananger.RoleExistsAsync(roleName).Result)
@@ -277,8 +277,8 @@ namespace MentorInterface
 
             var paddleRoleBinds = new PaddleRoleBind[]
             {
-                new PaddleRoleBind(583755, Roles.Premium),
-                new PaddleRoleBind(583756, Roles.Ultimate),
+                new PaddleRoleBind(583755, Subscriptions.Premium),
+                new PaddleRoleBind(583756, Subscriptions.Ultimate),
             };
 
             foreach (var roleBind in paddleRoleBinds)
