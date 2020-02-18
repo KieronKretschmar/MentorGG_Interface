@@ -75,7 +75,7 @@ namespace MentorInterface
 
             #region Paddle
 
-            services.AddTransient<PaddleUserMananger>();
+            services.AddTransient<PaddleUserManager>();
             services.AddTransient<WebhookVerifier>(x =>
                 {
                     return new WebhookVerifier(

@@ -11,7 +11,7 @@ namespace MentorInterface.Paddle
     /// <summary>
     /// Manages PaddleUsers in the DatabaseContext
     /// </summary>
-    public class PaddleUserMananger
+    public class PaddleUserManager
     {
         private readonly ApplicationContext _applicationContext;
 
@@ -21,7 +21,7 @@ namespace MentorInterface.Paddle
         /// Stores a reference to the DatabaseContext
         /// </summary>
         /// <param name="applicationContext"></param>
-        public PaddleUserMananger(ApplicationContext applicationContext)
+        public PaddleUserManager(ApplicationContext applicationContext)
         {
             this._applicationContext = applicationContext;
         }
@@ -33,7 +33,7 @@ namespace MentorInterface.Paddle
         /// <returns></returns>
         public async Task<PaddleUser> GetUserAsync(int userId)
         {
-            return await Context.SingleAsync<PaddleUser>(x => x.UserId == userId);
+            return await Context.SingleOrDefaultAsync<PaddleUser>(x => x.UserId == userId);
         }
 
         /// <summary>

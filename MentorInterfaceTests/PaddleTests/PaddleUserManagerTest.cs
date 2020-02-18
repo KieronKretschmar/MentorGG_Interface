@@ -47,14 +47,14 @@ namespace MentorInterfaceTests.Paddle
             // Add the User
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 paddleUserMananger.AddUserAsync(newUser).Wait();
             }
 
             // Remove the User
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 paddleUserMananger.RemoveUserAsync(userId).Wait();
             }
 
@@ -63,7 +63,7 @@ namespace MentorInterfaceTests.Paddle
                 {
                     using (var context = new ApplicationContext(applicationContextOptions))
                     {
-                        var paddleUserMananger = new PaddleUserMananger(context);
+                        var paddleUserMananger = new PaddleUserManager(context);
                         paddleUserMananger.GetUserAsync(userId).Wait();
                     }
                 }
@@ -95,7 +95,7 @@ namespace MentorInterfaceTests.Paddle
             // Add the User
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 paddleUserMananger.AddUserAsync(newUser).Wait();
             }
 
@@ -103,7 +103,7 @@ namespace MentorInterfaceTests.Paddle
             PaddleUser returnedUser;
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 returnedUser = paddleUserMananger.GetUserAsync(userId).Result;
             }
 
@@ -146,7 +146,7 @@ namespace MentorInterfaceTests.Paddle
             // Add the User
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 paddleUserMananger.AddUserAsync(newUser).Wait();
 
             }
@@ -154,7 +154,7 @@ namespace MentorInterfaceTests.Paddle
             // Update the User
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 paddleUserMananger.UpdateUserAsync(updatedUser).Wait();
             }
 
@@ -162,7 +162,7 @@ namespace MentorInterfaceTests.Paddle
             PaddleUser returnedUser;
             using (var context = new ApplicationContext(applicationContextOptions))
             {
-                var paddleUserMananger = new PaddleUserMananger(context);
+                var paddleUserMananger = new PaddleUserManager(context);
                 returnedUser = paddleUserMananger.GetUserAsync(userId).Result;
             }
 
