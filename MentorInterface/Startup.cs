@@ -85,23 +85,11 @@ namespace MentorInterface
 
             #region HTTP Clients
 
-            services.AddHttpClient(ConnectedServices.SharingCodeGatherer, c =>
-            {
-                c.BaseAddress = new Uri($"http://{ConnectedServices.SharingCodeGatherer.DNSAddress}");
-                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
-            });
+            // Add HTTP clients with potentially overriden urls.
+            services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.FaceitMatchGatherer, Configuration, "FACEITMATCHGATHERER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.MatchRetriever, Configuration, "MATCHRETRIEVER_URL_OVERRIDE");
 
-            services.AddHttpClient(ConnectedServices.FaceitMatchGatherer, c =>
-            {
-                c.BaseAddress = new Uri($"http://{ConnectedServices.FaceitMatchGatherer.DNSAddress}");
-                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
-            });
-
-            services.AddHttpClient(ConnectedServices.MatchRetriever, c =>
-            {
-                c.BaseAddress = new Uri($"http://{ConnectedServices.MatchRetriever.DNSAddress}"); //TODO: Port
-                c.DefaultRequestHeaders.Add("User-Agent", "MatchRetriever");
-            });
             #endregion
 
             #region Identity
