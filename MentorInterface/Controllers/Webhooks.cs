@@ -29,7 +29,7 @@ namespace MentorInterface.Controllers
         readonly WebhookVerifier _webhookVerifier;
         private readonly ILogger<Webhooks> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly PaddleUserMananger _paddleUserMananger;
+        private readonly PaddleUserManager _paddleUserMananger;
         private readonly ApplicationContext _applicationContext;
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace MentorInterface.Controllers
         public Webhooks(
             ILogger<Webhooks> logger,
             UserManager<ApplicationUser> userManager,
-            PaddleUserMananger paddleUserMananger,
+            PaddleUserManager paddleUserMananger,
             WebhookVerifier webhookVerifier,
             ApplicationContext applicationContext)
         {
@@ -81,10 +81,10 @@ namespace MentorInterface.Controllers
                     #region Subscription Created
                     case AlertType.SubscriptionCreated:
                         var createdAlert = SubscriptionCreatedFactory.FromAlert(rawAlert);
-                        
+
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionCreated.Any(x => x.AlertId == createdAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {createdAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
@@ -97,7 +97,7 @@ namespace MentorInterface.Controllers
 
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionUpdated.Any(x => x.AlertId == updatedAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {updatedAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
@@ -110,11 +110,11 @@ namespace MentorInterface.Controllers
 
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionCancelled.Any(x => x.AlertId == cancelledAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {cancelledAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
-                        return CancelSubscription(cancelledAlert);
+                        return await CancelSubscriptionAsync(cancelledAlert);
                     #endregion
 
                     #region GROUP: Subscription Payments
@@ -124,7 +124,7 @@ namespace MentorInterface.Controllers
 
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionPaymentSucceeded.Any(x => x.AlertId == paymentSucceededAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {paymentSucceededAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
@@ -139,7 +139,7 @@ namespace MentorInterface.Controllers
 
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionPaymentFailed.Any(x => x.AlertId == paymentFailedAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {paymentFailedAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
@@ -154,7 +154,7 @@ namespace MentorInterface.Controllers
 
                         // Confirm the Alert is unique
                         if (_applicationContext.SubscriptionPaymentRefunded.Any(x => x.AlertId == paymentRefundedAlert.AlertId))
-                        {   
+                        {
                             _logger.LogError($"Received alert that has been stored previously: [ {paymentRefundedAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
@@ -186,37 +186,43 @@ namespace MentorInterface.Controllers
         {
             _applicationContext.SubscriptionCreated.Add(alert);
 
-            PaddleUser existingUser = _applicationContext.PaddleUser.SingleOrDefault(
-                x => x.UserId == alert.UserId);
+            PaddleUser existingPaddleUser = await _paddleUserMananger.GetUserAsync(alert.UserId);
 
-            if (existingUser != null)
+            var userInfo = PaddleUserFactory.FromAlert(alert);
+
+            // If user exists
+            if (existingPaddleUser != null)
             {
-                _logger.LogError(
-                    $"Tried to create subscription for pre-existing user: [ {existingUser.UserId} ]");
-                return StatusCode(400);
+                _logger.LogInformation(
+                    $"Creating new subscription for pre-existing user [ {existingPaddleUser.UserId} ]");
+
+                userInfo.UserId = existingPaddleUser.UserId;
+                bool isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
+                if (!isSuccess)
+                {
+                    throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
+                }
+            }
+            else
+            {
+                bool isSuccess = await _paddleUserMananger.AddUserAsync(userInfo);
+                if (!isSuccess)
+                {
+                    throw new Exception($"Failed to add PaddleUser [ {userInfo.UserId} ] ");
+                }
             }
 
-            var newPaddleUser = PaddleUserFactory.FromAlert(alert);
-
-            _applicationContext.PaddleUser.Add(newPaddleUser);
-
-            // Saving the changes must happen here to get the associated ApplicationUser from
-            // the Database..  ╭∩╮(Ο_Ο)╭∩╮
-            _applicationContext.SaveChanges();
-
             // Find the assoicated ApplicationRole for this PaddlePlan
-            var role = _applicationContext.PaddlePlan
-                .Where(x => x.PlanId == newPaddleUser.SubscriptionPlanId)
-                .Select(x => x.Role)
-                .Single();
+            var role = await _applicationContext.RoleFromPaddlePlanIdAsync(
+                userInfo.SubscriptionPlanId);
 
             // Find the assoicated ApplicationUser for this PaddleUser
             var user = _applicationContext.PaddleUser
-                .Where(x => x.Id == newPaddleUser.Id)
+                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
                 .Select(x => x.User)
                 .Single();
 
-            _userManager.AddToRoleAsync(user, role.Name).Wait();
+            await _userManager.AddToRoleAsync(user, role.Name);
 
             return StatusCode(200);
         }
@@ -230,8 +236,36 @@ namespace MentorInterface.Controllers
         {
             _applicationContext.SubscriptionUpdated.Add(alert);
 
+            // Update the existing Paddle User with new fields.
             PaddleUser userInfo = PaddleUserFactory.FromAlert(alert);
-            _applicationContext.UpdatePaddleUser(userInfo);
+            bool isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
+            if (!isSuccess)
+            {
+                throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
+            }
+
+            // Remove the old plans associated role
+            // Add the new plans associated role
+            int newPlanId = alert.SubscriptionPlanId;
+            int oldPlanId = alert.OldSubscriptionPlanId;
+
+            // Find the NEW assoicated ApplicationRole for this PaddlePlan
+            var newRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
+                newPlanId);
+
+            // Find the OLD assoicated ApplicationRole for this PaddlePlan
+            var oldRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
+                oldPlanId);
+
+            // Find the assoicated ApplicationUser for this PaddleUser ID
+            var user = _applicationContext.PaddleUser
+                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
+                .Select(x => x.User)
+                .Single();
+
+            _userManager.RemoveFromRoleAsync(user, oldRole.Name).Wait();
+            _userManager.AddToRoleAsync(user, newRole.Name).Wait();
+
             return StatusCode(200);
         }
 
@@ -240,13 +274,40 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private IActionResult CancelSubscription(SubscriptionCancelled alert)
+        private async Task<IActionResult> CancelSubscriptionAsync(SubscriptionCancelled alert)
         {
             _applicationContext.SubscriptionCancelled.Add(alert);
 
             PaddleUser userInfo = PaddleUserFactory.FromCancelledAlert(alert);
-            _applicationContext.UpdatePaddleUser(userInfo);
+
+            var isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
+            if (!isSuccess)
+            {
+                throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
+            }
+
             return StatusCode(200);
+
+            // TODO:
+            /*
+            ### Poll for when Cancellation data has passed
+
+            var x = alert.CancellationEffectiveDate;
+
+            ### Once is has, run the following:
+
+            var currentRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
+                alert.SubscriptionPlanId);
+
+            ### Find the assoicated ApplicationUser for this PaddleUser ID
+
+            var user = _applicationContext.PaddleUser
+                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
+                .Select(x => x.User)
+                .Single();
+
+            _userManager.RemoveFromRoleAsync(user, currentRole.Name);
+            */
         }
     }
 }
