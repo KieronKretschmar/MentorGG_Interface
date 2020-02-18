@@ -9,9 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using AspNet.Security.OpenId;
 using MentorInterface.Authentication;
-using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
@@ -22,7 +20,6 @@ using Prometheus;
 using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Entities.Models.Paddle;
-using MentorInterface.Payment;
 using MentorInterface.Paddle;
 
 namespace MentorInterface
