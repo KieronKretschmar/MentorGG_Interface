@@ -67,7 +67,9 @@ namespace MentorInterface
         /// <param name="services"></param>
         public virtual void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                // Serialize JSON using the Member CASE!
+                .AddNewtonsoftJson(x => x.UseMemberCasing());
             services.AddApiVersioning();
 
             #region Paddle
