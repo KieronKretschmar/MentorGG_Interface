@@ -212,11 +212,11 @@ namespace MentorInterface.Controllers
                 }
             }
 
-            // Find the assoicated ApplicationRole for this PaddlePlan
+            // Find the associated ApplicationRole for this PaddlePlan
             var role = await _applicationContext.RoleFromPaddlePlanIdAsync(
                 userInfo.SubscriptionPlanId);
 
-            // Find the assoicated ApplicationUser for this PaddleUser
+            // Find the associated ApplicationUser for this PaddleUser
             var user = _applicationContext.PaddleUser
                 .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
                 .Select(x => x.User)
@@ -249,15 +249,15 @@ namespace MentorInterface.Controllers
             int newPlanId = alert.SubscriptionPlanId;
             int oldPlanId = alert.OldSubscriptionPlanId;
 
-            // Find the NEW assoicated ApplicationRole for this PaddlePlan
+            // Find the NEW associated ApplicationRole for this PaddlePlan
             var newRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
                 newPlanId);
 
-            // Find the OLD assoicated ApplicationRole for this PaddlePlan
+            // Find the OLD associated ApplicationRole for this PaddlePlan
             var oldRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
                 oldPlanId);
 
-            // Find the assoicated ApplicationUser for this PaddleUser ID
+            // Find the associated ApplicationUser for this PaddleUser ID
             var user = _applicationContext.PaddleUser
                 .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
                 .Select(x => x.User)
@@ -299,7 +299,7 @@ namespace MentorInterface.Controllers
             var currentRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
                 alert.SubscriptionPlanId);
 
-            ### Find the assoicated ApplicationUser for this PaddleUser ID
+            ### Find the associated ApplicationUser for this PaddleUser ID
 
             var user = _applicationContext.PaddleUser
                 .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
