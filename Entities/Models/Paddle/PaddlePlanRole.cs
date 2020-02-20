@@ -21,17 +21,14 @@ namespace Entities.Models.Paddle
         /// </summary>
         public int RoleId { get; set; }
 
-
         /// <summary>
         /// Navigational Property
         /// </summary>
         public virtual ApplicationRole Role { get; set; }
 
-
         /// <summary>
         /// Navigational Property
         /// </summary>
         public virtual PaddlePlan PaddlePlan { get; set; }
-
     }
 }

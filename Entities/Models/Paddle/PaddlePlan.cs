@@ -10,17 +10,24 @@ namespace Entities.Models.Paddle
     {
         /// <summary>
         /// PlanId provided by Paddle to identify the Subscription.
+<<<<<<< HEAD
         /// </summary>
         public int PlanId { get; set; }
 
         /// <summary>
         /// Navigational Property
+=======
+>>>>>>> Made PaddlePlan and Role a many to many relationship
         /// </summary>
         public virtual ICollection<PaddlePlanRole> PaddlePlanRoles { get; set; }
 
         /// <summary>
         /// Navigational Property
         /// </summary>
+<<<<<<< HEAD
         public virtual ICollection<PaddleSubscription> Subscriptions { get; set; }
+=======
+        public virtual DbSet<PaddlePlanRole> PaddlePlanRoles { get; set; }
+>>>>>>> Made PaddlePlan and Role a many to many relationship
     }
 }
