@@ -243,26 +243,7 @@ namespace MentorInterface
             });
 
             app.UseMetricServer(METRICS_PORT);
-
-            CreateRoles(serviceProvider);
-            CreatePaddlePlanRoleBindings(serviceProvider);
-        }
-
-        /// <summary>
-        /// Create the ApplicationRoles, if not present.
-        /// </summary>
-        /// <param name="serviceProvider"></param>
-        private void CreateRoles(IServiceProvider serviceProvider)
-        {
-            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            string[] roleNames = { Subscriptions.Premium, Subscriptions.Ultimate };
-            foreach (var roleName in roleNames)
-            {
-                if (!roleMananger.RoleExistsAsync(roleName).Result)
-                {
-                    roleMananger.CreateAsync(new ApplicationRole(roleName)).Wait();
-                }
-            }
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
         }
 
         /// <summary>
