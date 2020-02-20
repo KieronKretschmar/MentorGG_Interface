@@ -17,5 +17,10 @@ namespace Entities.Models.Paddle
         /// Navigational Property
         /// </summary>
         public virtual ICollection<PaddlePlanRole> PaddlePlanRoles { get; set; }
+
+        /// <summary>
+        /// Navigational Property
+        /// </summary>
+        public virtual ICollection<PaddleSubscription> Subscriptions { get; set; }
     }
 }

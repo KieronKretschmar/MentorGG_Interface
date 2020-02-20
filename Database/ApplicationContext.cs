@@ -18,6 +18,7 @@ namespace Database
         public DbSet<PaddleUser> PaddleUser { get; set; }
         public DbSet<PaddlePlan> PaddlePlan { get; set; }
         public DbSet<PaddlePlanRole> PaddlePlanRole { get; set; }
+        public DbSet<PaddleSubscription> PaddleSubscription { get; set; }
 
         public DbSet<SubscriptionCreated> SubscriptionCreated { get; set; }
         public DbSet<SubscriptionUpdated> SubscriptionUpdated { get; set; }
@@ -84,6 +85,18 @@ namespace Database
             builder.Entity<PaddlePlan>(b =>
             {
                 b.HasKey(x => x.PlanId);
+            });
+
+            builder.Entity<PaddleSubscription>(b =>
+            {
+                b.HasKey(x => x.SubscriptionId);
+
+                // n:1 relationship to PaddlePlan
+                b.HasOne(x => x.PaddlePlan)
+                .WithMany(x => x.Subscriptions)
+                .HasForeignKey(x => x.SubscriptionId)
+                .IsRequired();
+
             });
 
             builder.Entity<SubscriptionCreated>(b => b.HasKey(x => x.AlertId));
