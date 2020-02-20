@@ -13,13 +13,13 @@ namespace Database
         /// <summary>
         /// Return an ApplicationRole for a bound PaddlePlan
         /// </summary>
-        public static async Task<ApplicationRole> RoleFromPaddlePlanIdAsync(
+        public static async Task<List<ApplicationRole>> RolesFromPaddlePlanIdAsync(
             this ApplicationContext applicationContext, int planId)
         {
             return await applicationContext.PaddlePlan
                 .Where(x => x.PlanId == planId)
-                .Select(x => x.Role)
-                .SingleAsync();
+                .SelectMany(x => x.PaddlePlanRoles.Select(x => x.Role))
+                .ToListAsync();
         }
     }
 }
