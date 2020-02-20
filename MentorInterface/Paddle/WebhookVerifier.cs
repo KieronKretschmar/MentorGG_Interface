@@ -17,7 +17,20 @@ namespace MentorInterface.Paddle
     /// Verify Paddle Webhooks
     /// https://developer.paddle.com/webhook-reference/verifying-webhooks
     /// </summary>
-    public class WebhookVerifier
+    public interface IWebhookVerifier
+    {
+        /// <summary>
+        /// Verify a message from Paddle
+        /// https://github.com/whitej031788/c--paddle-webhook-verify
+        /// </summary>
+        bool IsAlertValid(Dictionary<string, string> alert);
+    }
+
+    /// <summary>
+    /// Verify Paddle Webhooks
+    /// https://developer.paddle.com/webhook-reference/verifying-webhooks
+    /// </summary>
+    public class WebhookVerifier : IWebhookVerifier
     {
 
         private string PublicKey { get; }
@@ -40,7 +53,8 @@ namespace MentorInterface.Paddle
         /// </summary>
         public bool IsAlertValid(Dictionary<string, string> alert)
         {
-            if (!alert.ContainsKey(SignatureKey)){
+            if (!alert.ContainsKey(SignatureKey))
+            {
                 return false;
             }
 
