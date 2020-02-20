@@ -15,7 +15,6 @@ namespace Database
     public class ApplicationContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         #region Paddle
-        public DbSet<PaddleUser> PaddleUser { get; set; }
         public DbSet<PaddlePlan> PaddlePlan { get; set; }
         public DbSet<PaddlePlanRole> PaddlePlanRole { get; set; }
         public DbSet<PaddleSubscription> PaddleSubscription { get; set; }

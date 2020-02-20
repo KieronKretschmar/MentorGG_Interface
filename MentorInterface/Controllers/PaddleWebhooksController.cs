@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MentorInterface.Controllers
 {
@@ -23,28 +24,25 @@ namespace MentorInterface.Controllers
     /// Controller to receive Paddle (Payment Provider) Hooks
     /// </summary>
     [Route("webhooks")]
-    public class Webhooks : ControllerBase
+    public class PaddleWebhooksController : ControllerBase
     {
 
         readonly WebhookVerifier _webhookVerifier;
-        private readonly ILogger<Webhooks> _logger;
+        private readonly ILogger<PaddleWebhooksController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly PaddleUserManager _paddleUserMananger;
         private readonly ApplicationContext _applicationContext;
 
         /// <summary>
         ///
         /// </summary>
-        public Webhooks(
-            ILogger<Webhooks> logger,
+        public PaddleWebhooksController(
+            ILogger<PaddleWebhooksController> logger,
             UserManager<ApplicationUser> userManager,
-            PaddleUserManager paddleUserMananger,
             WebhookVerifier webhookVerifier,
             ApplicationContext applicationContext)
         {
             _logger = logger;
             _userManager = userManager;
-            _paddleUserMananger = paddleUserMananger;
             _webhookVerifier = webhookVerifier;
             _applicationContext = applicationContext;
         }
@@ -178,93 +176,55 @@ namespace MentorInterface.Controllers
         }
 
         /// <summary>
-        ///
+        /// Add Role to ApplicationUser as defined by passthrough.
+        /// 
+        /// 
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
         private async Task<IActionResult> CreateSubscriptionAsync(SubscriptionCreated alert)
         {
-            _applicationContext.SubscriptionCreated.Add(alert);
+            //1. Identify ApplicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
 
-            PaddleUser existingPaddleUser = await _paddleUserMananger.GetUserAsync(alert.UserId);
-
-            var userInfo = PaddleUserFactory.FromAlert(alert);
-
-            // If user exists
-            if (existingPaddleUser != null)
+            //2. Create PaddleSubscription and write to database
+            var subscription = new PaddleSubscription
             {
-                _logger.LogInformation(
-                    $"Creating new subscription for pre-existing user [ {existingPaddleUser.UserId} ]");
+                ApplicationUserId = appUser.Id,
+                CancelUrl = alert.CancelUrl,
+                SubscriptionId = alert.SubscriptionId,
+                SubscriptionPlanId = alert.SubscriptionPlanId,
+                UpdateUrl = alert.UpdateUrl,
+                ExpirationTime = null,
+            };
+            _applicationContext.PaddleSubscription.Add(subscription);
+            await _applicationContext.SaveChangesAsync();
 
-                userInfo.UserId = existingPaddleUser.UserId;
-                bool isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
-                if (!isSuccess)
-                {
-                    throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
-                }
-            }
-            else
-            {
-                bool isSuccess = await _paddleUserMananger.AddUserAsync(userInfo);
-                if (!isSuccess)
-                {
-                    throw new Exception($"Failed to add PaddleUser [ {userInfo.UserId} ] ");
-                }
-            }
-
-            // Find the associated ApplicationRole for this PaddlePlan
-            var role = await _applicationContext.RoleFromPaddlePlanIdAsync(
-                userInfo.SubscriptionPlanId);
-
-            // Find the associated ApplicationUser for this PaddleUser
-            var user = _applicationContext.PaddleUser
-                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
-                .Select(x => x.User)
-                .Single();
-
-            await _userManager.AddToRoleAsync(user, role.Name);
+            // TODO: we will need to use navigational properties of subscription. Reload?
+            //2. Add role(s) to ApplicationUser
+            await _userManager.AddToRolesAsync(subscription.User, subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name));
 
             return StatusCode(200);
         }
 
         /// <summary>
-        ///
+        /// Webhook for SubscriptionUpdated.
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
         private async Task<IActionResult> UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
-            _applicationContext.SubscriptionUpdated.Add(alert);
-
-            // Update the existing Paddle User with new fields.
-            PaddleUser userInfo = PaddleUserFactory.FromAlert(alert);
-            bool isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
-            if (!isSuccess)
+            //1. Identify applicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            if (appUser == null)
             {
-                throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] updated, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
             }
 
-            // Remove the old plans associated role
-            // Add the new plans associated role
-            int newPlanId = alert.SubscriptionPlanId;
-            int oldPlanId = alert.OldSubscriptionPlanId;
-
-            // Find the NEW associated ApplicationRole for this PaddlePlan
-            var newRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
-                newPlanId);
-
-            // Find the OLD associated ApplicationRole for this PaddlePlan
-            var oldRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
-                oldPlanId);
-
-            // Find the associated ApplicationUser for this PaddleUser ID
-            var user = _applicationContext.PaddleUser
-                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
-                .Select(x => x.User)
-                .Single();
-
-            _userManager.RemoveFromRoleAsync(user, oldRole.Name).Wait();
-            _userManager.AddToRoleAsync(user, newRole.Name).Wait();
+            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated, but no action was done. SubscriptionCancelledAlert: [ {alert} ].";
+            _logger.LogInformation(logMsg);
 
             return StatusCode(200);
         }
@@ -276,16 +236,29 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         private async Task<IActionResult> CancelSubscriptionAsync(SubscriptionCancelled alert)
         {
-            _applicationContext.SubscriptionCancelled.Add(alert);
 
-            PaddleUser userInfo = PaddleUserFactory.FromCancelledAlert(alert);
-
-            var isSuccess = await _paddleUserMananger.UpdateUserAsync(userInfo);
-            if (!isSuccess)
+            //1. Identify applicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            if(appUser == null)
             {
-                throw new Exception($"Failed to update PaddleUser [ {userInfo.UserId} ] ");
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
             }
 
+            //2. Determine PaddleSubscription from DB
+            var paddleSubscription = _applicationContext.PaddleSubscription.Find(alert.SubscriptionId);
+            if (paddleSubscription == null)
+            {
+                var errorMsg = $"PaddleSubscription [ {paddleSubscription.SubscriptionId} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            //3. Mark PaddleSubscription for deletion
+            paddleSubscription.ExpirationTime = alert.CancellationEffectiveDate;
+            await _applicationContext.SaveChangesAsync();
+            
             return StatusCode(200);
 
             // TODO:
@@ -308,6 +281,55 @@ namespace MentorInterface.Controllers
 
             _userManager.RemoveFromRoleAsync(user, currentRole.Name);
             */
+        }
+
+        /// <summary>
+        /// Gets application user by the ApplicationUserId from inside the passthrough. 
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="passthrough"></param>
+        /// <returns></returns>
+        private async Task<ApplicationUser> GetApplicationUserFromPassthrough(string passthrough)
+        {
+            JObject jsonObj = JObject.Parse(passthrough);
+            int appUserId = jsonObj.Value<int>("ApplicationUserId");
+            var appUser = await _applicationContext.Users.FindAsync(appUserId);
+            return appUser;
+        }
+
+        /// <summary>
+        /// Queries the database for expired subscriptions and removes them accordingly.
+        /// </summary>
+        /// <returns></returns>
+        private async Task RemoveAllExpiredSubscriptions()
+        {
+            var expiredSubscriptions = _applicationContext.PaddleSubscription.Where(x => x.ExpirationTime < DateTime.Now);
+            foreach (var subscription in expiredSubscriptions)
+            {
+                await RemoveSubscription(subscription);
+            }
+        }
+
+        /// <summary>
+        /// Removes a subscription along with the user's Roles he gained through this subscription only.
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <returns></returns>
+        private async Task RemoveSubscription(PaddleSubscription subscription)
+        {
+            // Determine roles the user had because of this subscription,
+            // excluding roles that the user does not also have from other subscriptions
+            var rolesFromOtherSubscriptions = subscription.User.PaddleSubscriptions
+                .Where(x => x.SubscriptionId != subscription.SubscriptionId)
+                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name))
+                .Distinct();
+            var rolesToRemove = subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name).Except(rolesFromOtherSubscriptions);
+
+            // Remove all Roles from the user that are not supplied by any other role
+            await _userManager.RemoveFromRolesAsync(subscription.User, rolesToRemove);
+
+            // Remove this subscription from database
+            _applicationContext.PaddleSubscription.Remove(subscription);
         }
     }
 }
