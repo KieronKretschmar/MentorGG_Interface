@@ -95,7 +95,7 @@ namespace MentorInterface
             #region Identity
 
             // Connect to the user database.
-            var connString = Configuration.GetValue<string>("MYSQL_CONNECTIONSTRING");
+            var connString = Configuration.GetValue<string>("MYSQL_CONNECTION_STRING");
             if (connString != null)
             {
                 services.AddDbContext<ApplicationContext>(o =>
