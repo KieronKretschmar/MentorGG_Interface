@@ -179,11 +179,19 @@ namespace MentorInterface
             #endregion
 
             #region Cors
-            services.AddCors(o => o.AddPolicy("AllowAny", builder =>
+            services.AddCors(o => o.AddPolicy("AllowProductionAndDebug", builder =>
             {
-                builder.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
+                var allowedOrigins = new string[]
+                {
+                    "https://mentor.gg",
+                    "https://www.mentor.gg",
+                    "http://localhost:8080",
+                    "https://localhost:8080",
+                };
+                builder.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
             }));
             #endregion
 
@@ -221,7 +229,7 @@ namespace MentorInterface
                 app.UseHttpsRedirection();
             }
 
-            app.UseCors("AllowAny");
+            app.UseCors("AllowProductionAndDebug");
 
             #region Swagger
             app.UseSwagger();
