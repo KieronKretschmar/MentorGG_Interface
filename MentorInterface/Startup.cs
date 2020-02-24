@@ -121,7 +121,7 @@ namespace MentorInterface
             else
             {
                 throw new ArgumentException(
-                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTIONSTRING` enviroment variable.");
+                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTION_STRING` enviroment variable.");
             }
 
 
