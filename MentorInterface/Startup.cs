@@ -9,9 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using AspNet.Security.OpenId;
 using MentorInterface.Authentication;
-using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
@@ -20,6 +18,9 @@ using Entities.Models;
 using Database;
 using Prometheus;
 using MentorInterface.Helpers;
+using Microsoft.AspNetCore.Identity;
+using Entities.Models.Paddle;
+using MentorInterface.Paddle;
 
 namespace MentorInterface
 {
@@ -29,7 +30,7 @@ namespace MentorInterface
     public class Startup
     {
 
-        private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") != Environments.Development;
+        private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == Environments.Development;
 
 
         /// <summary>
@@ -66,8 +67,21 @@ namespace MentorInterface
         /// <param name="services"></param>
         public virtual void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                // Serialize JSON using the Member CASE!
+                .AddNewtonsoftJson(x => x.UseMemberCasing());
             services.AddApiVersioning();
+
+            #region Paddle
+
+            services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
+                {
+                    return new WebhookVerifier(
+                        File.ReadAllText("Paddle/PaddlePublicKey.pem"));
+                }
+            );
+
+            #endregion
 
             #region HTTP Clients
 
@@ -193,9 +207,8 @@ namespace MentorInterface
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -229,6 +242,12 @@ namespace MentorInterface
             });
 
             app.UseMetricServer(METRICS_PORT);
+
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
+
+            // Write PaddlePlans to db and connect them with Roles
+            var roleBinds = PaddlePlanManager.ProductionBinds;
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
         }
     }
 }

@@ -1,0 +1,335 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Database;
+using Entities.Models;
+using Entities.Models.Paddle;
+using Entities.Models.Paddle.Alerts;
+using MentorInterface.Helpers.ModelFactories;
+using MentorInterface.Helpers.ModelFactories.Paddle;
+using MentorInterface.Paddle;
+using MentorInterface.Payment;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace MentorInterface.Controllers
+{
+    /// <summary>
+    /// Controller to receive Paddle (Payment Provider) Hooks
+    /// </summary>
+    [Route("webhooks")]
+    public class PaddleWebhooksController : ControllerBase
+    {
+
+        readonly WebhookVerifier _webhookVerifier;
+        private readonly ILogger<PaddleWebhooksController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationContext _applicationContext;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public PaddleWebhooksController(
+            ILogger<PaddleWebhooksController> logger,
+            UserManager<ApplicationUser> userManager,
+            WebhookVerifier webhookVerifier,
+            ApplicationContext applicationContext)
+        {
+            _logger = logger;
+            _userManager = userManager;
+            _webhookVerifier = webhookVerifier;
+            _applicationContext = applicationContext;
+        }
+
+        /// <summary>
+        /// Paddle Webhook Receiver.
+        /// </summary>
+        /// <param name="rawAlert">Form Content</param>
+        /// <returns></returns>
+        [HttpPost("paddle")]
+        [Consumes("application/x-www-form-urlencoded")]
+        public async Task<IActionResult> HandleAlertAsync([FromForm]Dictionary<string, string> rawAlert)
+        {
+            string alertName;
+            try
+            {
+                alertName = rawAlert["alert_name"];
+            }
+            catch (KeyNotFoundException)
+            {
+                return StatusCode(400);
+            }
+
+            // Confirm the alert is valid
+            if (!_webhookVerifier.IsAlertValid(rawAlert))
+            {
+                return StatusCode(403, "Signature mismatch");
+            }
+
+            try
+            {
+                switch (alertName)
+                {
+                    #region Subscription Created
+                    case AlertType.SubscriptionCreated:
+                        var createdAlert = SubscriptionCreatedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionCreated.Any(x => x.AlertId == createdAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {createdAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return await CreateSubscriptionAsync(createdAlert);
+                    #endregion
+
+                    #region Subscription Updated
+                    case AlertType.SubscriptionUpdated:
+                        var updatedAlert = SubscriptionUpdatedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionUpdated.Any(x => x.AlertId == updatedAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {updatedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return await UpdateSubscriptionAsync(updatedAlert);
+                    #endregion
+
+                    #region Subscription Cancelled
+                    case AlertType.SubscriptionCancelled:
+                        var cancelledAlert = SubscriptionCancelledFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionCancelled.Any(x => x.AlertId == cancelledAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {cancelledAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        return await CancelSubscriptionAsync(cancelledAlert);
+                    #endregion
+
+                    #region GROUP: Subscription Payments
+                    #region Subscription Payment Succeded
+                    case AlertType.SubscriptionPaymentSucceded:
+                        var paymentSucceededAlert = SubscriptionPaymentSucceededFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentSucceeded.Any(x => x.AlertId == paymentSucceededAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentSucceededAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        _applicationContext.SubscriptionPaymentSucceeded.Add(paymentSucceededAlert);
+                        _applicationContext.SaveChanges();
+                        return StatusCode(200);
+                    #endregion
+
+                    #region Subscription Payment Failed
+                    case AlertType.SubscriptionPaymentFailed:
+                        var paymentFailedAlert = SubscriptionPaymentFailedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentFailed.Any(x => x.AlertId == paymentFailedAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentFailedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        _applicationContext.SubscriptionPaymentFailed.Add(paymentFailedAlert);
+                        _applicationContext.SaveChanges();
+                        return StatusCode(200);
+                    #endregion
+
+                    #region Subscription Payment Refunded
+                    case AlertType.SubscriptionPaymentRefunded:
+                        var paymentRefundedAlert = SubscriptionPaymentRefundedFactory.FromAlert(rawAlert);
+
+                        // Confirm the Alert is unique
+                        if (_applicationContext.SubscriptionPaymentRefunded.Any(x => x.AlertId == paymentRefundedAlert.AlertId))
+                        {
+                            _logger.LogError($"Received alert that has been stored previously: [ {paymentRefundedAlert.AlertId} ] ");
+                            return StatusCode(200);
+                        }
+                        _applicationContext.SubscriptionPaymentRefunded.Add(paymentRefundedAlert);
+                        _applicationContext.SaveChanges();
+                        return StatusCode(200);
+                    #endregion
+
+                    #endregion
+
+                    default:
+                        return StatusCode(501);
+                }
+            }
+            catch (AlertParseException ex)
+            {
+                _logger.LogError(ex, "Failed to parse alert from Paddle");
+                return StatusCode(400);
+            }
+
+        }
+
+        /// <summary>
+        /// Add Role to ApplicationUser as defined by passthrough.
+        /// 
+        /// 
+        /// </summary>
+        /// <param name="alert"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> CreateSubscriptionAsync(SubscriptionCreated alert)
+        {
+            //1. Identify ApplicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+
+            //2. Create PaddleSubscription and write to database
+            var subscription = new PaddleSubscription
+            {
+                ApplicationUserId = appUser.Id,
+                CancelUrl = alert.CancelUrl,
+                SubscriptionId = alert.SubscriptionId,
+                SubscriptionPlanId = alert.SubscriptionPlanId,
+                UpdateUrl = alert.UpdateUrl,
+                ExpirationTime = null,
+            };
+            _applicationContext.PaddleSubscription.Add(subscription);
+            await _applicationContext.SaveChangesAsync();
+
+            // TODO: we will need to use navigational properties of subscription. Reload?
+            //2. Add role(s) to ApplicationUser
+            await _userManager.AddToRolesAsync(subscription.User, subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name));
+
+            return StatusCode(200);
+        }
+
+        /// <summary>
+        /// Webhook for SubscriptionUpdated.
+        /// </summary>
+        /// <param name="alert"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> UpdateSubscriptionAsync(SubscriptionUpdated alert)
+        {
+            //1. Identify applicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            if (appUser == null)
+            {
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] updated, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated, but no action was done. SubscriptionCancelledAlert: [ {alert} ].";
+            _logger.LogInformation(logMsg);
+
+            return StatusCode(200);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="alert"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> CancelSubscriptionAsync(SubscriptionCancelled alert)
+        {
+
+            //1. Identify applicationUser
+            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            if(appUser == null)
+            {
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            //2. Determine PaddleSubscription from DB
+            var paddleSubscription = _applicationContext.PaddleSubscription.Find(alert.SubscriptionId);
+            if (paddleSubscription == null)
+            {
+                var errorMsg = $"PaddleSubscription [ {paddleSubscription.SubscriptionId} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            //3. Mark PaddleSubscription for deletion
+            paddleSubscription.ExpirationTime = alert.CancellationEffectiveDate;
+            await _applicationContext.SaveChangesAsync();
+            
+            return StatusCode(200);
+
+            // TODO:
+            /*
+            ### Poll for when Cancellation data has passed
+
+            var x = alert.CancellationEffectiveDate;
+
+            ### Once is has, run the following:
+
+            var currentRole = await _applicationContext.RoleFromPaddlePlanIdAsync(
+                alert.SubscriptionPlanId);
+
+            ### Find the associated ApplicationUser for this PaddleUser ID
+
+            var user = _applicationContext.PaddleUser
+                .Where(x => x.ApplicationUserId == userInfo.ApplicationUserId)
+                .Select(x => x.User)
+                .Single();
+
+            _userManager.RemoveFromRoleAsync(user, currentRole.Name);
+            */
+        }
+
+        /// <summary>
+        /// Gets application user by the ApplicationUserId from inside the passthrough. 
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="passthrough"></param>
+        /// <returns></returns>
+        private async Task<ApplicationUser> GetApplicationUserFromPassthrough(string passthrough)
+        {
+            JObject jsonObj = JObject.Parse(passthrough);
+            int appUserId = jsonObj.Value<int>("ApplicationUserId");
+            var appUser = await _applicationContext.Users.FindAsync(appUserId);
+            return appUser;
+        }
+
+        /// <summary>
+        /// Queries the database for expired subscriptions and removes them accordingly.
+        /// </summary>
+        /// <returns></returns>
+        private async Task RemoveAllExpiredSubscriptions()
+        {
+            var expiredSubscriptions = _applicationContext.PaddleSubscription.Where(x => x.ExpirationTime < DateTime.Now);
+            foreach (var subscription in expiredSubscriptions)
+            {
+                await RemoveSubscription(subscription);
+            }
+        }
+
+        /// <summary>
+        /// Removes a subscription along with the user's Roles he gained through this subscription only.
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <returns></returns>
+        private async Task RemoveSubscription(PaddleSubscription subscription)
+        {
+            // Determine roles the user had because of this subscription,
+            // excluding roles that the user does not also have from other subscriptions
+            var rolesFromOtherSubscriptions = subscription.User.PaddleSubscriptions
+                .Where(x => x.SubscriptionId != subscription.SubscriptionId)
+                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(y => y.Role.Name))
+                .Distinct();
+            var rolesToRemove = subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name).Except(rolesFromOtherSubscriptions);
+
+            // Remove all Roles from the user that are not supplied by any other role
+            await _userManager.RemoveFromRolesAsync(subscription.User, rolesToRemove);
+
+            // Remove this subscription from database
+            _applicationContext.PaddleSubscription.Remove(subscription);
+        }
+    }
+}

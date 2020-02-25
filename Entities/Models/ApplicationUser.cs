@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Entities.Models.Paddle;
 using Microsoft.AspNetCore.Identity;
 
 namespace Entities.Models
@@ -46,6 +48,11 @@ namespace Entities.Models
     /// </summary>
     public class ApplicationUser : IdentityUser<int>
     {
+        /// <summary>
+        /// Navigational Property
+        /// </summary>
+        public virtual ICollection<PaddleSubscription> PaddleSubscriptions { get; set; }
+
         /// <summary>
         /// SteamId
         /// </summary>
