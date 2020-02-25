@@ -32,12 +32,10 @@ namespace MentorInterface
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {
-                    //options.ClearProviders();
                     options.AddConsole(o =>
                     {
-                        o.TimestampFormat = "[HH:mm:ss]";
-                    }
-                    );
+                        o.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
+                    });
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
