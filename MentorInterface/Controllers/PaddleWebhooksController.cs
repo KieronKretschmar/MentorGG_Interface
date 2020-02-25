@@ -321,7 +321,7 @@ namespace MentorInterface.Controllers
             // excluding roles that the user does not also have from other subscriptions
             var rolesFromOtherSubscriptions = subscription.User.PaddleSubscriptions
                 .Where(x => x.SubscriptionId != subscription.SubscriptionId)
-                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name))
+                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(y => y.Role.Name))
                 .Distinct();
             var rolesToRemove = subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name).Except(rolesFromOtherSubscriptions);
 
