@@ -11,7 +11,7 @@ namespace Entities.Models.Paddle.Alerts
     /// Subscription Updated Webhook Alert.
     /// https://developer.paddle.com/webhook-reference/subscription-alerts/subscription-updated
     /// </summary>
-    public class SubscriptionUpdated : IPaddleUser, IAlert
+    public class SubscriptionUpdated : IAlert
     {
         public int AlertId { get; set; }
 

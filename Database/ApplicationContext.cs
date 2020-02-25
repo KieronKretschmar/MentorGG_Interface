@@ -15,8 +15,9 @@ namespace Database
     public class ApplicationContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         #region Paddle
-        public DbSet<PaddleUser> PaddleUser { get; set; }
         public DbSet<PaddlePlan> PaddlePlan { get; set; }
+        public DbSet<PaddlePlanRole> PaddlePlanRole { get; set; }
+        public DbSet<PaddleSubscription> PaddleSubscription { get; set; }
 
         public DbSet<SubscriptionCreated> SubscriptionCreated { get; set; }
         public DbSet<SubscriptionUpdated> SubscriptionUpdated { get; set; }
@@ -66,33 +67,36 @@ namespace Database
                 }
             );
 
-            // Paddle
-            builder.Entity<PaddleUser>(b =>
-                {
-                    b.Property(x => x.Id).ValueGeneratedOnAdd();
+            // "Join"-table for many to many relationship between PaddlePlan and Role
+            builder.Entity<PaddlePlanRole>(b =>
+            {
+                b.HasKey(ppr => new { ppr.PlanId, ppr.RoleId});
 
-                    // A PaddleUser can have ONE ApplicationUser
-                    // An ApplicationUser can have MANY PaddleUsers
-                    b.HasOne(x => x.User)
-                        .WithMany(x => x.PaddleUser)
-                        .HasForeignKey(x => x.ApplicationUserId)
-                        .HasPrincipalKey(x => x.Id)
-                        .IsRequired();
-                }
-            );
+                b.HasOne(ppr => ppr.PaddlePlan)
+                .WithMany(pp => pp.PaddlePlanRoles)
+                .HasForeignKey(ppr => ppr.PlanId);
+
+                b.HasOne(ppr => ppr.Role)
+                .WithMany(r => r.PaddlePlanRoles)
+                .HasForeignKey(ppr => ppr.RoleId);
+            });
 
             builder.Entity<PaddlePlan>(b =>
-                {
-                    b.HasKey(x => x.PlanId);
+            {
+                b.HasKey(x => x.PlanId);
+            });
 
-                    // A PaddlePlan can have ONE ApplicationRole
-                    // An ApplicationRole can have MANY PaddlePlanss
-                    b.HasOne(x => x.Role)
-                        .WithMany(x => x.PaddlePlan)
-                        .HasForeignKey(x => x.RoleId)
-                        .IsRequired();
-                }
-            );
+            builder.Entity<PaddleSubscription>(b =>
+            {
+                b.HasKey(x => x.SubscriptionId);
+
+                // n:1 relationship to PaddlePlan
+                b.HasOne(x => x.PaddlePlan)
+                .WithMany(x => x.Subscriptions)
+                .HasForeignKey(x => x.SubscriptionId)
+                .IsRequired();
+
+            });
 
             builder.Entity<SubscriptionCreated>(b => b.HasKey(x => x.AlertId));
             builder.Entity<SubscriptionUpdated>(b => b.HasKey(x => x.AlertId));

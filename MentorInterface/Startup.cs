@@ -74,8 +74,7 @@ namespace MentorInterface
 
             #region Paddle
 
-            services.AddTransient<PaddleUserManager>();
-            services.AddTransient<WebhookVerifier>(x =>
+            services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
                 {
                     return new WebhookVerifier(
                         File.ReadAllText("Paddle/PaddlePublicKey.pem"));
@@ -244,58 +243,11 @@ namespace MentorInterface
 
             app.UseMetricServer(METRICS_PORT);
 
-            CreateRoles(serviceProvider);
-            CreatePaddlePlanRoleBindings(serviceProvider);
-        }
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
 
-        /// <summary>
-        /// Create the ApplicationRoles, if not present.
-        /// </summary>
-        /// <param name="serviceProvider"></param>
-        private void CreateRoles(IServiceProvider serviceProvider)
-        {
-            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            string[] roleNames = { Subscriptions.Premium, Subscriptions.Ultimate };
-            foreach (var roleName in roleNames)
-            {
-                if (!roleMananger.RoleExistsAsync(roleName).Result)
-                {
-                    roleMananger.CreateAsync(new ApplicationRole(roleName)).Wait();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Create the binds between PaddlePlanIds and Application Roles.
-        /// </summary>
-        /// <param name="serviceProvider"></param>
-        private void CreatePaddlePlanRoleBindings(IServiceProvider serviceProvider)
-        {
-            var applicationContext = serviceProvider.GetRequiredService<ApplicationContext>();
-            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-
-            var paddleRoleBinds = new PaddleRoleBind[]
-            {
-                new PaddleRoleBind(583755, Subscriptions.Premium),
-                new PaddleRoleBind(583756, Subscriptions.Ultimate),
-            };
-
-            foreach (var roleBind in paddleRoleBinds)
-            {
-                if (!applicationContext.PaddlePlan.Any(x => x.PlanId == roleBind.PlanId))
-                {
-                    var role = roleMananger.FindByNameAsync(roleBind.RoleName).Result;
-                    var paddlePlan = new PaddlePlan
-                    {
-                        Role = role,
-                        PlanId = roleBind.PlanId,
-                    };
-
-                    applicationContext.PaddlePlan.Add(paddlePlan);
-                }
-            }
-            applicationContext.SaveChanges();
+            // Write PaddlePlans to db and connect them with Roles
+            var roleBinds = PaddlePlanManager.ProductionBinds;
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
         }
     }
-
 }

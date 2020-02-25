@@ -11,7 +11,7 @@ namespace Entities.Models.Paddle.Alerts
     /// Subscription Created Webhook Alert.
     /// https://developer.paddle.com/webhook-reference/subscription-alerts/subscription-payment-failed
     /// </summary>
-    public class SubscriptionPaymentFailed : IPaddleUser, IAlert
+    public class SubscriptionPaymentFailed : IAlert
     {
         public int AlertId { get; set; }
 
