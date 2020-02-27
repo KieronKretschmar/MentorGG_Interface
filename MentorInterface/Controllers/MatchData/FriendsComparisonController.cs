@@ -47,13 +47,13 @@ namespace MentorInterface.Controllers.MatchData
         /// <returns></returns>
         [Authorize]
         [HttpGet("single/{steamId}/friendscomparison")]
-        public async Task<IActionResult> FriendsComparisonAsync(long steamId, string matchIds, int maxFriends = 3, int offset = 0)
+        public async Task<IActionResult> FriendsComparisonAsync(long steamId, string matchIds, int count = 3, int offset = 0)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/friendscomparison?matchIds={matchIds}&maxFriends={maxFriends}&offset={offset}");
+                $"v1/public/single/{steamId}/friendscomparison?matchIds={matchIds}&count={count}&offset={offset}");
 
             return await ForwardHttpRequest(client, message);
         }
