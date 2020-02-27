@@ -68,8 +68,13 @@ namespace MentorInterface
         public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                // Serialize JSON using the Member CASE!
-                .AddNewtonsoftJson(x => x.UseMemberCasing());
+                .AddNewtonsoftJson(x => 
+                {
+                    // Serialize JSON using the Member CASE!
+                    x.UseMemberCasing();
+                    // Serialize longs (steamIds) as strings
+                    x.SerializerSettings.Converters.Add(new LongToStringConverter());
+                });
             services.AddApiVersioning();
 
             #region Paddle
