@@ -45,14 +45,14 @@ namespace MentorInterface.Controllers.MatchData
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("single/{steamId}/kills")]
+        [HttpGet("single/{steamId}/filterablekills")]
         public async Task<IActionResult> KillsAsync(long steamId, string matchIds, string map)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/kills?matchIds={matchIds}&map={map}");
+                $"v1/public/single/{steamId}/filterablekills?matchIds={matchIds}&map={map}");
 
             return await ForwardHttpRequest(client, message);
         }
