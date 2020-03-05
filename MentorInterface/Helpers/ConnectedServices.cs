@@ -10,13 +10,12 @@ namespace MentorInterface.Helpers
     /// </summary>
     public static class ConnectedServices
     {
-
         /// <summary>
-        /// Sharing Code Gatherer
+        /// Demo Central
         /// </summary>
-        public static ConnectedService SharingCodeGatherer = new ConnectedService(
-            "sharing-code-gatherer",
-            "sharing-code-gatherer.default.svc.cluster.local");
+        public static ConnectedService DemoCentral = new ConnectedService(
+            "demo-central",
+            "demo-central.default.svc.cluster.local");
 
         /// <summary>
         /// FaceIt Match Gatherer
@@ -31,6 +30,13 @@ namespace MentorInterface.Helpers
         public static ConnectedService MatchRetriever = new ConnectedService(
             "match-retriever",
             "match-retriever.default.svc.cluster.local");
+
+        /// <summary>
+        /// Sharing Code Gatherer
+        /// </summary>
+        public static ConnectedService SharingCodeGatherer = new ConnectedService(
+            "sharing-code-gatherer",
+            "sharing-code-gatherer.default.svc.cluster.local");
     }
 
 
