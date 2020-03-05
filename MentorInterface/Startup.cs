@@ -91,9 +91,10 @@ namespace MentorInterface
             #region HTTP Clients
 
             // Add HTTP clients with potentially overriden urls.
-            services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.DemoCentral, Configuration, "DEMOCENTRAL_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.FaceitMatchGatherer, Configuration, "FACEITMATCHGATHERER_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.MatchRetriever, Configuration, "MATCHRETRIEVER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
 
             #endregion
 

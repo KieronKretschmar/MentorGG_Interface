@@ -45,7 +45,6 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// Query FaceItMatchGatherer to look for matches.
         /// </summary>
         /// <returns></returns>
-
         [Authorize]
         [HttpPost("faceit/look")]
         public async Task<IActionResult> FaceItAsync()
