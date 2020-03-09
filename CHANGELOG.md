@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - ?
 ### Updated
+### Changed
 - Rename env var MYSQL_CONNECTIONSTRING to MYSQL_CONNECTION_STRING
 
 ## [0.1.1] - 2020-01-24
