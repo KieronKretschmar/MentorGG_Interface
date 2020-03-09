@@ -185,12 +185,10 @@ namespace MentorInterface
             #endregion
 
             #region Cors
-            services.AddCors(o => o.AddPolicy("AllowProductionAndDebug", builder =>
+            services.AddCors(o => o.AddPolicy("Debug", builder =>
             {
                 var allowedOrigins = new string[]
                 {
-                    "https://mentor.gg",
-                    "https://www.mentor.gg",
                     "http://localhost:8080",
                     "https://localhost:8080",
                 };
@@ -235,7 +233,10 @@ namespace MentorInterface
                 app.UseHttpsRedirection();
             }
 
-            app.UseCors("AllowProductionAndDebug");
+            if (IsDevelopment)
+            {
+                app.UseCors("Debug");
+            }
 
             #region Swagger
             app.UseSwagger();
