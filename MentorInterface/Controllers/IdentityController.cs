@@ -53,9 +53,15 @@ namespace MentorInterface.Controllers
             {
                 ApplicationUserId = user.Id,
                 SteamId = user.SteamId,
-                SubscriptionType = subscriptionType
-
+                SubscriptionType = subscriptionType,
+                DailyUploadLimit = await GetDailyLimitAsync(user)
             };
+        }
+
+        private async Task<int> GetDailyLimitAsync(ApplicationUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return SubscriptionHelper.GetDailyLimit(roles);
         }
     }
 }

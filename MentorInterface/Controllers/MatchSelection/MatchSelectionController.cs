@@ -29,16 +29,19 @@ namespace MentorInterface.Controllers.MatchSelection
         /// User Manager
         /// </summary>
         private readonly UserManager<ApplicationUser> _userMananger;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
         public MatchSelectionController(
             IHttpClientFactory clientFactory,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager)
         {
             _clientFactory = clientFactory;
             _userMananger = userManager;
+            _roleManager = roleManager;
         }
 
         /// <summary>

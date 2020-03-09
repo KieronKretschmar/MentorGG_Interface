@@ -13,5 +13,6 @@ namespace MentorInterface.Models
         public long SteamId { get; set; }
 
         public SubscriptionType SubscriptionType { get; set; }
+        public int DailyUploadLimit { get; set; }
     }
 }

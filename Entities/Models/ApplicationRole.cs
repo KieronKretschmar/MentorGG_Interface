@@ -13,7 +13,6 @@ namespace Entities.Models
         /// Navigational Property
         /// </summary>
         public virtual ICollection<PaddlePlanRole> PaddlePlanRoles { get; set; }
-
         public ApplicationRole() { }
         public ApplicationRole(string roleName) : base(roleName) { }
     }
