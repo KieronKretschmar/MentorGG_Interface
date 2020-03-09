@@ -9,7 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entities", "Entities\Entiti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{73F41D80-50EB-438D-B5D3-D28E129F6D0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentorInterfaceTests", "MentorInterfaceTests\MentorInterfaceTests.csproj", "{842291EF-EF8C-4C3F-BD7F-268BDEEDC475}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MentorInterfaceTests", "MentorInterfaceTests\MentorInterfaceTests.csproj", "{842291EF-EF8C-4C3F-BD7F-268BDEEDC475}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2283FCF4-8963-4F29-B354-E2172F6ADD35}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		Dockerfile = Dockerfile
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,10 +10,10 @@ A REST API providing authentication and access to the Mentor Engine
 
 `docker run --name mi_container --rm -d -p 80:80 mentorinterface:<version>`
 
-## Enviroment Variables
+## Environment Variables
 
 - `STEAM_API_KEY` : Steam application key for OpenID authentication. [*]
-- `MYSQL_CONNECTIONSTRING` : Connection string for the User Database. [*]
+- `MYSQL_CONNECTION_STRING` : Connection string for the User Database. [*]
 
 [*] *Required*
 

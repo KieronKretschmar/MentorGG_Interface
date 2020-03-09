@@ -11,14 +11,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace MentorInterface.Controllers.AutomaticUpload
+namespace MentorInterface.Controllers.MatchSelection
 {
     /// <summary>
-    /// Look for matches controller.
+    /// MatchSelection controller.
     /// </summary>
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/automatic-upload/")]
-    public class LookForMatchesController : ForwardController
+    [Route("v{version:apiVersion}/")]
+    public class MatchSelectionController : ForwardController
     {
         /// <summary>
         /// Http Client Factory
@@ -33,7 +33,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
-        public LookForMatchesController(
+        public MatchSelectionController(
             IHttpClientFactory clientFactory,
             UserManager<ApplicationUser> userManager)
         {
@@ -42,40 +42,31 @@ namespace MentorInterface.Controllers.AutomaticUpload
         }
 
         /// <summary>
-        /// Query FaceItMatchGatherer to look for matches.
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpPost("faceit/look")]
-        public async Task<IActionResult> FaceItAsync()
+        [HttpGet("single/{steamId}/matchselection")]
+        public async Task<IActionResult> MatchSelectionAsync(long steamId)
         {
             var user = await _userMananger.GetUserAsync(User);
-            var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
+            var dailyLimit = await GetDailyLimitAsync(user);
+
+            var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
+                HttpMethod.Get,
+                $"v1/public/single/{steamId}/matchselection?dailyLimit={dailyLimit}");
 
             return await ForwardHttpRequest(client, message);
         }
 
-        /// <summary>
-        /// Query SharingCodeGatherer to look for matches.
-        /// </summary>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPost("valve/look")]
-        public async Task<IActionResult> ValveAsync()
+        private async Task<int> GetDailyLimitAsync(ApplicationUser user)
         {
-            var user = await _userMananger.GetUserAsync(User);
-            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
-
-            HttpRequestMessage message = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
-
-            return await ForwardHttpRequest(client, message);
+            var roles = await _userMananger.GetRolesAsync(user);
+            return 3;
+            // TODO: Return depending on role
+            //if(roles.Contains())
+            throw new NotImplementedException();
         }
-
     }
 }

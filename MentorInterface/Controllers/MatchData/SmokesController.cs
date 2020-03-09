@@ -11,14 +11,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace MentorInterface.Controllers.AutomaticUpload
+namespace MentorInterface.Controllers.MatchData
 {
     /// <summary>
-    /// Look for matches controller.
+    /// Smokes controller.
     /// </summary>
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/automatic-upload/")]
-    public class LookForMatchesController : ForwardController
+    [Route("v{version:apiVersion}/")]
+    public class SmokesController : ForwardController
     {
         /// <summary>
         /// Http Client Factory
@@ -33,7 +33,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
-        public LookForMatchesController(
+        public SmokesController(
             IHttpClientFactory clientFactory,
             UserManager<ApplicationUser> userManager)
         {
@@ -42,40 +42,35 @@ namespace MentorInterface.Controllers.AutomaticUpload
         }
 
         /// <summary>
-        /// Query FaceItMatchGatherer to look for matches.
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpPost("faceit/look")]
-        public async Task<IActionResult> FaceItAsync()
+        [HttpGet("single/{steamId}/smokes")]
+        public async Task<IActionResult> SmokesAsync(long steamId, string matchIds, string map)
         {
-            var user = await _userMananger.GetUserAsync(User);
-            var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
+            var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
+                HttpMethod.Get,
+                $"v1/public/single/{steamId}/smokes?matchIds={matchIds}&map={map}");
 
             return await ForwardHttpRequest(client, message);
         }
 
         /// <summary>
-        /// Query SharingCodeGatherer to look for matches.
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpPost("valve/look")]
-        public async Task<IActionResult> ValveAsync()
+        [HttpGet("single/{steamId}/smokesoverview")]
+        public async Task<IActionResult> SmokesOverviewAsync(long steamId, string matchIds)
         {
-            var user = await _userMananger.GetUserAsync(User);
-            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+            var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
+                HttpMethod.Get,
+                $"v1/public/single/{steamId}/smokesoverview?matchIds={matchIds}");
 
             return await ForwardHttpRequest(client, message);
         }
-
     }
 }

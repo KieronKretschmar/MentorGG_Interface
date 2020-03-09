@@ -68,8 +68,13 @@ namespace MentorInterface
         public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                // Serialize JSON using the Member CASE!
-                .AddNewtonsoftJson(x => x.UseMemberCasing());
+                .AddNewtonsoftJson(x => 
+                {
+                    // Serialize JSON using the Member CASE!
+                    x.UseMemberCasing();
+                    // Serialize longs (steamIds) as strings
+                    x.SerializerSettings.Converters.Add(new LongToStringConverter());
+                });
             services.AddApiVersioning();
 
             #region Paddle
@@ -85,24 +90,18 @@ namespace MentorInterface
 
             #region HTTP Clients
 
-            services.AddHttpClient(ConnectedServices.SharingCodeGatherer, c =>
-            {
-                c.BaseAddress = new Uri($"http://{ConnectedServices.SharingCodeGatherer.DNSAddress}");
-                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
-            });
-
-            services.AddHttpClient(ConnectedServices.FaceitMatchGatherer, c =>
-            {
-                c.BaseAddress = new Uri($"http://{ConnectedServices.FaceitMatchGatherer.DNSAddress}");
-                c.DefaultRequestHeaders.Add("User-Agent", "MentorInterface");
-            });
+            // Add HTTP clients with potentially overriden urls.
+            services.AddConnectedHttpService(ConnectedServices.DemoCentral, Configuration, "DEMOCENTRAL_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.FaceitMatchGatherer, Configuration, "FACEITMATCHGATHERER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.MatchRetriever, Configuration, "MATCHRETRIEVER_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
 
             #endregion
 
             #region Identity
 
             // Connect to the user database.
-            var connString = Configuration.GetValue<string>("MYSQL_CONNECTIONSTRING");
+            var connString = Configuration.GetValue<string>("MYSQL_CONNECTION_STRING");
             if (connString != null)
             {
                 services.AddDbContext<ApplicationContext>(o =>
@@ -128,7 +127,7 @@ namespace MentorInterface
             else
             {
                 throw new ArgumentException(
-                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTIONSTRING` enviroment variable.");
+                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTION_STRING` enviroment variable.");
             }
 
 
@@ -185,6 +184,21 @@ namespace MentorInterface
             }
             #endregion
 
+            #region Cors
+            services.AddCors(o => o.AddPolicy("Debug", builder =>
+            {
+                var allowedOrigins = new string[]
+                {
+                    "http://localhost:8080",
+                    "https://localhost:8080",
+                };
+                builder.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }));
+            #endregion
+
             #region Swagger
             services.AddSwaggerGen(options =>
             {
@@ -217,6 +231,11 @@ namespace MentorInterface
             if (!env.IsDevelopment())
             {
                 app.UseHttpsRedirection();
+            }
+
+            if (IsDevelopment)
+            {
+                app.UseCors("Debug");
             }
 
             #region Swagger
