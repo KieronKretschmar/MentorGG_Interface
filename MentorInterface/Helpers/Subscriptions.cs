@@ -40,7 +40,7 @@ namespace MentorInterface.Helpers
         /// <summary>
         /// The number of matches for each day users with this subscription may see.
         /// </summary>
-        public int DailyLimit { get; set; }
+        public int DailyMatchesLimit { get; set; }
 
         /// <summary>
         /// Return the Subscription Type's Enum name.
@@ -73,12 +73,12 @@ namespace MentorInterface.Helpers
         /// <summary>
         /// Premium
         /// </summary>
-        public static Subscription Premium = new Subscription { Type = SubscriptionType.Premium, DailyLimit = 5 };
+        public static Subscription Premium = new Subscription { Type = SubscriptionType.Premium, DailyMatchesLimit = 5 };
 
         /// <summary>
         /// Ultimate
         /// </summary>
-        public static Subscription Ultimate = new Subscription { Type = SubscriptionType.Ultimate, DailyLimit = 200 };
+        public static Subscription Ultimate = new Subscription { Type = SubscriptionType.Ultimate, DailyMatchesLimit = 200 };
 
     }
 
@@ -97,7 +97,7 @@ namespace MentorInterface.Helpers
         /// </summary>
         /// <param name="roles"></param>
         /// <returns></returns>
-        public static int GetDailyLimit(IList<string> roles)
+        public static int GetDailyMatchesLimit(IList<string> roles)
         {
             var limit = DefaultDailyLimit;
             foreach (var role in roles)
@@ -105,7 +105,7 @@ namespace MentorInterface.Helpers
                 var sub = Subscriptions.All.SingleOrDefault(x => x.ToString() == role);
                 if (sub != null)
                 {
-                    limit = Math.Max(limit, sub.DailyLimit);
+                    limit = Math.Max(limit, sub.DailyMatchesLimit);
                 }
             }
             return limit;
