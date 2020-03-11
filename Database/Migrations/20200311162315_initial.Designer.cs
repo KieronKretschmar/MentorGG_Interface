@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200212162541_SubscriptionPlanID_To_Int")]
-    partial class SubscriptionPlanID_To_Int
+    [Migration("20200311162315_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,6 +28,9 @@ namespace Database.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<int>("DailyMatchesLimit")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
@@ -150,17 +153,17 @@ namespace Database.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("SubscriptionPlanId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UnitPrice")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("AlertId");
 
@@ -206,8 +209,8 @@ namespace Database.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SubscriptionPlanId")
                         .HasColumnType("int");
@@ -218,8 +221,8 @@ namespace Database.Migrations
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("AlertId");
 
@@ -274,8 +277,8 @@ namespace Database.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
 
                     b.Property<string>("SubscriptionPaymentId")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -289,8 +292,8 @@ namespace Database.Migrations
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("AlertId");
 
@@ -568,8 +571,8 @@ namespace Database.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("SubscriptionId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SubscriptionPlanId")
                         .HasColumnType("int");
@@ -577,8 +580,8 @@ namespace Database.Migrations
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("AlertId");
 
@@ -591,42 +594,48 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("RoleId")
+                    b.Property<double>("MonthlyPrice")
+                        .HasColumnType("double");
+
+                    b.Property<int>("Months")
                         .HasColumnType("int");
 
-                    b.HasKey("PlanId");
+                    b.Property<byte>("SubscriptionType")
+                        .HasColumnType("tinyint unsigned");
 
-                    b.HasIndex("RoleId");
+                    b.HasKey("PlanId");
 
                     b.ToTable("PaddlePlan");
                 });
 
-            modelBuilder.Entity("Entities.Models.Paddle.PaddleUser", b =>
+            modelBuilder.Entity("Entities.Models.Paddle.PaddlePlanRole", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("PlanId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlanId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("PaddlePlanRole");
+                });
+
+            modelBuilder.Entity("Entities.Models.Paddle.PaddleSubscription", b =>
+                {
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApplicationUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("CancelUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<bool>("MarketingConsent")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Passthrough")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<long>("SteamId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubscriptionId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<DateTime?>("ExpirationTime")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("SubscriptionPlanId")
                         .HasColumnType("int");
@@ -634,14 +643,11 @@ namespace Database.Migrations
                     b.Property<string>("UpdateUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.HasKey("SubscriptionId");
 
-                    b.HasKey("Id");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("SteamId");
-
-                    b.ToTable("PaddleUser");
+                    b.ToTable("PaddleSubscription");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -743,21 +749,32 @@ namespace Database.Migrations
                     b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("Entities.Models.Paddle.PaddlePlan", b =>
+            modelBuilder.Entity("Entities.Models.Paddle.PaddlePlanRole", b =>
                 {
+                    b.HasOne("Entities.Models.Paddle.PaddlePlan", "PaddlePlan")
+                        .WithMany("PaddlePlanRoles")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Entities.Models.ApplicationRole", "Role")
-                        .WithMany("PaddlePlan")
+                        .WithMany("PaddlePlanRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Entities.Models.Paddle.PaddleUser", b =>
+            modelBuilder.Entity("Entities.Models.Paddle.PaddleSubscription", b =>
                 {
                     b.HasOne("Entities.Models.ApplicationUser", "User")
-                        .WithMany("PaddleUser")
-                        .HasForeignKey("SteamId")
-                        .HasPrincipalKey("SteamId")
+                        .WithMany("PaddleSubscriptions")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.Paddle.PaddlePlan", "PaddlePlan")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("SubscriptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

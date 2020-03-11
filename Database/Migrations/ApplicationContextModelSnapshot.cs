@@ -27,6 +27,9 @@ namespace Database.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int>("DailyMatchesLimit")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
