@@ -5,28 +5,6 @@ using System.Threading.Tasks;
 
 namespace MentorInterface.Helpers
 {
-
-    /// <summary>
-    /// SubscriptionType
-    /// </summary>
-    public enum SubscriptionType
-    {
-        /// <summary>
-        /// Free
-        /// </summary>
-        Free = 1,
-
-        /// <summary>
-        /// Premium
-        /// </summary>
-        Premium = 2,
-
-        /// <summary>
-        /// Ultimate
-        /// </summary>
-        Ultimate = 3,
-    }
-
     /// <summary>
     /// An Application Role Helper
     /// </summary>
