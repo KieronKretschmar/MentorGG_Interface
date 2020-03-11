@@ -14,40 +14,47 @@ namespace MentorInterface.Paddle
     public static class PaddlePlanManager
     {
         /// <summary>
-        /// List of all PaddlePlans and the roles they enable.
+        /// List of all PaddlePlans.
         /// </summary>
-        public static readonly List<PaddlePlanRoleBind> ProductionBinds = new List<PaddlePlanRoleBind>
+        public static readonly List<PaddlePlan> ProductionPlans = new List<PaddlePlan>
         {
-            new PaddlePlanRoleBind(583755, new List<string> {Subscriptions.Premium }),
-            new PaddlePlanRoleBind(583756, new List<string> {Subscriptions.Ultimate }),
+            // Premium            
+            new PaddlePlan(586570, Entities.SubscriptionType.Premium, 1, 6.99),
+            new PaddlePlan(586571, Entities.SubscriptionType.Premium, 3, 4.99),
+            new PaddlePlan(586572, Entities.SubscriptionType.Premium, 6, 4.49),
+
+            // Ultimate            
+            new PaddlePlan(586580, Entities.SubscriptionType.Ultimate, 1, 16.99),
+            new PaddlePlan(586581, Entities.SubscriptionType.Ultimate, 3, 14.99),
+            new PaddlePlan(586582, Entities.SubscriptionType.Ultimate, 6, 14.49),
+                
         };
-        
+
 
         /// <summary>
         /// Writes PaddlePlans and binds between PaddlePlans and ApplicationRoles to database for the Plans.
         /// Does not modify PaddlePlans or binds for plans already in the database.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        public static void SetPaddlePlans(IServiceProvider serviceProvider, List<PaddlePlanRoleBind> binds)
+        public static void SetPaddlePlans(IServiceProvider serviceProvider, List<PaddlePlan> plans)
         {
             var applicationContext = serviceProvider.GetRequiredService<ApplicationContext>();
             var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-            foreach (var roleBind in binds)
+            foreach (var paddlePlan in plans)
             {
-                if (!applicationContext.PaddlePlan.Any(x => x.PlanId == roleBind.PlanId))
+                if (!applicationContext.PaddlePlan.Any(x => x.PlanId == paddlePlan.PlanId))
                 {
                     // Create PaddlePlan
-                    var paddlePlan = new PaddlePlan { PlanId = roleBind.PlanId };
                     applicationContext.PaddlePlan.Add(paddlePlan);
 
                     // Create a PaddlePlanRole for each role this plan includes and write to database
-                    foreach (var roleName in roleBind.RoleNames)
+                    foreach (var roleName in Subscriptions.GetSubscription(paddlePlan.SubscriptionType).Roles)
                     {
                         var roleId = roleMananger.FindByNameAsync(roleName).Result.Id;
                         var paddlePlanRole = new PaddlePlanRole
                         {
-                            PlanId = roleBind.PlanId,
+                            PlanId = paddlePlan.PlanId,
                             RoleId = roleId,
                         };
 

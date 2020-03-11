@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Entities;
+using Entities.Models.Paddle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 namespace MentorInterface.Helpers
 {
     /// <summary>
-    /// An Application Role Helper
+    /// Grants a user one or more Roles. Subscriptions may be granted through different PaddlePlans.
     /// </summary>
     public class Subscription
     {
@@ -19,6 +21,11 @@ namespace MentorInterface.Helpers
         /// The number of matches for each day users with this subscription may see.
         /// </summary>
         public int DailyMatchesLimit { get; set; }
+
+        /// <summary>
+        /// Roles granted by this subscription.
+        /// </summary>
+        public List<string> Roles { get; set; }
 
         /// <summary>
         /// Return the Subscription Type's Enum name.
@@ -36,6 +43,24 @@ namespace MentorInterface.Helpers
         {
             return Enum.GetName(typeof(SubscriptionType), Type);
         }
+
+        /// <summary>
+        /// A data model representing a PaddlePlan.
+        /// </summary>
+        public struct Offer
+        {
+            public Offer(PaddlePlan plan)
+            {
+                SubscriptionType = plan.SubscriptionType;
+                ProductId = plan.PlanId;
+                Months = plan.Months;
+                MonthlyPrice = plan.MonthlyPrice;
+            }
+            public SubscriptionType SubscriptionType{ get; set; }
+            public int Months { get; set; }
+            public double MonthlyPrice { get; set; }
+            public int ProductId { get; set; }
+        }
     }
 
     /// <summary>
@@ -51,13 +76,31 @@ namespace MentorInterface.Helpers
         /// <summary>
         /// Premium
         /// </summary>
-        public static Subscription Premium = new Subscription { Type = SubscriptionType.Premium, DailyMatchesLimit = 5 };
+        public static Subscription Premium = new Subscription { 
+            Type = SubscriptionType.Premium, 
+            DailyMatchesLimit = 5,
+            Roles = new List<string> { SubscriptionType.Premium.ToString() },
+        };
 
         /// <summary>
         /// Ultimate
         /// </summary>
-        public static Subscription Ultimate = new Subscription { Type = SubscriptionType.Ultimate, DailyMatchesLimit = 200 };
+        public static Subscription Ultimate = new Subscription
+        {
+            Type = SubscriptionType.Ultimate,
+            DailyMatchesLimit = 200,
+            Roles = new List<string> { SubscriptionType.Ultimate.ToString() },
+        };
 
+        /// <summary>
+        /// Returns the subscription.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Subscription GetSubscription(SubscriptionType type)
+        {
+            return All.Single(x => x.Type == type);
+        }
     }
 
     /// <summary>

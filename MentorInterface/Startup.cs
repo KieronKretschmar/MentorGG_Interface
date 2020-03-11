@@ -280,8 +280,8 @@ namespace MentorInterface
             RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
 
             // Write PaddlePlans to db and connect them with Roles
-            var roleBinds = PaddlePlanManager.ProductionBinds;
-            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
+            var plans = PaddlePlanManager.ProductionPlans;
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, plans);
         }
     }
 }

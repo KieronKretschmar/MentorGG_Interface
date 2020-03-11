@@ -10,6 +10,7 @@ using Entities.Models;
 using MentorInterface.Models;
 using MentorInterface.Paddle;
 using MentorInterface.Helpers;
+using Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
