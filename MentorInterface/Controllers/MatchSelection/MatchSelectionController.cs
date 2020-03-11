@@ -30,6 +30,7 @@ namespace MentorInterface.Controllers.MatchSelection
         /// </summary>
         private readonly UserManager<ApplicationUser> _userMananger;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IRoleHelper _roleHelper;
 
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
@@ -37,11 +38,13 @@ namespace MentorInterface.Controllers.MatchSelection
         public MatchSelectionController(
             IHttpClientFactory clientFactory,
             UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+            RoleManager<ApplicationRole> roleManager,
+            IRoleHelper roleHelper)
         {
             _clientFactory = clientFactory;
             _userMananger = userManager;
             _roleManager = roleManager;
+            _roleHelper = roleHelper;
         }
 
         /// <summary>
@@ -52,20 +55,16 @@ namespace MentorInterface.Controllers.MatchSelection
         public async Task<IActionResult> MatchSelectionAsync(long steamId)
         {
             var user = await _userMananger.GetUserAsync(User);
-            var dailyLimit = await GetDailyLimitAsync(user);
+
+            var dailyMatchesLimit = await _roleHelper.GetDailyMatchesLimitAsync(user);
 
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/matchselection?dailyLimit={dailyLimit}");
+                $"v1/public/single/{steamId}/matchselection?dailyLimit={dailyMatchesLimit}");
 
             return await ForwardHttpRequest(client, message);
-        }
-
-        private async Task<int> GetDailyLimitAsync(ApplicationUser user)
-        {
-            throw new NotImplementedException();
         }
     }
 }

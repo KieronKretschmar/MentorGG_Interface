@@ -23,12 +23,15 @@ namespace MentorInterface.Controllers
     public class IdentityController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRoleHelper _roleHelper;
 
         public IdentityController(
-            UserManager<ApplicationUser> userManager
+            UserManager<ApplicationUser> userManager,
+            IRoleHelper roleHelper
             )
         {
-            this._userManager = userManager;
+            _userManager = userManager;
+            _roleHelper = roleHelper;
         }
 
 
@@ -42,26 +45,16 @@ namespace MentorInterface.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            // Select the highest possible Subscription Type if present.
-            var appRoles = await _userManager.GetRolesAsync(user);
-            var subscriptionType = appRoles
-                .SelectMany(appRoleName => Subscriptions.All.Where(subscriptionName => subscriptionName == appRoleName))
-                .Select(x => x.Type)
-                .DefaultIfEmpty(SubscriptionType.Free)
-                .Max();
+            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var dailyMatchesLimit = await _roleHelper.GetDailyMatchesLimitAsync(user);
 
             return new UserIdentity
             {
                 ApplicationUserId = user.Id,
                 SteamId = user.SteamId,
                 SubscriptionType = subscriptionType,
-                DailyMatchesLimit = await GetDailyMatchesLimitAsync(user)
+                DailyMatchesLimit = dailyMatchesLimit
             };
-        }
-
-        private async Task<int> GetDailyMatchesLimitAsync(ApplicationUser user)
-        {
-            throw new NotImplementedException();
         }
     }
 }

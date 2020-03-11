@@ -52,7 +52,9 @@ namespace MentorInterface.Controllers
                 .ToList();
             
             // Get all PaddlePlans available to the user, grouped by SubscriptionType
-            var availableSubscriptions = _applicationContext.PaddlePlan.GroupBy(x => x.SubscriptionType)
+            var availableSubscriptions = _applicationContext.PaddlePlan
+                .ToList()
+                .GroupBy(x => x.SubscriptionType)
                 .Select(x => new AvailableSubscription(x.Key, x.ToList()))
                 .ToList();
 

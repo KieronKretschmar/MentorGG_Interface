@@ -77,6 +77,10 @@ namespace MentorInterface
                 });
             services.AddApiVersioning();
 
+            #region Helpers
+            services.AddTransient<IRoleHelper, RoleHelper>();
+            #endregion
+
             #region Paddle
 
             services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
