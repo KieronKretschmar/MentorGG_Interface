@@ -57,11 +57,10 @@ namespace MentorInterface.Controllers
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
         [HttpGet("signout")]
-        public IActionResult SignOut(string returnUrl = "/")
+        public async Task<IActionResult> SignOut(string returnUrl = "/")
         {
-            return SignOut(
-                new AuthenticationProperties { RedirectUri = returnUrl },
-                IdentityConstants.ApplicationScheme);
+            await _signInManager.SignOutAsync();
+            return Redirect(returnUrl);
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace MentorInterface.Controllers
             var signInAttempt = await _signInManager.ExternalLoginSignInAsync(
                 loginInfo.LoginProvider,
                 loginInfo.ProviderKey,
-                isPersistent: false);
+                isPersistent: true);
 
             if (signInAttempt.Succeeded)
             {

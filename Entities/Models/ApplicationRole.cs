@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Entities.Models.Paddle;
+using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 
 namespace Entities.Models
 {
@@ -8,8 +10,11 @@ namespace Entities.Models
     public class ApplicationRole : IdentityRole<int>
     {
         /// <summary>
-        /// Indicate if the user is Premium
+        /// Navigational Property
         /// </summary>
-        public bool Premium { get; set; }
+        public virtual ICollection<PaddlePlanRole> PaddlePlanRoles { get; set; }
+
+        public ApplicationRole() { }
+        public ApplicationRole(string roleName) : base(roleName) { }
     }
 }

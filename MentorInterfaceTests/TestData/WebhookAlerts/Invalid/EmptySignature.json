@@ -1,0 +1,23 @@
+{
+  "alert_id": "1885693839",
+  "alert_name": "subscription_created",
+  "cancel_url": "https://checkout.paddle.com/subscription/cancel?user=1&subscription=7&hash=42216b42d61c6a67535430335baa88aea66873d8",
+  "checkout_id": "8-3165615a1a7afa5-4b0c259b07",
+  "currency": "GBP",
+  "email": "willy.hoppe@example.net",
+  "event_time": "2020-02-17 14:39:52",
+  "linked_subscriptions": "6, 4, 5",
+  "marketing_consent": null,
+  "next_bill_date": "2020-03-01",
+  "passthrough": "Example String",
+  "quantity": "99",
+  "source": "Order",
+  "status": "trialing",
+  "subscription_id": "2",
+  "subscription_plan_id": "4",
+  "unit_price": "unit_price",
+  "update_url": "https://checkout.paddle.com/subscription/update?user=9&subscription=7&hash=72b43522c9e5388176f29de0281ed18e03526176",
+  "user_id": "2",
+  "p_signature": ""
+}
+
