@@ -262,17 +262,26 @@ namespace MentorInterface
 
             app.UseMetricServer(METRICS_PORT);
 
-            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
-
-            // Write PaddlePlans to db and connect them with Roles
-            var roleBinds = PaddlePlanManager.ProductionBinds;
-            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
-
             // Migrate if this is not an inmemory database
             if (serviceProvider.GetRequiredService<ApplicationContext>().Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
             {
                 serviceProvider.GetRequiredService<ApplicationContext>().Database.Migrate();
             }
+
+            SeedDatabase(serviceProvider);
+        }
+
+        /// <summary>
+        /// Seed the Database with Role information.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        private void SeedDatabase(IServiceProvider serviceProvider)
+        {
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
+
+            // Write PaddlePlans to db and connect them with Roles
+            var roleBinds = PaddlePlanManager.ProductionBinds;
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
         }
     }
 }
