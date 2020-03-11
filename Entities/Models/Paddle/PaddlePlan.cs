@@ -28,7 +28,7 @@ namespace Entities.Models.Paddle
         /// Identifies the subscription granted by this plan.
         /// </summary>
         public SubscriptionType SubscriptionType { get; set; }
-
+        
         /// <summary>
         /// Subscription period in months.
         /// </summary>

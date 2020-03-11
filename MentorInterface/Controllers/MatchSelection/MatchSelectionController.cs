@@ -65,10 +65,6 @@ namespace MentorInterface.Controllers.MatchSelection
 
         private async Task<int> GetDailyLimitAsync(ApplicationUser user)
         {
-            var roles = await _userMananger.GetRolesAsync(user);
-            return 3;
-            // TODO: Return depending on role
-            //if(roles.Contains())
             throw new NotImplementedException();
         }
     }

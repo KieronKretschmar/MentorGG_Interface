@@ -22,6 +22,9 @@ namespace MentorInterface.Models
     /// </summary>
     public class PaddleSubscriptionModel
     {
+        /// <summary>
+        /// ApplicationUser associated with this PaddleUser.
+        /// </summary>
         public int ApplicationUserId { get; set; }
         public int SubscriptionId { get; set; }
         public int SubscriptionPlanId { get; set; }
@@ -45,19 +48,45 @@ namespace MentorInterface.Models
     /// </summary>
     public class AvailableSubscription
     {
+        /// <summary>
+        /// The type of Subscription
+        /// </summary>
         public SubscriptionType SubscriptionType { get; set; }
 
         /// <summary>
-        /// List of all available offers for this subscription.
+        /// List of all available PaddlePlans for this subscription.
         /// </summary>
-        public List<Subscription.Offer> Offers { get; set; }
+        public List<PaddlePlanModel> Plans { get; set; }
 
-        public double StartingFromMonthly => Offers.Select(x => x.MonthlyPrice).Min();
+        /// <summary>
+        /// The lowest monthly price for which there is a plan.
+        /// </summary>
+        public double StartingFromMonthly => Plans.Select(x => x.MonthlyPrice).Min();
         
         public AvailableSubscription(SubscriptionType type, List<PaddlePlan> plans)
         {
             SubscriptionType = type;
-            Offers = plans.Select(x=> new Subscription.Offer(x)).ToList();
+            Plans = plans.Select(x=> new PaddlePlanModel(x)).ToList();
+        }
+
+
+
+        /// <summary>
+        /// A data model representing a PaddlePlan.
+        /// </summary>
+        public struct PaddlePlanModel
+        {
+            public PaddlePlanModel(PaddlePlan plan)
+            {
+                SubscriptionType = plan.SubscriptionType;
+                ProductId = plan.PlanId;
+                Months = plan.Months;
+                MonthlyPrice = plan.MonthlyPrice;
+            }
+            public SubscriptionType SubscriptionType { get; set; }
+            public int Months { get; set; }
+            public double MonthlyPrice { get; set; }
+            public int ProductId { get; set; }
         }
     }
 }

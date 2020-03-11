@@ -277,7 +277,7 @@ namespace MentorInterface
         /// <param name="serviceProvider"></param>
         private void SeedDatabase(IServiceProvider serviceProvider)
         {
-            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.ApplicationRoles);
 
             // Write PaddlePlans to db and connect them with Roles
             var plans = PaddlePlanManager.ProductionPlans;

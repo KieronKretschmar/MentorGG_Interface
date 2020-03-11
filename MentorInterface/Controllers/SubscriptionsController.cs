@@ -50,18 +50,11 @@ namespace MentorInterface.Controllers
             var activeSubscriptions = user.PaddleSubscriptions
                 .Select(x => new PaddleSubscriptionModel(x))
                 .ToList();
-
-            var availableSubscriptions = new List<AvailableSubscription>();
-            var subscriptionTypes = Subscriptions.All.Select(x => x.Type);
-            foreach (var type in subscriptionTypes)
-            {
-                var paddlePlans = _applicationContext.PaddlePlan
-                    .Where(x => x.SubscriptionType == type)
-                    .ToList();
-                var availableSubscription = new AvailableSubscription(type, paddlePlans);
-                availableSubscriptions.Add(availableSubscription);
-            }
-
+            
+            // Get all PaddlePlans available to the user, grouped by SubscriptionType
+            var availableSubscriptions = _applicationContext.PaddlePlan.GroupBy(x => x.SubscriptionType)
+                .Select(x => new AvailableSubscription(x.Key, x.ToList()))
+                .ToList();
 
             return new SubscriptionsModel
             {

@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using Entities;
+using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,23 +12,32 @@ namespace MentorInterface.Helpers
     public class RoleCreator
     {
         /// <summary>
-        /// The names of the roles we use.
+        /// The roles we use.
         /// </summary>
-        public static readonly string[] RoleNames = { Subscriptions.Premium, Subscriptions.Ultimate };
+        public static ApplicationRole[] ApplicationRoles => new ApplicationRole[] { Premium, Ultimate };
 
+        /// <summary>
+        /// Initial value for Premium role
+        /// </summary>
+        public static ApplicationRole Premium = new ApplicationRole(SubscriptionType.Premium.ToString(), 5);
+
+        /// <summary>
+        /// Initial value for Ultimate role
+        /// </summary>
+        public static ApplicationRole Ultimate = new ApplicationRole(SubscriptionType.Ultimate.ToString(), 100);
 
         /// <summary>
         /// Create the ApplicationRoles, if not present.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        public static void CreateRoles(IServiceProvider serviceProvider, string[] roleNames)
+        public static void CreateRoles(IServiceProvider serviceProvider, ApplicationRole[] roles)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            foreach (var roleName in roleNames)
+            foreach (var role in roles)
             {
-                if (!roleManager.RoleExistsAsync(roleName).Result)
+                if (!roleManager.RoleExistsAsync(role.Name).Result)
                 {
-                    roleManager.CreateAsync(new ApplicationRole(roleName)).Wait();
+                    roleManager.CreateAsync(role).Wait();
                 }
             }
         }

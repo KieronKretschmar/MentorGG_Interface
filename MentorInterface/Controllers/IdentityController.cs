@@ -61,8 +61,7 @@ namespace MentorInterface.Controllers
 
         private async Task<int> GetDailyMatchesLimitAsync(ApplicationUser user)
         {
-            var roles = await _userManager.GetRolesAsync(user);
-            return SubscriptionHelper.GetDailyMatchesLimit(roles);
+            throw new NotImplementedException();
         }
     }
 }
