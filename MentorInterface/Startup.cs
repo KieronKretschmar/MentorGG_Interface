@@ -267,6 +267,12 @@ namespace MentorInterface
             // Write PaddlePlans to db and connect them with Roles
             var roleBinds = PaddlePlanManager.ProductionBinds;
             PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
+
+            // Migrate if this is not an inmemory database
+            if (serviceProvider.GetRequiredService<ApplicationContext>().Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+            {
+                serviceProvider.GetRequiredService<ApplicationContext>().Database.Migrate();
+            }
         }
     }
 }
