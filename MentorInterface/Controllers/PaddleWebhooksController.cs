@@ -27,7 +27,7 @@ namespace MentorInterface.Controllers
     public class PaddleWebhooksController : ControllerBase
     {
 
-        readonly WebhookVerifier _webhookVerifier;
+        readonly IWebhookVerifier _webhookVerifier;
         private readonly ILogger<PaddleWebhooksController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationContext _applicationContext;
@@ -38,7 +38,7 @@ namespace MentorInterface.Controllers
         public PaddleWebhooksController(
             ILogger<PaddleWebhooksController> logger,
             UserManager<ApplicationUser> userManager,
-            WebhookVerifier webhookVerifier,
+            IWebhookVerifier webhookVerifier,
             ApplicationContext applicationContext)
         {
             _logger = logger;
