@@ -185,7 +185,7 @@ namespace MentorInterface.Controllers
         private async Task<IActionResult> CreateSubscriptionAsync(SubscriptionCreated alert)
         {
             //1. Identify ApplicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
 
             //2. Create PaddleSubscription and write to database
             var subscription = new PaddleSubscription
@@ -215,7 +215,7 @@ namespace MentorInterface.Controllers
         private async Task<IActionResult> UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
             //1. Identify applicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if (appUser == null)
             {
                 var errorMsg = $"ApplicationUser [ {appUser.Id} ] updated, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
@@ -238,7 +238,7 @@ namespace MentorInterface.Controllers
         {
 
             //1. Identify applicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if(appUser == null)
             {
                 var errorMsg = $"ApplicationUser [ {appUser.Id} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
@@ -289,7 +289,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="passthrough"></param>
         /// <returns></returns>
-        private async Task<ApplicationUser> GetApplicationUserFromPassthrough(string passthrough)
+        private async Task<ApplicationUser> GetApplicationUserFromPassthroughAsync(string passthrough)
         {
             JObject jsonObj = JObject.Parse(passthrough);
             int appUserId = jsonObj.Value<int>("ApplicationUserId");
