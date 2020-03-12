@@ -11,6 +11,7 @@ using MentorInterface.Models;
 using MentorInterface.Paddle;
 using MentorInterface.Helpers;
 using Database;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -47,8 +48,10 @@ namespace MentorInterface.Controllers
             // explicitly load PaddleSubscriptions for this user
             _applicationContext.Entry(user).Collection(x => x.PaddleSubscriptions).Load();
 
-            var activeSubscriptions = user.PaddleSubscriptions
-                .Select(x => new PaddleSubscriptionModel(x))
+            var activeSubscriptions = _applicationContext.PaddleSubscription
+                .Where(x => x.ApplicationUserId == user.Id)
+                .Include(x=>x.PaddlePlan)
+                .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
                 .ToList();
             
             // Get all PaddlePlans available to the user, grouped by SubscriptionType

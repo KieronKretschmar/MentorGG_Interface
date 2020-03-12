@@ -22,6 +22,7 @@ namespace MentorInterface.Models
     /// </summary>
     public class PaddleSubscriptionModel
     {
+        public SubscriptionType SubscriptionType { get; set; }
         /// <summary>
         /// ApplicationUser associated with this PaddleUser.
         /// </summary>
@@ -32,8 +33,9 @@ namespace MentorInterface.Models
         public string UpdateUrl { get; set; }
         public DateTime? ExpirationTime { get; set; }
 
-        public PaddleSubscriptionModel(PaddleSubscription paddleSubscription)
+        public PaddleSubscriptionModel(SubscriptionType subscriptionType, PaddleSubscription paddleSubscription)
         {
+            SubscriptionType = subscriptionType;
             ApplicationUserId = paddleSubscription.ApplicationUserId;
             SubscriptionId = paddleSubscription.SubscriptionId;
             SubscriptionPlanId = paddleSubscription.SubscriptionPlanId;
