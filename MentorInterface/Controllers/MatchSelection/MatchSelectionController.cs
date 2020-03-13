@@ -28,7 +28,7 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <summary>
         /// User Manager
         /// </summary>
-        private readonly UserManager<ApplicationUser> _userMananger;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRoleHelper _roleHelper;
 
@@ -42,7 +42,7 @@ namespace MentorInterface.Controllers.MatchSelection
             IRoleHelper roleHelper)
         {
             _clientFactory = clientFactory;
-            _userMananger = userManager;
+            _userManager = userManager;
             _roleManager = roleManager;
             _roleHelper = roleHelper;
         }
@@ -54,7 +54,7 @@ namespace MentorInterface.Controllers.MatchSelection
         [HttpGet("single/{steamId}/matchselection")]
         public async Task<IActionResult> MatchSelectionAsync(long steamId)
         {
-            var user = await _userMananger.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
             var dailyMatchesLimit = await _roleHelper.GetDailyMatchesLimitAsync(user);
 

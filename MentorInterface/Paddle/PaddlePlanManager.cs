@@ -41,7 +41,7 @@ namespace MentorInterface.Paddle
         public static void SetPaddlePlans(IServiceProvider serviceProvider, List<PaddlePlanRoleBind> binds)
         {
             var applicationContext = serviceProvider.GetRequiredService<ApplicationContext>();
-            var roleMananger = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
             foreach (var bind in binds)
             {
@@ -54,7 +54,7 @@ namespace MentorInterface.Paddle
                     // Create a PaddlePlanRole for each role this plan includes and write to database
                     foreach (var roleName in bind.RoleNames)
                     {
-                        var roleId = roleMananger.FindByNameAsync(roleName).Result.Id;
+                        var roleId = roleManager.FindByNameAsync(roleName).Result.Id;
                         var paddlePlanRole = new PaddlePlanRole
                         {
                             PlanId = paddlePlan.PlanId,

@@ -27,7 +27,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         private readonly IHttpClientFactory _clientFactory;
 
         /// <summary>
-        /// User Mananger
+        /// User Manager
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -36,10 +36,10 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// </summary>
         public FaceItMatchGathererController(
             IHttpClientFactory clientFactory,
-            UserManager<ApplicationUser> userMananger)
+            UserManager<ApplicationUser> userManager)
         {
             _clientFactory = clientFactory;
-            _userManager = userMananger;
+            _userManager = userManager;
         }
 
 
