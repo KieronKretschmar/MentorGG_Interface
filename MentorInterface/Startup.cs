@@ -21,6 +21,8 @@ using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Entities.Models.Paddle;
 using MentorInterface.Paddle;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace MentorInterface
 {
@@ -32,6 +34,15 @@ namespace MentorInterface
 
         private bool IsDevelopment => Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == Environments.Development;
 
+        /// <summary>
+        /// The token which devs need to add in Headers["Authorization"]="Bearer <token>" to authenticate
+        /// </summary>
+        private string IDENTITY_WORKAROUND_BEARER_TOKEN => Configuration.GetValue<string>("IDENTITY_WORKAROUND_BEARER_TOKEN");
+
+        /// <summary>
+        /// The ApplicationUserId of the User assigned to devs who login with above Bearer Token.
+        /// </summary>
+        private string IDENTITY_WORKAROUND_USER_ID => Configuration.GetValue<string>("IDENTITY_WORKAROUND_USER_ID");
 
         /// <summary>
         /// Amount of times to attempt a successful MySQL connection on startup.
@@ -256,6 +267,29 @@ namespace MentorInterface
 
             // Who is the user?
             app.UseAuthentication();
+
+            // Configure the app to check for an authorization header with the configured bearer token
+            // If it is present, authenticate as the user with the configured User Id
+            // The entire app.Use() statement could be removed while keeping the Cookie-based login intact
+            app.Use(async (context, next) =>
+            {
+                // Check if authorization header for workaround login is available
+                if(!context.User.Identity.IsAuthenticated && IDENTITY_WORKAROUND_BEARER_TOKEN != null && context.Request.Headers["Authorization"] == "Bearer " + IDENTITY_WORKAROUND_BEARER_TOKEN)
+                {
+                    var principal = new ClaimsPrincipal();
+
+                    context.User = principal;
+
+                    // Assign the current user the identity of the user with the User Id IDENTITY_WORKAROUND_USER_ID
+                    var claims = new List<Claim>();
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, IDENTITY_WORKAROUND_USER_ID));
+                    var claimsIdentity = new ClaimsIdentity(claims, "Identity.Application");
+                    principal.AddIdentity(claimsIdentity);
+                }
+
+                await next();
+            });
+
             // Is the user allowed to perform this action?
             app.UseAuthorization();
 
