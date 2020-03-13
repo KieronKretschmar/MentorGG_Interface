@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Logic for computing DailyMatchesLimit
 - Controller for handling subscriptions
+- Workaround for making devs seem authenticated as a User when accessing from localhost where the IdentityCookie can not be used
+- Environment vars IDENTITY_WORKAROUND_USER_ID and IDENTITY_WORKAROUND_BEARER_TOKEN for above workaround
 
 ## Changed
 - PaddlePlans and Roles are now created differently and coupled tighter than before
