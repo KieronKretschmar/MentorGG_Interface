@@ -27,7 +27,7 @@ namespace MentorInterface.Controllers
     public class PaddleWebhooksController : ControllerBase
     {
 
-        readonly WebhookVerifier _webhookVerifier;
+        readonly IWebhookVerifier _webhookVerifier;
         private readonly ILogger<PaddleWebhooksController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationContext _applicationContext;
@@ -38,7 +38,7 @@ namespace MentorInterface.Controllers
         public PaddleWebhooksController(
             ILogger<PaddleWebhooksController> logger,
             UserManager<ApplicationUser> userManager,
-            WebhookVerifier webhookVerifier,
+            IWebhookVerifier webhookVerifier,
             ApplicationContext applicationContext)
         {
             _logger = logger;
@@ -86,7 +86,15 @@ namespace MentorInterface.Controllers
                             _logger.LogError($"Received alert that has been stored previously: [ {createdAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
-                        return await CreateSubscriptionAsync(createdAlert);
+
+                        // Act
+                        await CreateSubscriptionAsync(createdAlert);
+
+                        // Store the alert in the database
+                        await _applicationContext.SubscriptionCreated.AddAsync(createdAlert);
+                        await _applicationContext.SaveChangesAsync();
+
+                        return StatusCode(200);
                     #endregion
 
                     #region Subscription Updated
@@ -99,7 +107,15 @@ namespace MentorInterface.Controllers
                             _logger.LogError($"Received alert that has been stored previously: [ {updatedAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
-                        return await UpdateSubscriptionAsync(updatedAlert);
+
+                        // Act
+                        await UpdateSubscriptionAsync(updatedAlert);
+
+                        // Store the alert in the database
+                        await _applicationContext.SubscriptionUpdated.AddAsync(updatedAlert);
+                        await _applicationContext.SaveChangesAsync();
+
+                        return StatusCode(200);
                     #endregion
 
                     #region Subscription Cancelled
@@ -112,7 +128,15 @@ namespace MentorInterface.Controllers
                             _logger.LogError($"Received alert that has been stored previously: [ {cancelledAlert.AlertId} ] ");
                             return StatusCode(200);
                         }
-                        return await CancelSubscriptionAsync(cancelledAlert);
+
+                        // Act
+                        await CancelSubscriptionAsync(cancelledAlert);
+
+                        // Store the alert in the database
+                        await _applicationContext.SubscriptionCancelled.AddAsync(cancelledAlert);
+                        await _applicationContext.SaveChangesAsync();
+
+                        return StatusCode(200);
                     #endregion
 
                     #region GROUP: Subscription Payments
@@ -182,10 +206,10 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private async Task<IActionResult> CreateSubscriptionAsync(SubscriptionCreated alert)
+        private async Task CreateSubscriptionAsync(SubscriptionCreated alert)
         {
             //1. Identify ApplicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
 
             //2. Create PaddleSubscription and write to database
             var subscription = new PaddleSubscription
@@ -200,11 +224,9 @@ namespace MentorInterface.Controllers
             _applicationContext.PaddleSubscription.Add(subscription);
             await _applicationContext.SaveChangesAsync();
 
-            // TODO: we will need to use navigational properties of subscription. Reload?
             //2. Add role(s) to ApplicationUser
-            await _userManager.AddToRolesAsync(subscription.User, subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name));
-
-            return StatusCode(200);
+            var roles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == subscription.SubscriptionPlanId).Select(x => x.Role.Name);
+            await _userManager.AddToRolesAsync(subscription.User, roles);
         }
 
         /// <summary>
@@ -212,10 +234,10 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private async Task<IActionResult> UpdateSubscriptionAsync(SubscriptionUpdated alert)
+        private async Task UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
             //1. Identify applicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if (appUser == null)
             {
                 var errorMsg = $"ApplicationUser [ {appUser.Id} ] updated, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
@@ -225,8 +247,6 @@ namespace MentorInterface.Controllers
 
             var logMsg = $"ApplicationUser [ {appUser.Id} ] updated, but no action was done. SubscriptionCancelledAlert: [ {alert} ].";
             _logger.LogInformation(logMsg);
-
-            return StatusCode(200);
         }
 
         /// <summary>
@@ -234,11 +254,10 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="alert"></param>
         /// <returns></returns>
-        private async Task<IActionResult> CancelSubscriptionAsync(SubscriptionCancelled alert)
+        private async Task CancelSubscriptionAsync(SubscriptionCancelled alert)
         {
-
             //1. Identify applicationUser
-            var appUser = GetApplicationUserFromPassthrough(alert.Passthrough);
+            var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if(appUser == null)
             {
                 var errorMsg = $"ApplicationUser [ {appUser.Id} ] cancelled, but was not found in the database. SubscriptionCancelledAlert: [ {alert} ].";
@@ -259,7 +278,6 @@ namespace MentorInterface.Controllers
             paddleSubscription.ExpirationTime = alert.CancellationEffectiveDate;
             await _applicationContext.SaveChangesAsync();
             
-            return StatusCode(200);
 
             // TODO:
             /*
@@ -289,7 +307,7 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="passthrough"></param>
         /// <returns></returns>
-        private async Task<ApplicationUser> GetApplicationUserFromPassthrough(string passthrough)
+        private async Task<ApplicationUser> GetApplicationUserFromPassthroughAsync(string passthrough)
         {
             JObject jsonObj = JObject.Parse(passthrough);
             int appUserId = jsonObj.Value<int>("ApplicationUserId");

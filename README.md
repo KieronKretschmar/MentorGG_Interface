@@ -2,6 +2,12 @@
 
 A REST API providing authentication and access to the Mentor Engine
 
+## Paddle Plans, Subscriptions and Roles
+Users can have different (AspNet)`Roles`, e.g. "Admin" or "Premium", which may be required for accessing certain resources.
+Some Roles are available to users through `Subscriptions`.
+For each `Subscription` there may be one or multiple PaddlePlans the user can choose from, differing e.g. by contract duration and pricing. 
+
+
 ## Building
 
 `docker build -t mentorinterface:<version> .`

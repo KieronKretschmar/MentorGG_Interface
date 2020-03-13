@@ -93,7 +93,7 @@ namespace Database
                 // n:1 relationship to PaddlePlan
                 b.HasOne(x => x.PaddlePlan)
                 .WithMany(x => x.Subscriptions)
-                .HasForeignKey(x => x.SubscriptionId)
+                .HasForeignKey(x => x.SubscriptionPlanId)
                 .IsRequired();
 
             });

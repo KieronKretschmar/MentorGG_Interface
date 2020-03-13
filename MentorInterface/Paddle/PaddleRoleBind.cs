@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Entities.Models.Paddle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,21 +7,26 @@ using System.Threading.Tasks;
 namespace MentorInterface.Paddle
 {
     /// <summary>
-    /// Paddle Role Bind
-    /// Bind a PaddlePlanId to Application Roles.
+    /// Holds a PaddlePlan and the Application Roles it grants.
     /// </summary>
     public struct PaddlePlanRoleBind
     {
-        public readonly int PlanId;
+        /// <summary>
+        /// The PaddlePlan.
+        /// </summary>
+        public readonly PaddlePlan Plan;
 
+        /// <summary>
+        /// The Roles the PaddlePlan grants.
+        /// </summary>
         public readonly List<string> RoleNames;
 
         /// <summary>
-        /// Create a RoleBind
+        /// Create a RoleBind.
         /// </summary>
-        public PaddlePlanRoleBind(int planId, List<string> roleNames)
+        public PaddlePlanRoleBind(PaddlePlan plan, List<string> roleNames)
         {
-            PlanId = planId;
+            Plan = plan;
             RoleNames = roleNames;
         }
     }

@@ -64,13 +64,13 @@ namespace MentorInterfaceTests.Paddle
             var steamId = 999;
             var subscriptionPlanId = 1;
             // ... create roles
-            var roles = new string[] { Subscriptions.Premium };
+            var roles = RoleCreator.ApplicationRoles;
             RoleCreator.CreateRoles(serviceProvider, roles);
             // ... create paddlePlans
-            var paddlePlanRoles = new List<PaddlePlanRoleBind> {
-                new PaddlePlanRoleBind(subscriptionPlanId, new List<string> { Subscriptions.Premium })
+            var binds = new List<PaddlePlanRoleBind> {
+                new PaddlePlanRoleBind(new PaddlePlan(subscriptionPlanId, Entities.SubscriptionType.Premium, 1, 2.99),  new List<string> { RoleCreator.Premium.Name})
             };
-            PaddlePlanManager.SetPaddlePlans(serviceProvider, paddlePlanRoles);
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, binds);
             // ... create user
             var user = ApplicationUserFactory.FromSteamId(steamId);
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();

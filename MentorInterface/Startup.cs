@@ -77,6 +77,10 @@ namespace MentorInterface
                 });
             services.AddApiVersioning();
 
+            #region Helpers
+            services.AddTransient<IRoleHelper, RoleHelper>();
+            #endregion
+
             #region Paddle
 
             services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
@@ -277,11 +281,11 @@ namespace MentorInterface
         /// <param name="serviceProvider"></param>
         private void SeedDatabase(IServiceProvider serviceProvider)
         {
-            RoleCreator.CreateRoles(serviceProvider, RoleCreator.RoleNames);
+            RoleCreator.CreateRoles(serviceProvider, RoleCreator.ApplicationRoles);
 
             // Write PaddlePlans to db and connect them with Roles
-            var roleBinds = PaddlePlanManager.ProductionBinds;
-            PaddlePlanManager.SetPaddlePlans(serviceProvider, roleBinds);
+            var plans = PaddlePlanManager.ProductionPlans;
+            PaddlePlanManager.SetPaddlePlans(serviceProvider, plans);
         }
     }
 }

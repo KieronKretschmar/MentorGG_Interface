@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200220162144_subscription-centered-instead-of-paddleuser")]
-    partial class subscriptioncenteredinsteadofpaddleuser
+    [Migration("20200311162315_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,6 +28,9 @@ namespace Database.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<int>("DailyMatchesLimit")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
@@ -590,6 +593,15 @@ namespace Database.Migrations
                     b.Property<int>("PlanId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<double>("MonthlyPrice")
+                        .HasColumnType("double");
+
+                    b.Property<int>("Months")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("SubscriptionType")
+                        .HasColumnType("tinyint unsigned");
 
                     b.HasKey("PlanId");
 

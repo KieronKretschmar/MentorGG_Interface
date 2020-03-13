@@ -27,6 +27,9 @@ namespace Database.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int>("DailyMatchesLimit")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
@@ -589,6 +592,15 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<double>("MonthlyPrice")
+                        .HasColumnType("double");
+
+                    b.Property<int>("Months")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("SubscriptionType")
+                        .HasColumnType("tinyint unsigned");
+
                     b.HasKey("PlanId");
 
                     b.ToTable("PaddlePlan");
@@ -612,6 +624,7 @@ namespace Database.Migrations
             modelBuilder.Entity("Entities.Models.Paddle.PaddleSubscription", b =>
                 {
                     b.Property<int>("SubscriptionId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<int>("ApplicationUserId")
@@ -632,6 +645,8 @@ namespace Database.Migrations
                     b.HasKey("SubscriptionId");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("SubscriptionPlanId");
 
                     b.ToTable("PaddleSubscription");
                 });
@@ -760,7 +775,7 @@ namespace Database.Migrations
 
                     b.HasOne("Entities.Models.Paddle.PaddlePlan", "PaddlePlan")
                         .WithMany("Subscriptions")
-                        .HasForeignKey("SubscriptionId")
+                        .HasForeignKey("SubscriptionPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
