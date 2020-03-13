@@ -28,7 +28,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// <summary>
         /// User Manager
         /// </summary>
-        private readonly UserManager<ApplicationUser> _userMananger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
@@ -38,7 +38,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
             UserManager<ApplicationUser> userManager)
         {
             _clientFactory = clientFactory;
-            _userMananger = userManager;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [HttpPost("faceit/look")]
         public async Task<IActionResult> FaceItAsync()
         {
-            var user = await _userMananger.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
 
             HttpRequestMessage message = new HttpRequestMessage(
@@ -67,7 +67,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [HttpPost("valve/look")]
         public async Task<IActionResult> ValveAsync()
         {
-            var user = await _userMananger.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
 
             HttpRequestMessage message = new HttpRequestMessage(

@@ -27,7 +27,7 @@ namespace MentorInterface.Controllers
         /// <summary>
         /// User Manager
         /// </summary>
-        private readonly UserManager<ApplicationUser> _userMananger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
@@ -37,7 +37,7 @@ namespace MentorInterface.Controllers
             UserManager<ApplicationUser> userManager)
         {
             _clientFactory = clientFactory;
-            _userMananger = userManager;
+            _userManager = userManager;
         }
 
         /// <summary>
