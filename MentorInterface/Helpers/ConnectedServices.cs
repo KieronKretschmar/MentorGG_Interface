@@ -41,6 +41,14 @@ namespace MentorInterface.Helpers
             "sharing-code-gatherer",
             "sharing-code-gatherer.default.svc.cluster.local",
             false);
+
+        /// <summary>
+        /// Paddle Api
+        /// </summary>
+        public static ConnectedService PaddleApi = new ConnectedService(
+            "paddle-api",
+            "vendors.paddle.com/api/2.0",
+            true);
     }
 
 

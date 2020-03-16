@@ -23,6 +23,7 @@ using Entities.Models.Paddle;
 using MentorInterface.Paddle;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using System.Net.Http;
 
 namespace MentorInterface
 {
@@ -101,16 +102,26 @@ namespace MentorInterface
                 }
             );
 
+            var PADDLE_VENDOR_ID = Configuration.GetValue<int>("PADDLE_VENDOR_ID");
+            var PADDLE_VENDOR_AUTH_CODE = Configuration.GetValue<string>("PADDLE_VENDOR_AUTH_CODE")
+                ?? throw new ArgumentNullException("The environment variable PADDLE_VENDOR_AUTH_CODE has not been set.");
+
+            services.AddTransient<IPaddleApiCommunicator, PaddleApiCommunicator>(sp =>
+            {
+                return new PaddleApiCommunicator(sp.GetRequiredService<ILogger<PaddleApiCommunicator>>(), sp.GetRequiredService<IHttpClientFactory>(), PADDLE_VENDOR_ID, PADDLE_VENDOR_AUTH_CODE);
+            });
             #endregion
 
             #region HTTP Clients
 
-            // Add HTTP clients with potentially overriden urls.
+            // Add HTTP clients for communication with other services in the cluster
             services.AddConnectedHttpService(ConnectedServices.DemoCentral, Configuration, "DEMOCENTRAL_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.FaceitMatchGatherer, Configuration, "FACEITMATCHGATHERER_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.MatchRetriever, Configuration, "MATCHRETRIEVER_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
 
+            // Add HTTP clients for external communication
+            services.AddConnectedHttpService(ConnectedServices.PaddleApi, Configuration, "PADDLEAPI_URL_OVERRIDE");
             #endregion
 
             #region Identity
