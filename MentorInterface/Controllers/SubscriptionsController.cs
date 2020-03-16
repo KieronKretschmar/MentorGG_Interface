@@ -50,9 +50,9 @@ namespace MentorInterface.Controllers
 
             var activeSubscriptions = _applicationContext.PaddleSubscription
                 .Where(x => x.ApplicationUserId == user.Id)
-                .Include(x=>x.PaddlePlan)
+                .Include(x => x.PaddlePlan)
                 .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
-                .ToList();
+                .Single();
             
             // Get all PaddlePlans available to the user, grouped by SubscriptionType
             var availableSubscriptions = _applicationContext.PaddlePlan
@@ -63,7 +63,7 @@ namespace MentorInterface.Controllers
 
             return new SubscriptionsModel
             {
-                ActiveSubscriptions = activeSubscriptions,
+                ActiveSubscription = activeSubscriptions,
                 AvailableSubscriptions = availableSubscriptions
             };
         }

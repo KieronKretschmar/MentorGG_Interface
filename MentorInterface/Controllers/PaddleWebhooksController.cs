@@ -208,10 +208,23 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         private async Task CreateSubscriptionAsync(SubscriptionCreated alert)
         {
-            //1. Identify ApplicationUser
+            // Identify ApplicationUser
             var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
 
-            //2. Create PaddleSubscription and write to database
+            // Make sure the user has no other subscription active
+            var otherActiveSubscriptions = _applicationContext.PaddleSubscription
+                .Where(x => x.ApplicationUserId == appUser.Id && !(x.ExpirationTime < DateTime.Now))
+                .ToList();
+            if (otherActiveSubscriptions.Any())
+            {
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] tried to create a new subscription, but already has subscriptions with " +
+                    $"ID's [ {otherActiveSubscriptions.Select(x=>x.SubscriptionId.ToString()).ToArray()} ] still has onewas not found in " +
+                    $"the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            // Create PaddleSubscription and write to database
             var subscription = new PaddleSubscription
             {
                 ApplicationUserId = appUser.Id,
@@ -224,7 +237,7 @@ namespace MentorInterface.Controllers
             _applicationContext.PaddleSubscription.Add(subscription);
             await _applicationContext.SaveChangesAsync();
 
-            //2. Add role(s) to ApplicationUser
+            // Add role(s) to ApplicationUser
             var roles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == subscription.SubscriptionPlanId).Select(x => x.Role.Name);
             await _userManager.AddToRolesAsync(subscription.User, roles);
         }
