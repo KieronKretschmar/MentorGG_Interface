@@ -12,6 +12,8 @@ using MentorInterface.Paddle;
 using MentorInterface.Helpers;
 using Database;
 using Microsoft.EntityFrameworkCore;
+using Entities;
+using Microsoft.Extensions.Logging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,14 +27,17 @@ namespace MentorInterface.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationContext _applicationContext;
+        private readonly ILogger<SubscriptionsController> _logger;
 
         public SubscriptionsController(
             UserManager<ApplicationUser> userManager,
-            ApplicationContext applicationContext
+            ApplicationContext applicationContext,
+            ILogger<SubscriptionsController> logger
             )
         {
-            this._userManager = userManager;
+            _userManager = userManager;
             _applicationContext = applicationContext;
+            _logger = logger;
         }
 
 
@@ -48,14 +53,17 @@ namespace MentorInterface.Controllers
             // explicitly load PaddleSubscriptions for this user
             _applicationContext.Entry(user).Collection(x => x.PaddleSubscriptions).Load();
 
-            var activeSubscriptions = _applicationContext.PaddleSubscription
+            var activeSubscription = _applicationContext.PaddleSubscription
                 .Where(x => x.ApplicationUserId == user.Id)
                 .Include(x => x.PaddlePlan)
                 .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
-                .Single();
-            
+                .SingleOrDefault();
+
+            var availableSubscriptionTypes = GetAvailableSubscriptions(activeSubscription?.SubscriptionType ?? SubscriptionType.Free);
+
             // Get all PaddlePlans available to the user, grouped by SubscriptionType
             var availableSubscriptions = _applicationContext.PaddlePlan
+                .Where(x => availableSubscriptionTypes.Contains(x.SubscriptionType))
                 .ToList()
                 .GroupBy(x => x.SubscriptionType)
                 .Select(x => new AvailableSubscription(x.Key, x.ToList()))
@@ -63,9 +71,26 @@ namespace MentorInterface.Controllers
 
             return new SubscriptionsModel
             {
-                ActiveSubscription = activeSubscriptions,
+                ActiveSubscription = activeSubscription,
                 AvailableSubscriptions = availableSubscriptions
             };
+        }
+
+        private List<SubscriptionType> GetAvailableSubscriptions(SubscriptionType currentSubscriptionType)
+        {
+            var res = new List<SubscriptionType>();
+            switch (currentSubscriptionType)
+            {
+                case SubscriptionType.Free:
+                    return new List<SubscriptionType> { SubscriptionType.Premium, SubscriptionType.Ultimate };
+                case SubscriptionType.Premium:
+                    return new List<SubscriptionType> { SubscriptionType.Ultimate };
+                case SubscriptionType.Ultimate:
+                    return new List<SubscriptionType>();
+                default:
+                    throw new Exception($"Could not determine AvailableSubscriptions for SubscriptionType [ {currentSubscriptionType} ]");
+                    break;
+            }
         }
     }
 }
