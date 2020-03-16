@@ -9,7 +9,6 @@ using Entities.Models.Paddle.Alerts;
 using MentorInterface.Helpers.ModelFactories;
 using MentorInterface.Helpers.ModelFactories.Paddle;
 using MentorInterface.Paddle;
-using MentorInterface.Payment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
