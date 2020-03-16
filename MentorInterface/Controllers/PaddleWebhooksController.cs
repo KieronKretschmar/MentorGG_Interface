@@ -248,7 +248,7 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         private async Task UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
-            //1. Identify applicationUser
+            // Identify applicationUser
             var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if (appUser == null)
             {
@@ -257,7 +257,24 @@ namespace MentorInterface.Controllers
                 throw new Exception(errorMsg);
             }
 
-            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated, but no action was done. SubscriptionCancelledAlert: [ {alert} ].";
+            // Remove role(s) from old plan
+            var oldRoles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == alert.SubscriptionPlanId).Select(x => x.Role.Name);
+            await _userManager.RemoveFromRolesAsync(appUser, oldRoles);
+
+            // Update Subscription to new plan
+            var subscription = _applicationContext.PaddleSubscription.Single(x => x.SubscriptionId == alert.SubscriptionId);
+            subscription.SubscriptionPlanId = alert.SubscriptionPlanId;
+            subscription.CancelUrl = alert.CancelUrl;
+            subscription.UpdateUrl = alert.UpdateUrl;
+            // ... reset ExpirationTime
+            subscription.ExpirationTime = null;
+            await _applicationContext.SaveChangesAsync();
+
+            // Add role(s) from new plan
+            var newRoles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == alert.SubscriptionPlanId).Select(x => x.Role.Name);
+            await _userManager.AddToRolesAsync(subscription.User, newRoles);
+
+            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated to SubscriptionPlan#{subscription.SubscriptionPlanId}. SubscriptionUpdatedAlert: [ {alert} ].";
             _logger.LogInformation(logMsg);
         }
 
