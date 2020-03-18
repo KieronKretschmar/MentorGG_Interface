@@ -22,6 +22,8 @@ For each `Subscription` there may be one or multiple PaddlePlans the user can ch
 - `MYSQL_CONNECTION_STRING` : Connection string for the User Database. [*]
 - `IDENTITY_WORKAROUND_BEARER_TOKEN` : The token which devs need to add in Headers["Authorization"]="Bearer [token]" to authenticate
 - `IDENTITY_WORKAROUND_USER_ID` : integer, the ApplicationUserId of the User assigned to devs who login with above Bearer Token.
+- `PADDLE_VENDOR_ID` : int, provided by Paddle for identifying us.
+- `PADDLE_VENDOR_AUTH_CODE` : string, our secret key for communication with Paddle.
 
 [*] *Required*
 
