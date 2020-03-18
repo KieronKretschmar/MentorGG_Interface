@@ -34,12 +34,12 @@ namespace MentorInterface.Paddle
         /// Queries the database for expired subscriptions and removes them accordingly.
         /// </summary>
         /// <returns></returns>
-        public async Task RemoveAllExpiredSubscriptions()
+        public async Task RemoveAllExpiredSubscriptionsAsync()
         {
             var expiredSubscriptions = _applicationContext.PaddleSubscription.Where(x => x.ExpirationTime < DateTime.Now);
             foreach (var subscription in expiredSubscriptions)
             {
-                await RemoveSubscription(subscription);
+                await RemoveSubscriptionAsync(subscription);
             }
         }
 
@@ -48,7 +48,7 @@ namespace MentorInterface.Paddle
         /// </summary>
         /// <param name="subscription"></param>
         /// <returns></returns>
-        private async Task RemoveSubscription(PaddleSubscription subscription)
+        private async Task RemoveSubscriptionAsync(PaddleSubscription subscription)
         {
             _logger.LogInformation($"Removing Subscription#{subscription.SubscriptionId} from User#{subscription.ApplicationUserId}");
 

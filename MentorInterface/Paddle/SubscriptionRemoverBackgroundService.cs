@@ -42,7 +42,7 @@ namespace MentorInterface.Paddle
                 {
                     _logger.LogDebug($"SubscriptionRemoverBackgroundService is doing background work.");
                     var remover = scope.ServiceProvider.GetRequiredService<SubscriptionRemover>();
-                    await remover.RemoveAllExpiredSubscriptions();
+                    await remover.RemoveAllExpiredSubscriptionsAsync();
                     await Task.Delay(UPDATE_INTERVAL_SECONDS * 1000, cancellationToken);
                 }
             }

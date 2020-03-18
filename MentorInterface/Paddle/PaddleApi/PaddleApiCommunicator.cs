@@ -18,7 +18,7 @@ namespace MentorInterface.Paddle
     /// </summary>
     public interface IPaddleApiCommunicator
     {
-        Task UpdateSubscription(int subscriptionId, int planId);
+        Task UpdateSubscriptionAsync(int subscriptionId, int planId);
     }
 
     public class PaddleApiCommunicator : IPaddleApiCommunicator
@@ -61,7 +61,7 @@ namespace MentorInterface.Paddle
         /// <param name="subscriptionId">Id of the subscription to be updated.</param>
         /// <param name="planId">Id of the new plan.</param>
         /// <returns></returns>
-        public async Task UpdateSubscription(int subscriptionId, int planId)
+        public async Task UpdateSubscriptionAsync(int subscriptionId, int planId)
         {
             _logger.LogInformation($"Contacting Paddle API to update subscription#{subscriptionId} to plan #{planId}");
 
