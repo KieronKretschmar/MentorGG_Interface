@@ -217,8 +217,7 @@ namespace MentorInterface.Controllers
             if (otherActiveSubscriptions.Any())
             {
                 var errorMsg = $"ApplicationUser [ {appUser.Id} ] tried to create a new subscription, but already has subscriptions with " +
-                    $"ID's [ {otherActiveSubscriptions.Select(x=>x.SubscriptionId.ToString()).ToArray()} ] still has onewas not found in " +
-                    $"the database. SubscriptionCancelledAlert: [ {alert} ].";
+                    $"ID's [ {otherActiveSubscriptions.Select(x=>x.SubscriptionId.ToString()).ToArray()} ] in the database. SubscriptionCancelledAlert: [ {alert} ].";
                 _logger.LogError(errorMsg);
                 throw new Exception(errorMsg);
             }
