@@ -9,7 +9,6 @@ using Entities.Models.Paddle.Alerts;
 using MentorInterface.Helpers.ModelFactories;
 using MentorInterface.Helpers.ModelFactories.Paddle;
 using MentorInterface.Paddle;
-using MentorInterface.Payment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -208,10 +207,22 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         private async Task CreateSubscriptionAsync(SubscriptionCreated alert)
         {
-            //1. Identify ApplicationUser
+            // Identify ApplicationUser
             var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
 
-            //2. Create PaddleSubscription and write to database
+            // Make sure the user has no other subscription active
+            var otherActiveSubscriptions = _applicationContext.PaddleSubscription
+                .Where(x => x.ApplicationUserId == appUser.Id && !(x.ExpirationTime < DateTime.Now))
+                .ToList();
+            if (otherActiveSubscriptions.Any())
+            {
+                var errorMsg = $"ApplicationUser [ {appUser.Id} ] tried to create a new subscription, but already has subscriptions with " +
+                    $"ID's [ {otherActiveSubscriptions.Select(x=>x.SubscriptionId.ToString()).ToArray()} ] in the database. SubscriptionCancelledAlert: [ {alert} ].";
+                _logger.LogError(errorMsg);
+                throw new Exception(errorMsg);
+            }
+
+            // Create PaddleSubscription and write to database
             var subscription = new PaddleSubscription
             {
                 ApplicationUserId = appUser.Id,
@@ -224,7 +235,7 @@ namespace MentorInterface.Controllers
             _applicationContext.PaddleSubscription.Add(subscription);
             await _applicationContext.SaveChangesAsync();
 
-            //2. Add role(s) to ApplicationUser
+            // Add role(s) to ApplicationUser
             var roles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == subscription.SubscriptionPlanId).Select(x => x.Role.Name);
             await _userManager.AddToRolesAsync(subscription.User, roles);
         }
@@ -236,7 +247,7 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         private async Task UpdateSubscriptionAsync(SubscriptionUpdated alert)
         {
-            //1. Identify applicationUser
+            // Identify applicationUser
             var appUser = await GetApplicationUserFromPassthroughAsync(alert.Passthrough);
             if (appUser == null)
             {
@@ -245,7 +256,24 @@ namespace MentorInterface.Controllers
                 throw new Exception(errorMsg);
             }
 
-            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated, but no action was done. SubscriptionCancelledAlert: [ {alert} ].";
+            // Remove role(s) from old plan
+            var oldRoles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == alert.SubscriptionPlanId).Select(x => x.Role.Name);
+            await _userManager.RemoveFromRolesAsync(appUser, oldRoles);
+
+            // Update Subscription to new plan
+            var subscription = _applicationContext.PaddleSubscription.Single(x => x.SubscriptionId == alert.SubscriptionId);
+            subscription.SubscriptionPlanId = alert.SubscriptionPlanId;
+            subscription.CancelUrl = alert.CancelUrl;
+            subscription.UpdateUrl = alert.UpdateUrl;
+            // ... reset ExpirationTime
+            subscription.ExpirationTime = null;
+            await _applicationContext.SaveChangesAsync();
+
+            // Add role(s) from new plan
+            var newRoles = _applicationContext.PaddlePlanRole.Where(x => x.PlanId == alert.SubscriptionPlanId).Select(x => x.Role.Name);
+            await _userManager.AddToRolesAsync(subscription.User, newRoles);
+
+            var logMsg = $"ApplicationUser [ {appUser.Id} ] updated to SubscriptionPlan#{subscription.SubscriptionPlanId}. SubscriptionUpdatedAlert: [ {alert} ].";
             _logger.LogInformation(logMsg);
         }
 
@@ -313,41 +341,6 @@ namespace MentorInterface.Controllers
             int appUserId = jsonObj.Value<int>("ApplicationUserId");
             var appUser = await _applicationContext.Users.FindAsync(appUserId);
             return appUser;
-        }
-
-        /// <summary>
-        /// Queries the database for expired subscriptions and removes them accordingly.
-        /// </summary>
-        /// <returns></returns>
-        private async Task RemoveAllExpiredSubscriptions()
-        {
-            var expiredSubscriptions = _applicationContext.PaddleSubscription.Where(x => x.ExpirationTime < DateTime.Now);
-            foreach (var subscription in expiredSubscriptions)
-            {
-                await RemoveSubscription(subscription);
-            }
-        }
-
-        /// <summary>
-        /// Removes a subscription along with the user's Roles he gained through this subscription only.
-        /// </summary>
-        /// <param name="subscription"></param>
-        /// <returns></returns>
-        private async Task RemoveSubscription(PaddleSubscription subscription)
-        {
-            // Determine roles the user had because of this subscription,
-            // excluding roles that the user does not also have from other subscriptions
-            var rolesFromOtherSubscriptions = subscription.User.PaddleSubscriptions
-                .Where(x => x.SubscriptionId != subscription.SubscriptionId)
-                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(y => y.Role.Name))
-                .Distinct();
-            var rolesToRemove = subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name).Except(rolesFromOtherSubscriptions);
-
-            // Remove all Roles from the user that are not supplied by any other role
-            await _userManager.RemoveFromRolesAsync(subscription.User, rolesToRemove);
-
-            // Remove this subscription from database
-            _applicationContext.PaddleSubscription.Remove(subscription);
         }
     }
 }

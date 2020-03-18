@@ -15,28 +15,40 @@ namespace MentorInterface.Helpers
         /// </summary>
         public static ConnectedService DemoCentral = new ConnectedService(
             "demo-central",
-            "demo-central.default.svc.cluster.local");
+            "demo-central.default.svc.cluster.local",
+            false);
 
         /// <summary>
         /// FaceIt Match Gatherer
         /// </summary>
         public static ConnectedService FaceitMatchGatherer = new ConnectedService(
             "faceit-match-gatherer",
-            "faceit-match-gatherer.default.svc.cluster.local");
+            "faceit-match-gatherer.default.svc.cluster.local",
+            false);
 
         /// <summary>
         /// Match Retriever
         /// </summary>
         public static ConnectedService MatchRetriever = new ConnectedService(
             "match-retriever",
-            "match-retriever.default.svc.cluster.local");
+            "match-retriever.default.svc.cluster.local",
+            false);
 
         /// <summary>
         /// Sharing Code Gatherer
         /// </summary>
         public static ConnectedService SharingCodeGatherer = new ConnectedService(
             "sharing-code-gatherer",
-            "sharing-code-gatherer.default.svc.cluster.local");
+            "sharing-code-gatherer.default.svc.cluster.local",
+            false);
+
+        /// <summary>
+        /// Paddle Api
+        /// </summary>
+        public static ConnectedService PaddleApi = new ConnectedService(
+            "paddle-api",
+            "vendors.paddle.com/api/2.0",
+            true);
     }
 
 
@@ -56,14 +68,20 @@ namespace MentorInterface.Helpers
         public readonly string DNSAddress;
 
         /// <summary>
+        /// Whether to use Https instead of Http.
+        /// </summary>
+        public readonly bool UseHttps;
+
+        /// <summary>
         /// Define a Connected Service.
         /// </summary>
         /// <param name="name">Name of the service</param>
         /// <param name="dnsAddress">DNS Address of the service</param>
-        public ConnectedService(string name, string dnsAddress)
+        public ConnectedService(string name, string dnsAddress, bool useHttps)
         {
             Name = name;
             DNSAddress = dnsAddress;
+            UseHttps = useHttps;
         }
 
         /// <summary>

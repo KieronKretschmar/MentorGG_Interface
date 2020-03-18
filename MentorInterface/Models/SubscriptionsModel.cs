@@ -14,7 +14,7 @@ namespace MentorInterface.Models
     public class SubscriptionsModel
     {
         public List<AvailableSubscription> AvailableSubscriptions { get; set; }
-        public List<PaddleSubscriptionModel> ActiveSubscriptions { get; set; }
+        public PaddleSubscriptionModel ActiveSubscription { get; set; }
     }
 
     /// <summary>
