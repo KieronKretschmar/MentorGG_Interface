@@ -20,7 +20,7 @@ namespace MentorInterface.Paddle
         /// <summary>
         /// Time between cycles of removing all expired subscriptions, in seconds.
         /// </summary>
-        private const int UPDATE_INTERVAL_SECONDS = 5; //* 60;
+        private const int UPDATE_INTERVAL_SECONDS = 5 * 60;
 
         public SubscriptionRemoverBackgroundService(ILogger<SubscriptionRemoverBackgroundService> logger, IServiceScopeFactory scopeFactory)
         {
