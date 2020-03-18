@@ -343,40 +343,5 @@ namespace MentorInterface.Controllers
             var appUser = await _applicationContext.Users.FindAsync(appUserId);
             return appUser;
         }
-
-        /// <summary>
-        /// Queries the database for expired subscriptions and removes them accordingly.
-        /// </summary>
-        /// <returns></returns>
-        private async Task RemoveAllExpiredSubscriptions()
-        {
-            var expiredSubscriptions = _applicationContext.PaddleSubscription.Where(x => x.ExpirationTime < DateTime.Now);
-            foreach (var subscription in expiredSubscriptions)
-            {
-                await RemoveSubscription(subscription);
-            }
-        }
-
-        /// <summary>
-        /// Removes a subscription along with the user's Roles he gained through this subscription only.
-        /// </summary>
-        /// <param name="subscription"></param>
-        /// <returns></returns>
-        private async Task RemoveSubscription(PaddleSubscription subscription)
-        {
-            // Determine roles the user had because of this subscription,
-            // excluding roles that the user does not also have from other subscriptions
-            var rolesFromOtherSubscriptions = subscription.User.PaddleSubscriptions
-                .Where(x => x.SubscriptionId != subscription.SubscriptionId)
-                .SelectMany(x => x.PaddlePlan.PaddlePlanRoles.Select(y => y.Role.Name))
-                .Distinct();
-            var rolesToRemove = subscription.PaddlePlan.PaddlePlanRoles.Select(x => x.Role.Name).Except(rolesFromOtherSubscriptions);
-
-            // Remove all Roles from the user that are not supplied by any other role
-            await _userManager.RemoveFromRolesAsync(subscription.User, rolesToRemove);
-
-            // Remove this subscription from database
-            _applicationContext.PaddleSubscription.Remove(subscription);
-        }
     }
 }

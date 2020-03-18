@@ -93,7 +93,7 @@ namespace MentorInterface
             services.AddTransient<IRoleHelper, RoleHelper>();
             #endregion
 
-            #region Paddle
+            #region Paddle & Subscriptions
 
             services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
                 {
@@ -110,6 +110,9 @@ namespace MentorInterface
             {
                 return new PaddleApiCommunicator(sp.GetRequiredService<ILogger<PaddleApiCommunicator>>(), sp.GetRequiredService<IHttpClientFactory>(), PADDLE_VENDOR_ID, PADDLE_VENDOR_AUTH_CODE);
             });
+
+            services.AddTransient<SubscriptionRemover>();
+            services.AddHostedService<SubscriptionRemoverBackgroundService>();
             #endregion
 
             #region HTTP Clients
