@@ -97,7 +97,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
             }
             else
             {
-                return StatusCode(500);
+                return StatusCode(responseMessage.StatusCode);
             }
         }
 
