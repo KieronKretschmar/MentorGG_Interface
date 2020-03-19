@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace MentorInterface.Controllers.AutomaticUpload
@@ -29,16 +30,19 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// User Manager
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRoleHelper _roleHelper;
 
         /// <summary>
         /// Create the controller and inject the HTTPClient factory.
         /// </summary>
         public LookForMatchesController(
             IHttpClientFactory clientFactory,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IRoleHelper roleHelper)
         {
             _clientFactory = clientFactory;
             _userManager = userManager;
+            _roleHelper = roleHelper;
         }
 
         /// <summary>
@@ -51,10 +55,15 @@ namespace MentorInterface.Controllers.AutomaticUpload
         {
             var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
+            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var parameters = new Dictionary<string, string>()
+                {
+                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                };
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
+                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
 
             return await ForwardHttpRequest(client, message);
         }
@@ -69,10 +78,15 @@ namespace MentorInterface.Controllers.AutomaticUpload
         {
             var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var parameters = new Dictionary<string, string>()
+                {
+                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                };
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"/users/{user.SteamId}/look-for-matches");
+                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
 
             return await ForwardHttpRequest(client, message);
         }
