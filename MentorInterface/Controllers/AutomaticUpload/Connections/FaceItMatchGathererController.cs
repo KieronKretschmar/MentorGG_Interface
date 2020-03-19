@@ -67,7 +67,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpPost]
+        [HttpGet("create")]
         [SwaggerOperation(Tags = new[] { "Connections" })]
         public async Task<IActionResult> ConnectUserAsync(string code)
         {
@@ -83,7 +83,22 @@ namespace MentorInterface.Controllers.AutomaticUpload
                 HttpMethod.Post,
                 QueryHelpers.AddQueryString($"/users/{user.SteamId}", parameters));
 
-            return await ForwardHttpRequest(client, message);
+            var responseMessage = await client.SendAsync(message);
+
+            if(responseMessage.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var content = new ContentResult
+                {
+                    StatusCode = (int)System.Net.HttpStatusCode.OK,
+                    Content = $"Succesfully activated automatic upload for Faceit! You can close this window.",
+                    ContentType = "text/plain",
+                };
+                return StatusCode(200, content);
+            }
+            else
+            {
+                return StatusCode(responseMessage.StatusCode);
+            }
         }
 
         /// <summary>
