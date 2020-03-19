@@ -67,7 +67,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpPost]
+        [HttpGet("create")]
         [SwaggerOperation(Tags = new[] { "Connections" })]
         public async Task<IActionResult> ConnectUserAsync(string code)
         {
