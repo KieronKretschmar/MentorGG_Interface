@@ -29,6 +29,10 @@ namespace MentorInterface.Attributes
         /// <param name="context"></param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            if (context.ActionArguments[MatchIdsArgument] == null)
+            {
+                context.ActionArguments[MatchIdsArgument] = "";
+            }
             var matchIds = context.ActionArguments[MatchIdsArgument].ToString();
             var isValid = matchIds.Split(Seperator).All(x => x.All(c => Char.IsDigit(c)));
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MentorInterface.Payment
+namespace MentorInterface.Paddle
 {
     /// <summary>
     /// Collection of Paddle Webhook alerts.

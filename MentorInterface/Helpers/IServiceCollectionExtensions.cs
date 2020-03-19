@@ -22,7 +22,7 @@ namespace MentorInterface.Helpers
         /// <param name="overrideUrlKey"></param>
         public static void AddConnectedHttpService(this IServiceCollection services, ConnectedService connectedService, IConfiguration configuration, string overrideUrlKey = null)
         {
-            var url = $"http://{connectedService.DNSAddress}";
+            var url = $"{(connectedService.UseHttps ? "https" : "http")}://{connectedService.DNSAddress}";
             if (configuration.GetValue<string>(overrideUrlKey) != null)
             {
                 url = configuration.GetValue<string>(overrideUrlKey);
