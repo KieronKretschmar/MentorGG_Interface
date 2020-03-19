@@ -18,18 +18,19 @@ namespace MentorInterface.Paddle
     {
         /// <summary>
         /// List of all PaddlePlans.
+        /// WARNING: When changing or replacing these, make sure there's no interference with old plans from database.
         /// </summary>
         public static readonly List<PaddlePlanRoleBind> ProductionPlans = new List<PaddlePlanRoleBind>
         {
             // Premium
-            new PaddlePlanRoleBind(new PaddlePlan(586570, Entities.SubscriptionType.Premium, 1, 6.99), new List<string> { RoleCreator.Premium.Name}),
-            new PaddlePlanRoleBind(new PaddlePlan(586571, Entities.SubscriptionType.Premium, 3, 4.99), new List<string> { RoleCreator.Premium.Name}),
-            new PaddlePlanRoleBind(new PaddlePlan(586572, Entities.SubscriptionType.Premium, 6, 4.59), new List<string> { RoleCreator.Premium.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587490, Entities.SubscriptionType.Premium, 1, 7.49), new List<string> { RoleCreator.Premium.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587491, Entities.SubscriptionType.Premium, 3, 5.99), new List<string> { RoleCreator.Premium.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587493, Entities.SubscriptionType.Premium, 6, 5.49), new List<string> { RoleCreator.Premium.Name}),
 
             // Ultimate            
-            new PaddlePlanRoleBind(new PaddlePlan(586580, Entities.SubscriptionType.Ultimate, 1, 16.99), new List<string> { RoleCreator.Ultimate.Name}),
-            new PaddlePlanRoleBind(new PaddlePlan(586581, Entities.SubscriptionType.Ultimate, 3, 14.99), new List<string> { RoleCreator.Ultimate.Name}),
-            new PaddlePlanRoleBind(new PaddlePlan(586582, Entities.SubscriptionType.Ultimate, 6, 14.59), new List<string> { RoleCreator.Ultimate.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587494, Entities.SubscriptionType.Ultimate, 1, 12.99), new List<string> { RoleCreator.Ultimate.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587495, Entities.SubscriptionType.Ultimate, 3, 10.99), new List<string> { RoleCreator.Ultimate.Name}),
+            new PaddlePlanRoleBind(new PaddlePlan(587496, Entities.SubscriptionType.Ultimate, 6, 9.49), new List<string> { RoleCreator.Ultimate.Name}),
         };
 
 
