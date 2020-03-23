@@ -50,7 +50,6 @@ namespace MentorInterface.Paddle
                     catch (Exception e)
                     {
                         _logger.LogError("Error when removing expired subscriptions. This can happen once when the database is not yet migrated.", e);
-                        throw;
                     }
                 }
             }
