@@ -41,9 +41,17 @@ namespace MentorInterface.Paddle
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     _logger.LogDebug($"SubscriptionRemoverBackgroundService is doing background work.");
-                    var remover = scope.ServiceProvider.GetRequiredService<SubscriptionRemover>();
-                    await remover.RemoveAllExpiredSubscriptionsAsync();
-                    await Task.Delay(UPDATE_INTERVAL_SECONDS * 1000, cancellationToken);
+                    try
+                    {
+                        var remover = scope.ServiceProvider.GetRequiredService<SubscriptionRemover>();
+                        await remover.RemoveAllExpiredSubscriptionsAsync();
+                        await Task.Delay(UPDATE_INTERVAL_SECONDS * 1000, cancellationToken);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError("Error when removing expired subscriptions. This can happen once when the database is not yet migrated.", e);
+                        throw;
+                    }
                 }
             }
 
