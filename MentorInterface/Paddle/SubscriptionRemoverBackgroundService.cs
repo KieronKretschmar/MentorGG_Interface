@@ -45,12 +45,12 @@ namespace MentorInterface.Paddle
                     {
                         var remover = scope.ServiceProvider.GetRequiredService<SubscriptionRemover>();
                         await remover.RemoveAllExpiredSubscriptionsAsync();
-                        await Task.Delay(UPDATE_INTERVAL_SECONDS * 1000, cancellationToken);
                     }
                     catch (Exception e)
                     {
                         _logger.LogError("Error when removing expired subscriptions. This can happen once when the database is not yet migrated.", e);
                     }
+                    await Task.Delay(UPDATE_INTERVAL_SECONDS * 1000, cancellationToken);
                 }
             }
 
