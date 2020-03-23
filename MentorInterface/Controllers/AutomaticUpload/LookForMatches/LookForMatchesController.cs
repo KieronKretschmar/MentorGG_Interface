@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace MentorInterface.Controllers.AutomaticUpload
@@ -46,7 +47,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
         }
 
         /// <summary>
-        /// Query FaceItMatchGatherer to look for matches.
+        /// Query FaceItMatchGatherer to look for matches of the logged-in User.
         /// </summary>
         /// <returns></returns>
         [Authorize]
@@ -69,7 +70,30 @@ namespace MentorInterface.Controllers.AutomaticUpload
         }
 
         /// <summary>
-        /// Query SharingCodeGatherer to look for matches.
+        /// Query FaceItMatchGatherer to look for matches for the User with the given steamId.
+        /// This is a temporary endpoint for filling the database pre-release.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("faceit/look/{steamId}")]
+        public async Task<IActionResult> FaceItAsync(long steamId)
+        {
+            var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
+            var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
+            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var parameters = new Dictionary<string, string>()
+                {
+                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                };
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Post,
+                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
+
+            return await ForwardHttpRequest(client, message);
+        }
+
+        /// <summary>
+        /// Query SharingCodeGatherer to look for matches of the logged-in User.
         /// </summary>
         /// <returns></returns>
         [Authorize]
@@ -77,6 +101,30 @@ namespace MentorInterface.Controllers.AutomaticUpload
         public async Task<IActionResult> ValveAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+            var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
+            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var parameters = new Dictionary<string, string>()
+                {
+                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                };
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Post,
+                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
+
+            return await ForwardHttpRequest(client, message);
+        }
+
+
+        /// <summary>
+        /// Query SharingCodeGatherer to look for matches for the User with the given steamId.
+        /// This is a temporary endpoint for filling the database pre-release.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("valve/look/{steamId}")]
+        public async Task<IActionResult> ValveAsync(long steamId)
+        {
+            var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
             var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
             var parameters = new Dictionary<string, string>()
