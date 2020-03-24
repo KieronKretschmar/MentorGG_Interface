@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Entities;
 using Entities.Models;
 using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -57,9 +58,10 @@ namespace MentorInterface.Controllers.AutomaticUpload
             var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
             var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                    {"requestedQuality", ((byte) requestedQuality).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
@@ -80,9 +82,10 @@ namespace MentorInterface.Controllers.AutomaticUpload
             var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
             var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
             var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                    {"requestedQuality", ((byte) requestedQuality).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
@@ -103,9 +106,10 @@ namespace MentorInterface.Controllers.AutomaticUpload
             var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
             var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                    {"requestedQuality", ((byte) requestedQuality).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
@@ -127,9 +131,10 @@ namespace MentorInterface.Controllers.AutomaticUpload
             var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
             var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
+            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"userSubscription", ((byte) subscriptionType).ToString() }
+                    {"requestedQuality", ((byte) requestedQuality).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
@@ -139,5 +144,35 @@ namespace MentorInterface.Controllers.AutomaticUpload
             return await ForwardHttpRequest(client, message);
         }
 
+        /// <summary>
+        /// Determines the AnalyzerQuality for a given subscription.
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <returns></returns>
+        private AnalyzerQuality GetQualityBySubscription(SubscriptionType subscription)
+        {
+            switch (subscription)
+            {
+                case SubscriptionType.Free:
+                    return AnalyzerQuality.Low;
+                case SubscriptionType.Premium:
+                    return AnalyzerQuality.Medium;
+                case SubscriptionType.Ultimate:
+                    return AnalyzerQuality.High;
+                default:
+                    return AnalyzerQuality.Low;
+            }
+        }
+
+        /// <summary>
+        /// The quality with which a demo should be analyzed, determining e.g. the FPS with which positions are stored.
+        /// Also defined in rabbit-repo. Please update accordingly.
+        /// </summary>
+        private enum AnalyzerQuality : byte
+        {
+            Low = 10,
+            Medium = 20,
+            High = 30,
+        }
     }
 }
