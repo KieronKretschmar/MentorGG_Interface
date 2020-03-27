@@ -89,6 +89,17 @@ namespace MentorInterface
                 });
             services.AddApiVersioning();
 
+
+            #region Logging
+            services.AddLogging(o =>
+            {
+                o.AddConsole(o =>
+                {
+                    o.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
+                });
+            });
+            #endregion
+
             #region Helpers
             services.AddTransient<IRoleHelper, RoleHelper>();
             #endregion
