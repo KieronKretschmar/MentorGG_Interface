@@ -32,6 +32,9 @@ RUN dotnet publish MentorInterface/ -c Release -o out
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
 WORKDIR /app
 
+# Copy in the Paddle Public Key
+COPY ./MentorInterface/Paddle/PaddlePublicKey.pem /app/Paddle/PaddlePublicKey.pem
+
 COPY --from=build /app/out .
 ENTRYPOINT ["dotnet", "MentorInterface.dll"]
 
