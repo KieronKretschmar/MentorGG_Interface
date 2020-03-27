@@ -97,6 +97,23 @@ namespace MentorInterface
                 {
                     o.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
                 });
+
+                o.AddConsole(options =>
+                {
+                    options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
+                });
+                o.AddDebug();
+
+                // Filter out ASP.Net and EFCore logs of LogLevel lower than LogLevel.Warning
+                o.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+                o.AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning);
+                o.AddFilter("Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker", LogLevel.Warning);
+                o.AddFilter("Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor", LogLevel.Warning);
+                o.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
+                o.AddFilter("Microsoft.AspNetCore.Routing.EndpointMiddleware", LogLevel.Warning);
+
+                // Filter logs for each forwarded request
+                o.AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
             });
             #endregion
 
