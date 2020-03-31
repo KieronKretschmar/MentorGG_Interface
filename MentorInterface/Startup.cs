@@ -126,7 +126,7 @@ namespace MentorInterface
             services.AddTransient<IWebhookVerifier, WebhookVerifier>(x =>
                 {
                     return new WebhookVerifier(
-                        File.ReadAllText("Paddle/PaddlePublicKey.pem"));
+                        File.ReadAllText("/app/Paddle/PaddlePublicKey.pem"));
                 }
             );
 
