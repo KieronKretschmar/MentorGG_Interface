@@ -89,6 +89,48 @@ namespace MentorInterface
                 });
             services.AddApiVersioning();
 
+            #region Identity
+
+            // Connect to the user database.
+            var connString = Configuration.GetValue<string>("MYSQL_CONNECTION_STRING");
+            if (connString != null)
+            {
+                services.AddDbContext<ApplicationContext>(o =>
+                {
+                    o.UseMySql(connString, sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(MYSQL_RETRY_LIMIT);
+                    });
+
+                }, ServiceLifetime.Scoped);
+            }
+            // Use InMemoryDatabase if the connectionstring is not set in a DEV enviroment
+            else if (IsDevelopment)
+            {
+                services.AddDbContext<ApplicationContext>(o =>
+                {
+                    o.UseInMemoryDatabase("MyTemporaryDatabase");
+
+                }, ServiceLifetime.Scoped);
+
+                Console.WriteLine("WARNING: Using InMemoryDatabase!");
+            }
+            else
+            {
+                throw new ArgumentException(
+                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTION_STRING` enviroment variable.");
+            }
+            
+            if (Configuration.GetValue<bool>("IS_MIGRATING"))
+            {
+                Console.WriteLine("IS_MIGRATING is true! ARE YOU STILL MIGRATING?");
+                return;
+            }
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddEntityFrameworkStores<ApplicationContext>();
+
+            #endregion
 
             #region Logging
             services.AddLogging(o =>
@@ -153,44 +195,6 @@ namespace MentorInterface
 
             // Add HTTP clients for external communication
             services.AddConnectedHttpService(ConnectedServices.PaddleApi, Configuration, "PADDLEAPI_URL_OVERRIDE");
-            #endregion
-
-            #region Identity
-
-            // Connect to the user database.
-            var connString = Configuration.GetValue<string>("MYSQL_CONNECTION_STRING");
-            if (connString != null)
-            {
-                services.AddDbContext<ApplicationContext>(o =>
-                {
-                    o.UseMySql(connString, sqlOptions =>
-                    {
-                        sqlOptions.EnableRetryOnFailure(MYSQL_RETRY_LIMIT);
-                    });
-
-                }, ServiceLifetime.Scoped);
-            }
-            // Use InMemoryDatabase if the connectionstring is not set in a DEV enviroment
-            else if (IsDevelopment)
-            {
-                services.AddDbContext<ApplicationContext>(o =>
-                {
-                    o.UseInMemoryDatabase("MyTemporaryDatabase");
-
-                }, ServiceLifetime.Scoped);
-
-                Console.WriteLine("WARNING: Using InMemoryDatabase!");
-            }
-            else
-            {
-                throw new ArgumentException(
-                    "MySqlConnectionString is missing, configure the `MYSQL_CONNECTION_STRING` enviroment variable.");
-            }
-
-
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationContext>();
-
             #endregion
 
             #region Application Cookie
