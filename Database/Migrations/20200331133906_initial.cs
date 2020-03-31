@@ -322,7 +322,8 @@ namespace Database.Migrations
                 name: "PaddleSubscription",
                 columns: table => new
                 {
-                    SubscriptionId = table.Column<int>(nullable: false),
+                    SubscriptionId = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ApplicationUserId = table.Column<int>(nullable: false),
                     SubscriptionPlanId = table.Column<int>(nullable: false),
                     CancelUrl = table.Column<string>(nullable: true),
@@ -339,8 +340,8 @@ namespace Database.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PaddleSubscription_PaddlePlan_SubscriptionId",
-                        column: x => x.SubscriptionId,
+                        name: "FK_PaddleSubscription_PaddlePlan_SubscriptionPlanId",
+                        column: x => x.SubscriptionPlanId,
                         principalTable: "PaddlePlan",
                         principalColumn: "PlanId",
                         onDelete: ReferentialAction.Cascade);
@@ -440,6 +441,11 @@ namespace Database.Migrations
                 name: "IX_PaddleSubscription_ApplicationUserId",
                 table: "PaddleSubscription",
                 column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaddleSubscription_SubscriptionPlanId",
+                table: "PaddleSubscription",
+                column: "SubscriptionPlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
