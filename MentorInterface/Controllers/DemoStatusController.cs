@@ -46,14 +46,13 @@ namespace MentorInterface.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpGet("single/{steamId}/demostatus/failed-demos")]
-        public async Task<IActionResult> FailedDemosAsync(int count, int offset = 0)
+        public async Task<IActionResult> FailedDemosAsync(long steamId, int count, int offset = 0)
         {
-            var user = await _userManager.GetUserAsync(User);
             var client = _clientFactory.CreateClient(ConnectedServices.DemoCentral);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"/v1/public/single/{user.SteamId}/failedmatches?count={count}&offset={offset}");
+                $"/v1/public/single/{steamId}/failedmatches?count={count}&offset={offset}");
 
             return await ForwardHttpRequest(client, message);
         }
