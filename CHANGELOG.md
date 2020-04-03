@@ -4,23 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-##[0.2.4] - Undefined
-###Added
+## [1.0.0] - 2020-04-03
+### Added
+- Anonymous route for user Identity only accessiable internal at `/identity/{steamId}`.
+
+### Changed
+- `/single/{steamId}/demostatus/failed-demos` now considers the SteamId.
+
+## [0.2.4] - 2020-03-19
+### Added
 - PaddleApiCommunicator
 - SubscriptionRemover
 - Environment Variables: PADDLE_VENDOR_ID, PADDLE_VENDOR_AUTH_CODE
 
-## Changed
+### Changed
 - Implementation of Subscriptions (regarding Paddle & the webapp)
 
-##[0.2.3] - 2020-03-13
+## [0.2.3] - 2020-03-13
 ### Added
 - Logic for computing DailyMatchesLimit
 - Controller for handling subscriptions
 - Workaround for making devs seem authenticated as a User when accessing from localhost where the IdentityCookie can not be used
 - Environment vars IDENTITY_WORKAROUND_USER_ID and IDENTITY_WORKAROUND_BEARER_TOKEN for above workaround
 
-## Changed
+### Changed
 - PaddlePlans and Roles are now created differently and coupled tighter than before
 - Cleared all migrations and start with fresh ones
 
