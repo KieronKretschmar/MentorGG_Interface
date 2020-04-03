@@ -73,7 +73,7 @@ namespace MentorInterface.Controllers
                 return null;
             }
 
-            var user =  _applicationContext.Users.SingleOrDefault(x => x.SteamId == steamId);
+            var user = _applicationContext.Users.SingleOrDefault(x => x.SteamId == steamId);
             if (user != null)
             {
                 _logger.LogInformation($"Returning Identity information for SteamId {steamId} to IP {remoteIp}");
