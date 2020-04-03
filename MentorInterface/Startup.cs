@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MentorInterface.Authentication;
+using MentorInterface.Middleware;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
@@ -289,15 +290,12 @@ namespace MentorInterface
                 app.UseDeveloperExceptionPage();
             }
 
-            if (!env.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
-
             if (IsDevelopment)
             {
                 app.UseCors("Debug");
             }
+
+	    app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
             #region Swagger
             app.UseSwagger();
