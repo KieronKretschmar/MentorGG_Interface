@@ -68,6 +68,7 @@ namespace MentorInterface.Controllers
             // Confirm the alert is valid
             if (!_webhookVerifier.IsAlertValid(rawAlert))
             {
+                _logger.LogCritical("Signature Mismatch, Either someone is sending fake Paddle alerts or the PaddlePublicKey is invalid!");
                 return StatusCode(403, "Signature mismatch");
             }
 
