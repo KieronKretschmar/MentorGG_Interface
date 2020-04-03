@@ -290,11 +290,6 @@ namespace MentorInterface
                 app.UseDeveloperExceptionPage();
             }
 
-            if (!env.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
-
             if (IsDevelopment)
             {
                 app.UseCors("Debug");
