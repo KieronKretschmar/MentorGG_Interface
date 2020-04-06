@@ -79,18 +79,15 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [HttpPost("faceit/look/{steamId}")]
         public async Task<IActionResult> FaceItAsync(long steamId)
         {
-            var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
             var client = _clientFactory.CreateClient(ConnectedServices.FaceitMatchGatherer);
-            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
-            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"requestedQuality", ((byte) requestedQuality).ToString() }
+                    {"requestedQuality", ((byte) AnalyzerQuality.Low).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
+                QueryHelpers.AddQueryString($"/users/{steamId}/look-for-matches", parameters));
 
             return await ForwardHttpRequest(client, message);
         }
@@ -128,18 +125,15 @@ namespace MentorInterface.Controllers.AutomaticUpload
         [HttpPost("valve/look/{steamId}")]
         public async Task<IActionResult> ValveAsync(long steamId)
         {
-            var user = await _userManager.Users.SingleAsync(x=>x.SteamId == steamId);
             var client = _clientFactory.CreateClient(ConnectedServices.SharingCodeGatherer);
-            var subscriptionType = await _roleHelper.GetSubscriptionTypeAsync(user);
-            var requestedQuality = GetQualityBySubscription(subscriptionType);
             var parameters = new Dictionary<string, string>()
                 {
-                    {"requestedQuality", ((byte) requestedQuality).ToString() }
+                    {"requestedQuality", ((byte) AnalyzerQuality.Low).ToString() }
                 };
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
-                QueryHelpers.AddQueryString($"/users/{user.SteamId}/look-for-matches", parameters));
+                QueryHelpers.AddQueryString($"/users/{steamId}/look-for-matches", parameters));
 
             return await ForwardHttpRequest(client, message);
         }
