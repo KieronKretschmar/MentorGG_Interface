@@ -30,7 +30,7 @@ namespace MentorInterface.Controllers
             string data;
             using (var reader = new StreamReader(message.Body))
             {
-                data = reader.ReadToEnd();
+                data = await reader.ReadToEndAsync();
             }
 
             var forwardedResponse = new HttpRequestMessage(
