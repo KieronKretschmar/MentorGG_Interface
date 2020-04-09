@@ -42,19 +42,26 @@ namespace MentorInterface.Controllers.MatchData
             _userManager = userManager;
         }
 
+
         /// <summary>
+        /// Returns data regarding for each match, including scoreboards.
+        /// Each matchId that is neither in matchIds nor in ignoredMatchIds will be treated as being above the daily limit and thus censored.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="steamId"></param>
+        /// <param name="matchIds">MatchIds for which uncensored data should be returned</param>
+        /// <param name="count"></param>
+        /// <param name="ignoredMatchIds">MatchIds for which no data should be returned.</param>
+        /// <param name="offset"></param>
         [ValidateMatchIds]
         [Authorize]
         [HttpGet("single/{steamId}/matches")]
-        public async Task<IActionResult> MatchesAsync(long steamId, string matchIds, int count, int offset = 0)
+        public async Task<IActionResult> MatchesAsync(long steamId, string matchIds, int count, string ignoredMatchIds = "", int offset = 0)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/matches?matchIds={matchIds}&count={count}&offset={offset}");
+                $"v1/public/single/{steamId}/matches?matchIds={matchIds}&count={count}&ignoredMatchIds={ignoredMatchIds}&offset={offset}");
 
             return await ForwardHttpRequest(client, message);
         }
