@@ -62,13 +62,11 @@ namespace MentorInterface.Controllers
         [HttpGet("{steamId}")]
         public async Task<UserIdentity> GetIdentityFromSteamIdAsync(long steamId)
         {
-            var httpConnectionFeature = Request.HttpContext.Features.Get<IHttpConnectionFeature>();
-            var remoteIp = httpConnectionFeature.RemoteIpAddress.MapToIPv4().ToString();
-
-            var IngressIp = "10.240.0.5";
-            // If the remote IP address is the Ingress Controller, suggusting that the call comes 
-            // from the internet, forbid it to the shadow realm. (╯°□°）╯︵ ┻━┻
-            if (remoteIp == IngressIp){
+            // If the host is api.mentor.gg
+            // Which the nginx-ingress-controller appends to each call
+            // Forbid it to the shadow realm! (╯°□°）╯︵ ┻━┻
+            if (Request.Headers.SingleOrDefault(x => x.Key == "Host").Value == "api.mentor.gg")
+            {
                 Response.StatusCode = 403;
                 return null;
             }
@@ -76,7 +74,6 @@ namespace MentorInterface.Controllers
             var user = _applicationContext.Users.SingleOrDefault(x => x.SteamId == steamId);
             if (user != null)
             {
-                _logger.LogInformation($"Returning Identity information for SteamId {steamId} to IP {remoteIp}");
                 return await GetUserIdentityAsync(user);
             }
             else
