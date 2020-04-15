@@ -19,7 +19,7 @@ namespace MentorInterface.Helpers
         /// <summary>
         /// Initial value for Premium role
         /// </summary>
-        public static ApplicationRole Premium = new ApplicationRole(SubscriptionType.Premium.ToString(), 5);
+        public static ApplicationRole Premium = new ApplicationRole(SubscriptionType.Premium.ToString(), 100);
 
         /// <summary>
         /// Initial value for Ultimate role
