@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MentorInterface.Helpers;
 using Microsoft.AspNetCore.Http;
@@ -33,8 +34,11 @@ namespace MentorInterface.Controllers
                 data = await reader.ReadToEndAsync();
             }
 
+            //Remove all line breaks from the input as these are not permitted in urls
+            data = Regex.Replace(data,"\n|\t","");
+
             var forwardedResponse = new HttpRequestMessage(
-                HttpMethod.Post, $"{requestUrl}?{data}"
+                HttpMethod.Post, $"{requestUrl}?data={data}"
                  );
 
             await ForwardHttpRequest(_client, forwardedResponse);
