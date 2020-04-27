@@ -322,11 +322,17 @@ namespace MentorInterface
                 {
                     var principal = new ClaimsPrincipal();
 
+                    // Determine Application User Id
+                    // Authenticate as user specified by header or use default value instead
+                    string appUserId = long.TryParse(context.Request.Headers["Impersonate-ApplicationUserId"], out var applicationUserId) 
+                        ? applicationUserId.ToString()
+                        : IDENTITY_WORKAROUND_USER_ID;
+
                     context.User = principal;
 
                     // Assign the current user the identity of the user with the User Id IDENTITY_WORKAROUND_USER_ID
                     var claims = new List<Claim>();
-                    claims.Add(new Claim(ClaimTypes.NameIdentifier, IDENTITY_WORKAROUND_USER_ID));
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, appUserId));
                     var claimsIdentity = new ClaimsIdentity(claims, "Identity.Application");
                     principal.AddIdentity(claimsIdentity);
                 }
