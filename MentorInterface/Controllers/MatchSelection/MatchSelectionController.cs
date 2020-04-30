@@ -56,13 +56,13 @@ namespace MentorInterface.Controllers.MatchSelection
         {
             var user = await _userManager.GetUserAsync(User);
 
-            var dailyMatchesLimit = await _roleHelper.GetDailyMatchesLimitAsync(user);
+            int subType = (int) await _roleHelper.GetSubscriptionTypeAsync(user);
 
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/matchselection?dailyLimit={dailyMatchesLimit}");
+                $"v1/public/single/{steamId}/matchselection?subscriptionType={subType}");
 
             return await ForwardHttpRequest(client, message);
         }
