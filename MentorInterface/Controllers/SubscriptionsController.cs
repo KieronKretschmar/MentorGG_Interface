@@ -29,6 +29,12 @@ namespace MentorInterface.Controllers
         private readonly ApplicationContext _applicationContext;
         private readonly ILogger<SubscriptionsController> _logger;
 
+        private readonly List<SubscriptionType> availableSubscriptionTypes = new List<SubscriptionType>
+        {
+            SubscriptionType.Premium,
+            SubscriptionType.Ultimate
+        };
+
         public SubscriptionsController(
             UserManager<ApplicationUser> userManager,
             ApplicationContext applicationContext,
@@ -59,8 +65,6 @@ namespace MentorInterface.Controllers
                 .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
                 .SingleOrDefault();
 
-            var availableSubscriptionTypes = GetAvailableSubscriptions(activeSubscription?.SubscriptionType ?? SubscriptionType.Free);
-
             // Get all PaddlePlans available to the user, grouped by SubscriptionType
             var availableSubscriptions = _applicationContext.PaddlePlan
                 .Where(x => availableSubscriptionTypes.Contains(x.SubscriptionType))
@@ -74,23 +78,6 @@ namespace MentorInterface.Controllers
                 ActiveSubscription = activeSubscription,
                 AvailableSubscriptions = availableSubscriptions
             };
-        }
-
-        private List<SubscriptionType> GetAvailableSubscriptions(SubscriptionType currentSubscriptionType)
-        {
-            var res = new List<SubscriptionType>();
-            switch (currentSubscriptionType)
-            {
-                case SubscriptionType.Free:
-                    return new List<SubscriptionType> { SubscriptionType.Premium, SubscriptionType.Ultimate };
-                case SubscriptionType.Premium:
-                    return new List<SubscriptionType> { SubscriptionType.Ultimate };
-                case SubscriptionType.Ultimate:
-                    return new List<SubscriptionType>();
-                default:
-                    throw new Exception($"Could not determine AvailableSubscriptions for SubscriptionType [ {currentSubscriptionType} ]");
-                    break;
-            }
         }
     }
 }
