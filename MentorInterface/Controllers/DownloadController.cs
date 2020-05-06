@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MentorInterface.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,7 @@ namespace MentorInterface.Controllers
         /// Get blobUrl of demo file.
         /// </summary>
         /// <returns></returns>
+        [Authorize(Roles = "Premium,Ultimate")]
         [HttpGet("match/{matchId}/download-url")]
         public async Task<IActionResult> DownloadUrlAsync(long matchId)
         {
