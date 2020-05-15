@@ -200,6 +200,9 @@ namespace MentorInterface
                     options.LoginPath = "/authentication/signin/steam";
                     options.LogoutPath = "/authentication/signout/steam";
 
+                    // Set the Cookie lifetime to ONE year.
+                    options.ExpireTimeSpan = TimeSpan.FromDays(365);
+
                     // Return 401 OR 403 instead of redirecting to LoginPath
                     options.Events = new CookieAuthenticationEvents
                     {
