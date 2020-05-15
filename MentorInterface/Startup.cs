@@ -141,12 +141,6 @@ namespace MentorInterface
                     o.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
                 });
 
-                o.AddConsole(options =>
-                {
-                    options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss zzz] ";
-                });
-                o.AddDebug();
-
                 // Filter out ASP.Net and EFCore logs of LogLevel lower than LogLevel.Warning
                 o.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
                 o.AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning);
