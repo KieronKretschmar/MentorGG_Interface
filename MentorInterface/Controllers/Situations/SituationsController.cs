@@ -69,7 +69,6 @@ namespace MentorInterface.Controllers.MatchSelection
         [HttpGet("single/{steamId}/situations")]
         public async Task<IActionResult> Player(long steamId, string matchIds)
         {
-            _logger.LogInformation($"Getting Player Situations for: SteamId [ {steamId} ]");
 
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
