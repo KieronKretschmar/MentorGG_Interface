@@ -48,8 +48,6 @@ namespace MentorInterface.Controllers.MatchSelection
         [HttpGet("single/match/{matchId}/situations")]
         public async Task<IActionResult> Match(long matchId)
         {
-            _logger.LogInformation($"Getting Match Situations for: Match [ {matchId} ]");
-
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
             HttpRequestMessage message = new HttpRequestMessage(
