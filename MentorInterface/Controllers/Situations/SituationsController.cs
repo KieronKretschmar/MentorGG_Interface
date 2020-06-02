@@ -58,10 +58,10 @@ namespace MentorInterface.Controllers.MatchSelection
         }
 
         /// <summary>
-        /// Return a player's Situtations.
+        /// Return a player's Situations.
         /// </summary>
         /// <param name="steamId">SteamId of the Player</param>
-        /// <param name="matchIds">Collection of MatchIds to return Situtations for</param>
+        /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
         /// <returns></returns>
         [Authorize]
         [HttpGet("single/{steamId}/situations")]
