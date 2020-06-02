@@ -39,6 +39,13 @@ namespace MentorInterface.Helpers
             "sharing-code-gatherer");
 
         /// <summary>
+        /// Situation Operator
+        /// </summary>
+        public static ConnectedService SituationOperator = new ConnectedService(
+            "situation-operator",
+            "situation-operator");
+
+        /// <summary>
         /// Paddle Api
         /// </summary>
         public static ConnectedService PaddleApi = new ConnectedService(
