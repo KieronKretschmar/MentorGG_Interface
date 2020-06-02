@@ -76,6 +76,24 @@ namespace MentorInterface.Controllers.MatchSelection
             return await ForwardHttpRequest(client, message);
         }
 
+        /// <summary>
+        /// Return a player's Situations of a specific SituationType.
+        /// </summary>
+        /// <param name="steamId">SteamId of the Player</param>
+        /// <param name="situationType">The type of which Situations are returned.</param>
+        /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("single/{steamId}/situations/{situationType}")]
+        public async Task<IActionResult> PlayerSituations(long steamId, int situationType, string matchIds)
+        {
+            var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"v1/public/player/{steamId}/situations/{situationType}?matchIds={matchIds}");
+
+            return await ForwardHttpRequest(client, message);
+        }
     }
 }
