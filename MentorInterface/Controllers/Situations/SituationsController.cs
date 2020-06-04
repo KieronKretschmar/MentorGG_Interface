@@ -22,6 +22,8 @@ namespace MentorInterface.Controllers.MatchSelection
     public class SituationsController : ForwardController
     {
         private readonly ILogger<SituationsController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRoleHelper _roleHelper;
 
         /// <summary>
         /// Http Client Factory
@@ -33,9 +35,13 @@ namespace MentorInterface.Controllers.MatchSelection
         /// </summary>
         public SituationsController(
             ILogger<SituationsController> logger,
+            UserManager<ApplicationUser> userManager,
+            IRoleHelper roleHelper,
             IHttpClientFactory clientFactory)
         {
             _logger = logger;
+            _userManager = userManager;
+            _roleHelper = roleHelper;
             _clientFactory = clientFactory;
         }
         
@@ -48,34 +54,61 @@ namespace MentorInterface.Controllers.MatchSelection
         [HttpGet("single/match/{matchId}/situations")]
         public async Task<IActionResult> Match(long matchId)
         {
+            var user = await _userManager.GetUserAsync(User);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/match/{matchId}/situations");
+                $"v1/public/match/{matchId}/situations?subscriptionType={subType}");
 
             return await ForwardHttpRequest(client, message);
         }
 
         /// <summary>
-        /// Return a player's Situtations.
+        /// Return a player's Situations.
         /// </summary>
         /// <param name="steamId">SteamId of the Player</param>
-        /// <param name="matchIds">Collection of MatchIds to return Situtations for</param>
+        /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
         /// <returns></returns>
         [Authorize]
         [HttpGet("single/{steamId}/situations")]
         public async Task<IActionResult> Player(long steamId, string matchIds)
         {
+            var user = await _userManager.GetUserAsync(User);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/player/{steamId}/situations?matchIds={matchIds}");
+                $"v1/public/player/{steamId}/situations?matchIds={matchIds}&subscriptionType={subType}");
 
             return await ForwardHttpRequest(client, message);
         }
 
+        /// <summary>
+        /// Return a player's Situations of a specific SituationType.
+        /// </summary>
+        /// <param name="steamId">SteamId of the Player</param>
+        /// <param name="situationType">The type of which Situations are returned.</param>
+        /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("single/{steamId}/situations/{situationType}")]
+        public async Task<IActionResult> PlayerSituations(long steamId, int situationType, string matchIds)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
 
+            var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"v1/public/player/{steamId}/situations/{situationType}?matchIds={matchIds}&subscriptionType={subType}");
+
+            return await ForwardHttpRequest(client, message);
+        }
     }
 }
