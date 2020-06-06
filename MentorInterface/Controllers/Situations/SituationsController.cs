@@ -110,5 +110,29 @@ namespace MentorInterface.Controllers.MatchSelection
 
             return await ForwardHttpRequest(client, message);
         }
+
+        /// <summary>
+        /// Get the most recent situations of the specified type and conditions.
+        /// 
+        /// Used for debugging.
+        /// </summary>
+        /// <param name="situationType">The type of which Situations are returned.</param>
+        /// <param name="matchCount">Number of most recently added matches for which to return Situations for.</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("situations/situationType/{situationType}/samples")]
+        public async Task<IActionResult> SituationSamplesAsync(int situationType, int matchCount)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+
+            var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"v1/public/situationType/{situationType}?matchCount={matchCount}&subscriptionType={subType}");
+
+            return await ForwardHttpRequest(client, message);
+        }
     }
 }
