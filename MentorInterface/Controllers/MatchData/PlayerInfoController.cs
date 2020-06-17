@@ -46,13 +46,13 @@ namespace MentorInterface.Controllers.MatchData
         /// <returns></returns>
         [Authorize]
         [HttpGet("single/{steamId}/playerinfo")]
-        public async Task<IActionResult> PlayerInfoAsync(long steamId)
+        public async Task<IActionResult> PlayerInfoAsync(long steamId, bool forceRefresh = false)
         {
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"v1/public/single/{steamId}/playerinfo");
+                $"v1/public/single/{steamId}/playerinfo?forceRefresh={forceRefresh}");
 
             return await ForwardHttpRequest(client, message);
         }
