@@ -46,6 +46,13 @@ namespace MentorInterface.Helpers
             "situation-operator");
 
         /// <summary>
+        /// Steam User Operator
+        /// </summary>
+        public static ConnectedService SteamUserOperator = new ConnectedService(
+            "steam-user-operator",
+            "steam-user-operator");
+
+        /// <summary>
         /// Paddle Api
         /// </summary>
         public static ConnectedService PaddleApi = new ConnectedService(
