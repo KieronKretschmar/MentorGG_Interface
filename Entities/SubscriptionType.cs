@@ -23,5 +23,10 @@ namespace Entities
         /// Ultimate
         /// </summary>
         Ultimate = 3,
+
+        /// <summary>
+        /// Users who have MENTOR.GG in their name.
+        /// </summary>
+        Influencer = 4,
     }
 }
