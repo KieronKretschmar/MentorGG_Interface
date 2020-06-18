@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0] - 2020-06-18
 ### Added
 - Env var `STEAMUSEROPERATOR_URL_OVERRIDE`
+- Influencer SubscriptionType, checked on-the-fly based on whether non-paying users have "mentor.gg" in their name
 
 ## [1.8.0] - 2020-06-17
 ### Added
