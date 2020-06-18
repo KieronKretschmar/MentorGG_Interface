@@ -156,6 +156,7 @@ namespace MentorInterface
 
             #region Helpers
             services.AddTransient<IRoleHelper, RoleHelper>();
+            services.AddTransient<ISteamUserOperator, SteamUserOperator>();
             #endregion
 
             #region Paddle & Subscriptions
