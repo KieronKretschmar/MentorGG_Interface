@@ -36,15 +36,18 @@ namespace MentorInterface.Helpers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ApplicationContext _applicationContext;
+        private readonly ISteamUserOperator _steamUserOperator;
 
         public RoleHelper(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            ApplicationContext applicationContext)
+            ApplicationContext applicationContext,
+            ISteamUserOperator steamUserOperator)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _applicationContext = applicationContext;
+            _steamUserOperator = steamUserOperator;
         }
 
         public async Task<int> GetDailyMatchesLimitAsync(ApplicationUser user)
@@ -65,6 +68,13 @@ namespace MentorInterface.Helpers
             if (roles.Contains(RoleCreator.Premium.Name))
             {
                 return SubscriptionType.Premium;
+            }
+
+            // Check whether user is Influencer by having MENTOR.GG in their name as we currently do not store it as a role in database
+            var steamUserData = await _steamUserOperator.GetUser(user.SteamId);
+            if (steamUserData.SteamName.ToLowerInvariant().Contains("mentor.gg"))
+            {
+                return SubscriptionType.Influencer;
             }
 
             return SubscriptionType.Free;

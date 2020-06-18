@@ -156,6 +156,7 @@ namespace MentorInterface
 
             #region Helpers
             services.AddTransient<IRoleHelper, RoleHelper>();
+            services.AddTransient<ISteamUserOperator, SteamUserOperator>();
             #endregion
 
             #region Paddle & Subscriptions
@@ -188,6 +189,7 @@ namespace MentorInterface
             services.AddConnectedHttpService(ConnectedServices.MatchRetriever, Configuration, "MATCHRETRIEVER_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.SharingCodeGatherer, Configuration, "SHARINGCODEGATHERER_URL_OVERRIDE");
             services.AddConnectedHttpService(ConnectedServices.SituationOperator, Configuration, "SITUATIONOPERATOR_URL_OVERRIDE");
+            services.AddConnectedHttpService(ConnectedServices.SteamUserOperator, Configuration, "STEAMUSEROPERATOR_URL_OVERRIDE");
 
             // Add HTTP clients for external communication
             services.AddConnectedHttpService(ConnectedServices.PaddleApi, Configuration, "PADDLEAPI_URL_OVERRIDE");
