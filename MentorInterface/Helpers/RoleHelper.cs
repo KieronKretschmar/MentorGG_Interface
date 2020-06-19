@@ -2,6 +2,7 @@
 using Entities;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,18 +33,20 @@ namespace MentorInterface.Helpers
     public class RoleHelper : IRoleHelper
     {
         private const int DAILY_LIMIT_DEFAULT = 3;
-
+        private readonly ILogger<RoleHelper> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ApplicationContext _applicationContext;
         private readonly ISteamUserOperator _steamUserOperator;
 
         public RoleHelper(
+            ILogger<RoleHelper> logger,
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             ApplicationContext applicationContext,
             ISteamUserOperator steamUserOperator)
         {
+            _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
             _applicationContext = applicationContext;
@@ -74,6 +77,7 @@ namespace MentorInterface.Helpers
             var steamUserData = await _steamUserOperator.GetUser(user.SteamId);
             if (steamUserData.SteamName.ToLowerInvariant().Contains("mentor.gg"))
             {
+                _logger.LogInformation($"User [ {steamUserData.SteamId} ] has mentor.gg in his name.");
                 return SubscriptionType.Influencer;
             }
 
