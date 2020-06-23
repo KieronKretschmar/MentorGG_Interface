@@ -28,11 +28,30 @@ namespace MentorInterface.Helpers
         /// <param name="user"></param>
         /// <returns></returns>
         Task<SubscriptionType> GetSubscriptionTypeAsync(ApplicationUser user);
+
+        /// <summary>
+        /// Gets the user's subscription. Returns the highest one if multiple are available. 
+        /// 
+        /// If <paramref name="requestedSteamId"/> is one of the demo profiles, returns ULTIMATE instead.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="requestedSteamId"></param>
+        /// <returns></returns>
+        Task<SubscriptionType> GetSubscriptionTypeAsync(ApplicationUser user, long requestedSteamId);
     }
 
     public class RoleHelper : IRoleHelper
     {
         private const int DAILY_LIMIT_DEFAULT = 3;
+
+        /// <summary>
+        /// List of steamids for which any user may access data as if they were ULTIMATE users.
+        /// </summary>
+        private readonly List<long> DemoProfiles = new List<long>
+        {
+            76561198033880857
+        };
+
         private readonly ILogger<RoleHelper> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
@@ -83,5 +102,16 @@ namespace MentorInterface.Helpers
 
             return SubscriptionType.Free;
         }
+
+        public async Task<SubscriptionType> GetSubscriptionTypeAsync(ApplicationUser user, long requestedSteamId)
+        {
+            if (DemoProfiles.Contains(requestedSteamId))
+            {
+                return SubscriptionType.Ultimate;
+            }
+
+            return await GetSubscriptionTypeAsync(user);
+        }
+
     }
 }

@@ -77,7 +77,7 @@ namespace MentorInterface.Controllers.MatchSelection
         public async Task<IActionResult> Player(long steamId, string matchIds)
         {
             var user = await _userManager.GetUserAsync(User);
-            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user, steamId);
 
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
@@ -100,7 +100,7 @@ namespace MentorInterface.Controllers.MatchSelection
         public async Task<IActionResult> PlayerSituations(long steamId, int situationType, string matchIds)
         {
             var user = await _userManager.GetUserAsync(User);
-            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user, steamId);
 
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 

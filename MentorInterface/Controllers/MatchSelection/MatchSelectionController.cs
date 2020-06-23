@@ -56,7 +56,7 @@ namespace MentorInterface.Controllers.MatchSelection
         {
             var user = await _userManager.GetUserAsync(User);
 
-            int subType = (int) await _roleHelper.GetSubscriptionTypeAsync(user);
+            int subType = (int) await _roleHelper.GetSubscriptionTypeAsync(user, steamId);
 
             var client = _clientFactory.CreateClient(ConnectedServices.MatchRetriever);
 
