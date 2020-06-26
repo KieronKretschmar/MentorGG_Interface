@@ -159,5 +159,22 @@ namespace MentorInterface.Controllers.MatchSelection
 
             return await ForwardHttpRequest(client, message);
         }
+
+        /// <summary>
+        /// Return MetaData about every SituationType.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("situations/meta/situationtype-meta-data")]
+        public async Task<IActionResult> MetaDataAsync()
+        {
+            var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"v1/public/meta/situationtype-meta-data");
+
+            return await ForwardHttpRequest(client, message);
+        }
     }
 }
