@@ -77,7 +77,7 @@ namespace MentorInterface.Controllers.MatchSelection
         public async Task<IActionResult> Player(long steamId, string matchIds)
         {
             var user = await _userManager.GetUserAsync(User);
-            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user, steamId);
 
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
@@ -100,7 +100,7 @@ namespace MentorInterface.Controllers.MatchSelection
         public async Task<IActionResult> PlayerSituations(long steamId, int situationType, string matchIds)
         {
             var user = await _userManager.GetUserAsync(User);
-            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user);
+            int subType = (int)await _roleHelper.GetSubscriptionTypeAsync(user, steamId);
 
             var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
 
@@ -156,6 +156,23 @@ namespace MentorInterface.Controllers.MatchSelection
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Get,
                 $"v1/public/situationType/{situationType}/samples?matchIds={matchIds}&subscriptionType={subType}");
+
+            return await ForwardHttpRequest(client, message);
+        }
+
+        /// <summary>
+        /// Return MetaData about every SituationType.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("situations/meta/situationtype-meta-data")]
+        public async Task<IActionResult> MetaDataAsync()
+        {
+            var client = _clientFactory.CreateClient(ConnectedServices.SituationOperator);
+
+            HttpRequestMessage message = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"v1/public/meta/situationtype-meta-data");
 
             return await ForwardHttpRequest(client, message);
         }

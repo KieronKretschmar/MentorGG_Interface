@@ -148,6 +148,7 @@ namespace MentorInterface.Controllers.AutomaticUpload
             switch (subscription)
             {
                 case SubscriptionType.Free:
+                case SubscriptionType.Influencer:
                     return AnalyzerQuality.Low;
                 case SubscriptionType.Premium:
                     return AnalyzerQuality.Medium;
