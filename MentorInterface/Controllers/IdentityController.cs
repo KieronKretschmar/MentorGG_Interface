@@ -60,15 +60,14 @@ namespace MentorInterface.Controllers
         /// Return Identity of any known SteamId.
         /// </summary>
         [HttpGet("{steamId}")]
-        public async Task<UserIdentity> GetIdentityFromSteamIdAsync(long steamId)
+        public async Task<ActionResult<UserIdentity>> GetIdentityFromSteamIdAsync(long steamId)
         {
             // If the host is api.mentor.gg
             // Which the nginx-ingress-controller appends to each call
             // Forbid it to the shadow realm! (╯°□°）╯︵ ┻━┻
             if (Request.Headers.SingleOrDefault(x => x.Key == "Host").Value == "api.mentor.gg")
             {
-                Response.StatusCode = 403;
-                return null;
+                return Unauthorized();
             }
 
             var user = _applicationContext.Users.SingleOrDefault(x => x.SteamId == steamId);
@@ -78,8 +77,7 @@ namespace MentorInterface.Controllers
             }
             else
             {
-                Response.StatusCode = 404;
-                return null;
+                return NotFound($"User [ {steamId} ] not found");
             }
         }
 
