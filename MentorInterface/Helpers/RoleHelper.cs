@@ -120,7 +120,7 @@ namespace MentorInterface.Helpers
             var steamUserData = await _steamUserOperator.GetUser(user.SteamId);
             if (IsInfluencer(steamUserData.SteamName))
             {
-                _logger.LogInformation($"User [ {user.SteamId} ] has mentor.gg in his name - Returning SubscriptioType.Influencer");
+                _logger.LogInformation($"User [ {user.SteamId} ] has mentor.gg in their name - Returning SubscriptioType.Influencer");
                 return SubscriptionType.Influencer;
             }
 
