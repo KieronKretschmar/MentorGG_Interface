@@ -87,6 +87,11 @@ namespace MentorInterface.Controllers
             // Get a list of ApplicationUsers from the list of SteamIds
             List<ApplicationUser> users = _applicationContext.Users.Where(x=>steamIds.Contains(x.SteamId)).Select(y => y).ToList();
 
+            if(users.Count == 0)
+            {
+                return NotFound($"Users not found");
+            }
+
             var subscriptionTypes = await _roleHelper.GetSubscriptionTypesAsync(users);
             var dailyLimits = await _roleHelper.GetDailyMatchesLimitAsync(users);
 
