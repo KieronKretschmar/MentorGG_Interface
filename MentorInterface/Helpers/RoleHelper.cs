@@ -106,6 +106,11 @@ namespace MentorInterface.Helpers
 
         public async Task<SubscriptionType> GetSubscriptionTypeAsync(ApplicationUser user)
         {
+            if(user == null)
+            {
+                return SubscriptionType.Free;
+            }
+
             var roles = await _userManager.GetRolesAsync(user);
 
             if( roles.Contains(RoleCreator.Ultimate.Name))

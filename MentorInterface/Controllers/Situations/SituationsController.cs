@@ -50,7 +50,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// </summary>
         /// <param name="matchId"></param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/match/{matchId}/situations")]
         public async Task<IActionResult> Match(long matchId)
         {
@@ -72,7 +71,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <param name="steamId">SteamId of the Player</param>
         /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/situations")]
         public async Task<IActionResult> Player(long steamId, string matchIds)
         {
@@ -95,7 +93,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <param name="situationType">The type of which Situations are returned.</param>
         /// <param name="matchIds">Collection of MatchIds to return Situations for</param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/situations/{situationType}")]
         public async Task<IActionResult> PlayerSituations(long steamId, int situationType, string matchIds)
         {
@@ -119,7 +116,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <param name="situationType">The type of which Situations are returned.</param>
         /// <param name="matchCount">Number of most recently added matches for which to return Situations for.</param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("situations/situationType/{situationType}/samples-by-matchcount")]
         public async Task<IActionResult> SituationSamplesAsync(int situationType, int matchCount)
         {
@@ -144,7 +140,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <param name="situationType">The type of which Situations are returned.</param>
         /// <param name="matchIds">Matches for which to return situations.</param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("situations/situationType/{situationType}/samples")]
         public async Task<IActionResult> SituationSamplesAsync(int situationType, string matchIds)
         {
@@ -164,7 +159,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// Return MetaData about every SituationType.
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("situations/meta/situationtype-meta-data")]
         public async Task<IActionResult> MetaDataAsync()
         {
