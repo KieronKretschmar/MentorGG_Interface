@@ -14,5 +14,10 @@ namespace MentorInterface.Authentication
         /// Steam Open ID Provider.
         /// </summary>
         public const string STEAM = "OpenID.Steam";
+
+        /// <summary>
+        /// Mentor Issued JWT Token.
+        /// </summary>
+        public const string JWT = "JWT";
     }
 }

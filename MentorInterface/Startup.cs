@@ -25,6 +25,12 @@ using MentorInterface.Paddle;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using System.Net.Http;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MentorInterface
 {
@@ -195,55 +201,96 @@ namespace MentorInterface
             services.AddConnectedHttpService(ConnectedServices.PaddleApi, Configuration, "PADDLEAPI_URL_OVERRIDE");
             #endregion
 
-            #region Application Cookie
+            #region Authentication
+
+            var steamApplicationKey = Configuration.GetValue<string>("STEAM_API_KEY");
+
             services
-                .ConfigureApplicationCookie(options =>
+                .AddAuthentication(options => 
                 {
-                    options.Cookie.Name = "MentorInterface.Identity";
-                    options.LoginPath = "/authentication/signin/steam";
-                    options.LogoutPath = "/authentication/signout/steam";
-
-                    // Set the Cookie lifetime to ONE year.
-                    options.ExpireTimeSpan = TimeSpan.FromDays(365);
-
-                    // Return 401 OR 403 instead of redirecting to LoginPath
-                    options.Events = new CookieAuthenticationEvents
+                    options.DefaultAuthenticateScheme = MentorAuthenticationSchemes.JWT;
+                    options.DefaultChallengeScheme = MentorAuthenticationSchemes.JWT;
+                })
+                .AddJwtBearer(MentorAuthenticationSchemes.JWT, options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        OnRedirectToLogin = async (context) => {
-                            context.Response.StatusCode = 401;
-                            await Task.CompletedTask;
-                        },
+                        ValidateIssuer = true,  
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = "test.mentor.gg",   
+                        ValidAudience = "test.mentor.gg",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("This is the secret phrase my dude, watch out ;)"))
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = context =>
+                        {
+                            // Add the access_token as a claim, as we may need it
+                            var accessToken = context.SecurityToken as JwtSecurityToken;
+                            if (accessToken != null)
+                            {
+                                ClaimsIdentity identity = context.Principal.Identity as ClaimsIdentity;
+                                if (identity != null)
+                                {
+                                    identity.AddClaim(new Claim("access_token", accessToken.RawData));
+                                }
+                            }
 
-                        OnRedirectToAccessDenied = async (context) => {
-                            context.Response.StatusCode = 403;
-                            await Task.CompletedTask;
-                        },
+                            return Task.CompletedTask;
+                        }
+                    };
+
+
+                })
+                .AddSteam(MentorAuthenticationSchemes.STEAM, options =>
+                {
+                    options.ApplicationKey = steamApplicationKey;
+                    options.CallbackPath = "/openid/callback/steam";
+
+                    options.Events = new AspNet.Security.OpenId.OpenIdAuthenticationEvents
+                    {
+                        OnAuthenticated = context =>
+                        {
+                            // Add the SteamId as a claim to isolate the OpenId Claim logic
+                            ClaimsIdentity identity = context.Identity as ClaimsIdentity;
+                            if (identity != null)
+                            {
+                                Claim steamCommunityClaim = identity.Claims.Single(o =>
+                                {
+                                    return o.Value.Contains("openid/id");
+                                });
+                                
+                                var success = long.TryParse(steamCommunityClaim.Value.Split('/').Last(), out long steamId);
+                                if (success)
+                                {
+                                    identity.AddClaim(new Claim("steamId", steamId.ToString()));
+                                }
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
-            #endregion
+            
+            services.AddAuthorization(options =>
+            {
+                    var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                        MentorAuthenticationSchemes.JWT);
 
-            #region Steam Authentication
-            // Load the Authentication Section and confirm the entry exists.
-            var steamApplicationKey = Configuration.GetValue<string>("STEAM_API_KEY");
-            if (steamApplicationKey != null)
-            {
-                services
-                    .AddAuthentication()
-                    .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
+                    defaultAuthorizationPolicyBuilder = 
+                        defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+                    options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+
+                    options.AddPolicy("Steam", o => 
                     {
-                        options.ApplicationKey = steamApplicationKey;
-                        options.CallbackPath = "/openid/callback/steam";
+                        o.AddAuthenticationSchemes(MentorAuthenticationSchemes.STEAM);
+                        o.RequireAuthenticatedUser();
                     });
-            }
-            // If in a DEV context, warn, dont throw.
-            else if (IsDevelopment)
-            {
-                Console.WriteLine("WARNING: `STEAM_API_KEY` is missing!");
-            }
-            else
-            {
-                throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
-            }
+            });
+
+            IdentityModelEventSource.ShowPII = true;
+
             #endregion
 
             #region Cors

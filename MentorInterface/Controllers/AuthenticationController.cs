@@ -1,13 +1,17 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Entities.Models;
 using MentorInterface.Authentication;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MentorInterface.Controllers
 {
@@ -33,6 +37,28 @@ namespace MentorInterface.Controllers
             this._userManager = userManager;
             this._signInManager = signInManager;
             this._logger = logger;
+        }
+
+
+        private string GenerateJSONWebToken(ApplicationUser user)    
+        {
+            _logger.LogInformation($"Creating Token for User [ {user.SteamId} ]");
+            
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("This is the secret phrase my dude, watch out ;)"));    
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);    
+
+            var claims = new[] {    
+                new Claim("steamId", user.SteamId.ToString()),
+                GetUserIdClaim(user)
+            };
+
+            var token = new JwtSecurityToken(
+                "test.mentor.gg",
+                "test.mentor.gg",    
+                claims,
+                expires: DateTime.Now.AddMinutes(120),
+                signingCredentials: credentials);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         /// <summary>
@@ -68,25 +94,37 @@ namespace MentorInterface.Controllers
         /// </summary>
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
+        [Authorize("Steam")]
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("callback/steam")]
         public async Task<ActionResult> SteamLoginCallbackAsync(string returnUrl = "/")
         {
-            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+            ClaimsIdentity identity = User.Identity as ClaimsIdentity;
 
-            var signInAttempt = await _signInManager.ExternalLoginSignInAsync(
-                loginInfo.LoginProvider,
-                loginInfo.ProviderKey,
-                isPersistent: true);
+            foreach (var claim in identity.Claims)
+            {
+                _logger.LogInformation($"{claim.Type}:{claim.Value}");
+            }
 
-            if (signInAttempt.Succeeded)
+            // Explictly return the corrent claim associated with the SteamId.
+            Claim steamClaim = identity.Claims.Single(o =>
             {
-                return Redirect(returnUrl);
-            }
-            else
+                return o.Type == "steamId";
+            });
+
+            // Try find an existing User
+            var users = await _userManager.GetUsersForClaimAsync(steamClaim);
+            ApplicationUser user = users.FirstOrDefault();
+
+            if(user == null)
             {
-                return await RegisterSteamUserAsync(loginInfo, returnUrl);
+                user = await RegisterSteamUserAsync(steamClaim);
             }
+
+            var tokenString = GenerateJSONWebToken(user);
+            _logger.LogCritical(tokenString);
+            return Ok(new {token = tokenString});
+
         }
 
         #endregion
@@ -94,39 +132,39 @@ namespace MentorInterface.Controllers
         #region Private Methods
 
         /// <summary>
-        /// Register and sign in a new User, Logged in from Steam.
+        /// Return the UserIdClaim
+        /// With this Claim present, _userMananger.GetUserAsync() functions.
         /// </summary>
-        /// <param name="loginInfo">Steam Login Info</param>
-        /// <param name="returnUrl">Return Url</param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        private async Task<ActionResult> RegisterSteamUserAsync(ExternalLoginInfo loginInfo, string returnUrl = "/")
+        private Claim GetUserIdClaim(ApplicationUser user)
         {
-            ClaimsIdentity loginIdentity = loginInfo.Principal.Identity as ClaimsIdentity;
+                IdentityOptions options = new IdentityOptions();
+                return new Claim(options.ClaimsIdentity.UserIdClaimType, user.Id.ToString());
+        }
 
-            // Explictly return the corrent claim associated with the SteamId.
-            Claim steamClaim = loginIdentity.Claims.Single(o =>
+        /// <summary>
+        /// Register and sign in a new User, from Steam.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<ApplicationUser> RegisterSteamUserAsync(Claim steamClaim)
+        {
+            long steamId;
+            bool success = long.TryParse(steamClaim.Value, out steamId);
+            if(!success)
             {
-                return o.Value.Contains("openid/id");
-            });
+                throw new ArgumentException("SteamClaim does not contain a valid SteamId!");
+            }
 
             // Create a new ApplicationUser
-            ApplicationUser newUser;
-            try
-            {
-                newUser = ApplicationUserFactory.FromCommunityUrl(community_url: steamClaim.Value);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to create new user from Steam Community URL");
-                return StatusCode(500);
-            }
+            ApplicationUser newUser = new ApplicationUser(steamId);
 
             // Attempt to add the new user to the connected data store.
             var newUserCreationResult = await _userManager.CreateAsync(newUser);
+
             if (newUserCreationResult.Succeeded)
             {
-                await _userManager.AddLoginAsync(newUser, loginInfo);
-                await _signInManager.SignInAsync(newUser, isPersistent: true);
+                await _userManager.AddClaimAsync(newUser, steamClaim);
             }
             else
             {
@@ -134,7 +172,7 @@ namespace MentorInterface.Controllers
                 _logger.LogError("Error creating User: " + errors);
             }
 
-            return Redirect(returnUrl);
+            return newUser;
         }
 
         #endregion
