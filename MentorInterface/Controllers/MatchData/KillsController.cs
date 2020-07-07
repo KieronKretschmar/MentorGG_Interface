@@ -44,7 +44,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/filterablekills")]
         public async Task<IActionResult> KillsAsync(long steamId, string matchIds, string map)
         {
@@ -60,7 +59,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/killsoverview")]
         public async Task<IActionResult> KillsOverviewAsync(long steamId, string matchIds)
         {

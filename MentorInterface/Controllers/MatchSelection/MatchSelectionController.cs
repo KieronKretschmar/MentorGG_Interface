@@ -50,7 +50,6 @@ namespace MentorInterface.Controllers.MatchSelection
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/matchselection")]
         public async Task<IActionResult> MatchSelectionAsync(long steamId)
         {

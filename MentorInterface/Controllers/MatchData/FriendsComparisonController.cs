@@ -45,7 +45,6 @@ namespace MentorInterface.Controllers.MatchData
         /// Get FriendsComparison
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/friendscomparison")]
         public async Task<IActionResult> FriendsComparisonAsync(long steamId, string matchIds, int count = 3, int offset = 0)
         {
