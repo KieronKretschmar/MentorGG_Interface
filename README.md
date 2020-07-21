@@ -17,6 +17,13 @@ For each `Subscription` there may be one or multiple PaddlePlans the user can ch
 - `PADDLE_VENDOR_ID` : int, provided by Paddle for identifying us. [\*]
 - `PADDLE_VENDOR_AUTH_CODE` : string, our secret key for communication with Paddle.[\*]
 
+**JWT**
+
+- `JWT_SIGNING_KEY`: The passphrase used to create and validate JWT Tokens. [\*]
+- `JWT_ISSUER`: The issuer of the tokens. (`api.mentor.gg`) [\*]
+- `JWT_AUDIENCE`: The valid audience sending the token (`mentor.gg`) [\*]
+- `JWT_VALIDITY`: The amount of time, in minutes a token is valid for. [\*]
+
 [\*] *Required*
 
 

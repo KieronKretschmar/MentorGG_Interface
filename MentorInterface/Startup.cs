@@ -203,7 +203,31 @@ namespace MentorInterface
 
             #region Authentication
 
-            var steamApplicationKey = Configuration.GetValue<string>("STEAM_API_KEY");
+            var steamApplicationKey = Configuration.GetValue<string>("STEAM_API_KEY")
+                ?? throw new ArgumentNullException("The environment variable STEAM_API_KEY has not been set.");
+
+            var jwtSigningKey = Configuration.GetValue<string>("JWT_SIGNING_KEY")
+                ?? throw new ArgumentNullException("The environment variable JWT_SIGNING_KEY has not been set.");
+
+            var jwtIssuer = Configuration.GetValue<string>("JWT_ISSUER")
+                ?? throw new ArgumentNullException("The environment variable JWT_ISSUER has not been set.");
+
+            var jwtAudience = Configuration.GetValue<string>("JWT_AUDIENCE")
+                ?? throw new ArgumentNullException("The environment variable JWT_AUDIENCE has not been set.");
+
+            var jwtValidity = Configuration.GetValue<int?>("JWT_VALIDITY")
+                ?? throw new ArgumentNullException("The environment variable JWT_VALIDITY has not been set.");
+
+            services.AddSingleton<IJsonWebTokenGenerator>(sp =>
+                {
+                    return new JsonWebTokenGenerator(
+                        jwtSigningKey,
+                        jwtIssuer,
+                        jwtAudience,
+                        TimeSpan.FromMinutes(jwtValidity),
+                        sp.GetRequiredService<ILogger<JsonWebTokenGenerator>>());
+                }
+            );
 
             services
                 .AddAuthentication(options => 
@@ -219,9 +243,9 @@ namespace MentorInterface
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = "test.mentor.gg",   
-                        ValidAudience = "test.mentor.gg",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("This is the secret phrase my dude, watch out ;)"))
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)) 
                     };
                     options.Events = new JwtBearerEvents
                     {
@@ -289,6 +313,8 @@ namespace MentorInterface
                     });
             });
 
+            // This enable more verbose logging and should be removed in Production
+            // Todo Remove this
             IdentityModelEventSource.ShowPII = true;
 
             #endregion

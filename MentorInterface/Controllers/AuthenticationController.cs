@@ -24,6 +24,7 @@ namespace MentorInterface.Controllers
         private readonly ILogger<AuthenticationController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IJsonWebTokenGenerator _jsonWebTokenGenerator;
 
         #region Public Methods
         /// <summary>
@@ -32,33 +33,13 @@ namespace MentorInterface.Controllers
         public AuthenticationController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            IJsonWebTokenGenerator jsonWebTokenGenerator,
             ILogger<AuthenticationController> logger)
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
+            this._jsonWebTokenGenerator = jsonWebTokenGenerator;
             this._logger = logger;
-        }
-
-
-        private string GenerateJSONWebToken(ApplicationUser user)    
-        {
-            _logger.LogInformation($"Creating Token for User [ {user.SteamId} ]");
-            
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("This is the secret phrase my dude, watch out ;)"));    
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);    
-
-            var claims = new[] {    
-                new Claim("steamId", user.SteamId.ToString()),
-                GetUserIdClaim(user)
-            };
-
-            var token = new JwtSecurityToken(
-                "test.mentor.gg",
-                "test.mentor.gg",    
-                claims,
-                expires: DateTime.Now.AddMinutes(120),
-                signingCredentials: credentials);
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         /// <summary>
@@ -121,7 +102,7 @@ namespace MentorInterface.Controllers
                 user = await RegisterSteamUserAsync(steamClaim);
             }
 
-            var tokenString = GenerateJSONWebToken(user);
+            var tokenString = _jsonWebTokenGenerator.GenerateJSONWebToken(user);
             _logger.LogCritical(tokenString);
             return Ok(new {token = tokenString});
 
@@ -130,18 +111,6 @@ namespace MentorInterface.Controllers
         #endregion
 
         #region Private Methods
-
-        /// <summary>
-        /// Return the UserIdClaim
-        /// With this Claim present, _userMananger.GetUserAsync() functions.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        private Claim GetUserIdClaim(ApplicationUser user)
-        {
-                IdentityOptions options = new IdentityOptions();
-                return new Claim(options.ClaimsIdentity.UserIdClaimType, user.Id.ToString());
-        }
 
         /// <summary>
         /// Register and sign in a new User, from Steam.
