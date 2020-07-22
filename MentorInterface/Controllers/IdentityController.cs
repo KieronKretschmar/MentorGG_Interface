@@ -85,7 +85,7 @@ namespace MentorInterface.Controllers
         public async Task<ActionResult<List<UserIdentity>>> GetIdentitiesFromSteamIdsAsync([ModelBinder(typeof(CsvModelBinder))] List<long> steamIds)
         {
             // Get a list of ApplicationUsers from the list of SteamIds
-            List<ApplicationUser> users = _applicationContext.Users.Where(x=>steamIds.Contains(x.SteamId)).Select(y => y).ToList();
+            List<ApplicationUser> users = _applicationContext.Users.Where(x=>steamIds.Contains(x.SteamId)).ToList();
 
             if(users.Count == 0)
             {
@@ -109,17 +109,6 @@ namespace MentorInterface.Controllers
             }
 
             return identities;
-        }
-        
-        /// <summary>
-        /// Read the Headers of a request to see if the Host is api.mentor.gg
-        /// Confirming the call is from the Internal and not internal.
-        /// </summary>
-        /// <param name="headers"></param>
-        /// <returns></returns>
-        private bool IsExternalRequest(IHeaderDictionary headers)
-        {
-            return (headers.SingleOrDefault(x => x.Key == "Host").Value == "api.mentor.gg");
         }
 
         /// <summary>
