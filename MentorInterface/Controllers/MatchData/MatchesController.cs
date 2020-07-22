@@ -53,7 +53,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <param name="ignoredMatchIds">MatchIds for which no data should be returned.</param>
         /// <param name="offset"></param>
         [ValidateMatchIds]
-        [Authorize]
         [HttpGet("single/{steamId}/matches")]
         public async Task<IActionResult> MatchesAsync(long steamId, string matchIds, int count, string ignoredMatchIds = "", int offset = 0)
         {

@@ -14,6 +14,8 @@ using Entities;
 using Database;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using MentorInterface.Attributes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -57,19 +59,12 @@ namespace MentorInterface.Controllers
         }
 
         /// <summary>
-        /// Return Identity of any known SteamId.
+        /// Return UserIdentity of any known SteamId.
         /// </summary>
+        [InternalHttp]
         [HttpGet("{steamId}")]
         public async Task<ActionResult<UserIdentity>> GetIdentityFromSteamIdAsync(long steamId)
         {
-            // If the host is api.mentor.gg
-            // Which the nginx-ingress-controller appends to each call
-            // Forbid it to the shadow realm! (╯°□°）╯︵ ┻━┻
-            if (Request.Headers.SingleOrDefault(x => x.Key == "Host").Value == "api.mentor.gg")
-            {
-                return Unauthorized();
-            }
-
             var user = _applicationContext.Users.SingleOrDefault(x => x.SteamId == steamId);
             if (user != null)
             {
@@ -79,6 +74,41 @@ namespace MentorInterface.Controllers
             {
                 return NotFound($"User [ {steamId} ] not found");
             }
+        }
+
+        /// <summary>
+        /// Return known UserIdentities for a list of SteamIds.
+        /// </summary>
+        /// <returns></returns>
+        [InternalHttp]
+        [HttpGet("multiple/{steamIds}")]
+        public async Task<ActionResult<List<UserIdentity>>> GetIdentitiesFromSteamIdsAsync([ModelBinder(typeof(CsvModelBinder))] List<long> steamIds)
+        {
+            // Get a list of ApplicationUsers from the list of SteamIds
+            List<ApplicationUser> users = _applicationContext.Users.Where(x=>steamIds.Contains(x.SteamId)).ToList();
+
+            if(users.Count == 0)
+            {
+                return NotFound($"Users not found");
+            }
+
+            var subscriptionTypes = await _roleHelper.GetSubscriptionTypesAsync(users);
+            var dailyLimits = await _roleHelper.GetDailyMatchesLimitAsync(users);
+
+            List<UserIdentity> identities = new List<UserIdentity>(users.Count);
+            foreach(var user in users)
+            {
+                var identity = new UserIdentity
+                {
+                    ApplicationUserId = user.Id,
+                    SteamId = user.SteamId,
+                    SubscriptionType = subscriptionTypes.Single(x=> x.Item1 == user).Item2,
+                    DailyMatchesLimit = dailyLimits.Single(x=> x.Item1 == user).Item2       
+                };
+                identities.Add(identity);
+            }
+
+            return identities;
         }
 
         /// <summary>

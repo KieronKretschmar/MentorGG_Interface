@@ -45,7 +45,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [ValidateMatchIds]
         [HttpGet("single/{steamId}/firenades")]
         public async Task<IActionResult> FireNadesAsync(long steamId, string matchIds, string map)
@@ -63,7 +62,6 @@ namespace MentorInterface.Controllers.MatchData
         /// Forward request to MatchRetriever
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/firenadesoverview")]
         public async Task<IActionResult> FireNadesOverviewAsync(long steamId, string matchIds)
         {

@@ -44,7 +44,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/playersummary")]
         public async Task<IActionResult> PlayerInfoAsync(long steamId)
         {

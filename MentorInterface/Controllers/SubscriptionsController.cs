@@ -51,33 +51,33 @@ namespace MentorInterface.Controllers
         /// Return the currently logged in User's active and available subscriptions.
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet]
         public async Task<SubscriptionsModel> GetSubscriptionsAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
-            // explicitly load PaddleSubscriptions for this user
-            _applicationContext.Entry(user).Collection(x => x.PaddleSubscriptions).Load();
+            var model = new SubscriptionsModel();
 
-            var activeSubscription = _applicationContext.PaddleSubscription
-                .Where(x => x.ApplicationUserId == user.Id)
-                .Include(x => x.PaddlePlan)
-                .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
-                .SingleOrDefault();
+            var user = await _userManager.GetUserAsync(User);
+            if(user != null)
+            {
+                // explicitly load PaddleSubscriptions for this user
+                _applicationContext.Entry(user).Collection(x => x.PaddleSubscriptions).Load();
+
+                model.ActiveSubscription = _applicationContext.PaddleSubscription
+                    .Where(x => x.ApplicationUserId == user.Id)
+                    .Include(x => x.PaddlePlan)
+                    .Select(x => new PaddleSubscriptionModel(x.PaddlePlan.SubscriptionType, x))
+                    .SingleOrDefault();
+            }
 
             // Get all PaddlePlans available to the user, grouped by SubscriptionType
-            var availableSubscriptions = _applicationContext.PaddlePlan
+            model.AvailableSubscriptions = _applicationContext.PaddlePlan
                 .Where(x => availableSubscriptionTypes.Contains(x.SubscriptionType))
                 .ToList()
                 .GroupBy(x => x.SubscriptionType)
                 .Select(x => new AvailableSubscription(x.Key, x.ToList()))
                 .ToList();
 
-            return new SubscriptionsModel
-            {
-                ActiveSubscription = activeSubscription,
-                AvailableSubscriptions = availableSubscriptions
-            };
+            return model;
         }
     }
 }
