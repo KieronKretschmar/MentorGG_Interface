@@ -44,7 +44,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/hes")]
         public async Task<IActionResult> HesAsync(long steamId, string matchIds, string map)
         {
@@ -60,7 +59,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/hesoverview")]
         public async Task<IActionResult> HesOverviewAsync(long steamId, string matchIds)
         {

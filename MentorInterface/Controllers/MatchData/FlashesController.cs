@@ -44,7 +44,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/flashes")]
         public async Task<IActionResult> FlashesAsync(long steamId, string matchIds, string map)
         {
@@ -60,7 +59,6 @@ namespace MentorInterface.Controllers.MatchData
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("single/{steamId}/flashesoverview")]
         public async Task<IActionResult> FlashesOverviewAsync(long steamId, string matchIds)
         {
