@@ -25,6 +25,7 @@ using MentorInterface.Paddle;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using System.Net.Http;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace MentorInterface
 {
@@ -245,6 +246,11 @@ namespace MentorInterface
                 throw new ArgumentException("SteamApplicationKey is missing, configure the `STEAM_API_KEY` enviroment variable.");
             }
             #endregion
+
+
+            services.AddDataProtection()
+                    .SetApplicationName($"mentor-interface")
+                    .PersistKeysToFileSystem(new DirectoryInfo($@"/keys"));
 
             #region Cors
             services.AddCors(o => o.AddPolicy("Debug", builder =>
