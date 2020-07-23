@@ -7,6 +7,9 @@ Users can have different (AspNet)`Roles`, e.g. "Admin" or "Premium", which may b
 Some Roles are available to users through `Subscriptions`.
 For each `Subscription` there may be one or multiple PaddlePlans the user can choose from, differing e.g. by contract duration and pricing. 
 
+## Persisting Cookies
+To persist cookies, mount a `PVC` to `/keys` - This way MentorInterface can remount the keys to validate existing cookies upon relaunch.
+
 ## Environment Variables
 
 - `STEAM_API_KEY` : Steam application key for OpenID authentication. [\*]
