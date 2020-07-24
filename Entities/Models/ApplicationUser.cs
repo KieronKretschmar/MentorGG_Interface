@@ -64,6 +64,12 @@ namespace Entities.Models
         public DateTime Registration { get; set; }
 
         /// <summary>
+        /// Accepted Terms of Service
+        /// </summary>
+        /// <value></value>
+        public bool AcceptedTermsOfService { get; set;}
+
+        /// <summary>
         /// Create a user from a SteamId.
         /// </summary>
         public ApplicationUser(long steamId) : base()
