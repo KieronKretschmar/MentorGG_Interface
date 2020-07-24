@@ -234,6 +234,10 @@ namespace MentorInterface.Controllers
                 ExpirationTime = null,
             };
             _applicationContext.PaddleSubscription.Add(subscription);
+
+            // If the user has Subscribed, they have had to had accepted the TOS.
+            appUser.AcceptedTermsOfService = true;
+
             await _applicationContext.SaveChangesAsync();
 
             // Add role(s) to ApplicationUser
