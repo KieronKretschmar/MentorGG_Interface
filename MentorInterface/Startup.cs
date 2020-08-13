@@ -236,6 +236,8 @@ namespace MentorInterface
                     .AddAuthentication()
                     .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
                     {
+                        options.CorrelationCookie.SameSite = SameSiteMode.None;
+                        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                         options.ApplicationKey = steamApplicationKey;
                         options.CallbackPath = "/openid/callback/steam";
                     });
