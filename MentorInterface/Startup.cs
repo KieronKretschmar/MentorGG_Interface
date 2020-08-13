@@ -26,6 +26,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using System.Net.Http;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 
 namespace MentorInterface
 {
@@ -201,6 +202,9 @@ namespace MentorInterface
                 .ConfigureApplicationCookie(options =>
                 {
                     options.Cookie.Name = "MentorInterface.Identity";
+                    options.Cookie.IsEssential = true;
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.LoginPath = "/authentication/signin/steam";
                     options.LogoutPath = "/authentication/signout/steam";
 
@@ -232,6 +236,8 @@ namespace MentorInterface
                     .AddAuthentication()
                     .AddSteam(scheme: MentorAuthenticationSchemes.STEAM, options =>
                     {
+                        options.CorrelationCookie.SameSite = SameSiteMode.None;
+                        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
                         options.ApplicationKey = steamApplicationKey;
                         options.CallbackPath = "/openid/callback/steam";
                     });
