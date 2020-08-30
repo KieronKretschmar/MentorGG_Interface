@@ -67,7 +67,13 @@ namespace Entities.Models
         /// Accepted Terms of Service
         /// </summary>
         /// <value></value>
-        public bool AcceptedTermsOfService { get; set;}
+        public bool AcceptedTermsOfService { get; set; }
+
+        /// <summary>
+        /// The SteamID of the user who refered this user to Mentor.gg
+        /// </summary>
+        /// <value></value>
+        public long RefererSteamId { get; set; }
 
         /// <summary>
         /// Create a user from a SteamId.
