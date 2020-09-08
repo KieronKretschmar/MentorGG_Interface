@@ -627,6 +627,23 @@ namespace Database.Migrations
                     b.ToTable("PaddlePlanRole");
                 });
 
+            modelBuilder.Entity("Entities.Models.Paddle.PaddleReferralCoupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Coupon")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<long>("SteamId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaddleReferralCoupon");
+                });
+
             modelBuilder.Entity("Entities.Models.Paddle.PaddleSubscription", b =>
                 {
                     b.Property<int>("SubscriptionId")

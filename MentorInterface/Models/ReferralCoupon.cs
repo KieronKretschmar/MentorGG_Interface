@@ -4,6 +4,8 @@ namespace MentorInterface.Models
     {
         public string? Coupon { get; set; }
 
-        public int Referrals { get; set; }
+        public int? Referrals { get; set; }
+
+        public string? Error { get; set;}
     }
 }

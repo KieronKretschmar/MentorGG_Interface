@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database;
 using Entities.Models;
+using Entities.Models.Paddle;
 using MentorInterface.Models;
 using MentorInterface.Paddle;
 using Microsoft.AspNetCore.Authorization;
@@ -50,23 +51,49 @@ namespace MentorInterface.Controllers
         public async Task<ActionResult<ReferralCoupon>> GetCouponAsync()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            int referrals = _applicationContext.Users.Where(x=> x.RefererSteamId == currentUser.SteamId).Count();
 
+            // Check if the current user has already claimed a coupon.
+            var existingCoupon = _applicationContext.PaddleReferralCoupon.SingleOrDefault(x => x.SteamId == currentUser.SteamId);
+            if (existingCoupon != null)
+            {
+                return new ReferralCoupon
+                {
+                    Error = "Coupon has already been claimed",
+                };
+            }
+
+            int referrals = _applicationContext.Users.Where(x => x.RefererSteamId == currentUser.SteamId).Count();
             _logger.LogInformation($"Current User [ {currentUser.SteamId} ] has referred [ {referrals } ] users.");
 
             if(referrals >= 4)
             {
+                // Create the coupon
+                string coupon = await _paddleApi.CreateReferralCouponAsync();
+
+                await StorePaddleReferralCoupon(currentUser.SteamId, coupon);
+
                 return new ReferralCoupon
                 {
-                    Coupon = await _paddleApi.CreateReferralCouponAsync(),
+                    Coupon = coupon,
                     Referrals = referrals,
                 };
             }
 
             return new ReferralCoupon
             {
-                Referrals = referrals
+                Referrals = referrals,
+                Error = "Not enough referrals",
             };
+        }
+
+        private async Task StorePaddleReferralCoupon(long steamId, string coupon)
+        {
+            _applicationContext.PaddleReferralCoupon.Add(new PaddleReferralCoupon
+            {
+                SteamId = steamId,
+                Coupon = coupon,
+            });
+            await _applicationContext.SaveChangesAsync();
         }
     }
 }
