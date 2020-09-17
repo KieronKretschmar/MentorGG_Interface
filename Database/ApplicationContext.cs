@@ -18,6 +18,7 @@ namespace Database
         public DbSet<PaddlePlan> PaddlePlan { get; set; }
         public DbSet<PaddlePlanRole> PaddlePlanRole { get; set; }
         public DbSet<PaddleSubscription> PaddleSubscription { get; set; }
+        public DbSet<PaddleReferralCoupon> PaddleReferralCoupon { get; set; }
 
         public DbSet<SubscriptionCreated> SubscriptionCreated { get; set; }
         public DbSet<SubscriptionUpdated> SubscriptionUpdated { get; set; }
@@ -96,6 +97,11 @@ namespace Database
                 .HasForeignKey(x => x.SubscriptionPlanId)
                 .IsRequired();
 
+            });
+
+            builder.Entity<PaddleReferralCoupon>(b =>
+            {
+                b.HasKey(x => x.Id);
             });
 
             builder.Entity<SubscriptionCreated>(b => b.HasKey(x => x.AlertId));

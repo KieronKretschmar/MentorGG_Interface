@@ -57,7 +57,7 @@ namespace MentorInterface.Helpers
         /// </summary>
         public static ConnectedService PaddleApi = new ConnectedService(
             "paddle-api",
-            "vendors.paddle.com/api/2.0",
+            "vendors.paddle.com",
             true);
     }
 

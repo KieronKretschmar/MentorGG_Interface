@@ -3,14 +3,16 @@ using System;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Database.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20200907155837_add-referer-field")]
+    partial class addrefererfield
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -625,23 +627,6 @@ namespace Database.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("PaddlePlanRole");
-                });
-
-            modelBuilder.Entity("Entities.Models.Paddle.PaddleReferralCoupon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Coupon")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<long>("SteamId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PaddleReferralCoupon");
                 });
 
             modelBuilder.Entity("Entities.Models.Paddle.PaddleSubscription", b =>
