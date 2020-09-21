@@ -52,18 +52,20 @@ namespace MentorInterface.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
+            int referrals = _applicationContext.Users.Where(x => x.RefererSteamId == currentUser.SteamId).Count();
+            _logger.LogInformation($"Current User [ {currentUser.SteamId} ] has referred [ {referrals } ] users.");
+
             // Check if the current user has already claimed a coupon.
             var existingCoupon = _applicationContext.PaddleReferralCoupon.SingleOrDefault(x => x.SteamId == currentUser.SteamId);
             if (existingCoupon != null)
             {
                 return new ReferralCoupon
                 {
-                    Error = "Coupon has already been claimed",
+                    Coupon = existingCoupon.Coupon,
+                    Referrals = referrals
                 };
             }
 
-            int referrals = _applicationContext.Users.Where(x => x.RefererSteamId == currentUser.SteamId).Count();
-            _logger.LogInformation($"Current User [ {currentUser.SteamId} ] has referred [ {referrals } ] users.");
 
             if(referrals >= 4)
             {
