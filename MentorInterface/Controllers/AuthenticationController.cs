@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -38,12 +40,15 @@ namespace MentorInterface.Controllers
         /// <summary>
         /// Sign in with Steams OpenID service.
         /// </summary>
-        /// <param name="returnUrl">Return Url</param>
-        /// <returns></returns>
         [HttpGet("signin/steam")]
-        public IActionResult SteamSignIn(string returnUrl = "/")
+        public IActionResult SteamSignIn(string returnUrl = "/", string referrer = "")
         {
             var redirectUrl = $"/authentication/callback/steam?returnUrl={returnUrl}";
+            if(!string.IsNullOrEmpty(referrer))
+            {
+                 redirectUrl += $"&referrer={referrer}";
+            }
+
             var props = _signInManager.ConfigureExternalAuthenticationProperties(
                 provider: MentorAuthenticationSchemes.STEAM,
                 redirectUrl: redirectUrl);
@@ -66,11 +71,9 @@ namespace MentorInterface.Controllers
         /// <summary>
         /// Steam Login callback, log in existing users and register new users.
         /// </summary>
-        /// <param name="returnUrl">Return Url</param>
-        /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("callback/steam")]
-        public async Task<ActionResult> SteamLoginCallbackAsync(string returnUrl = "/")
+        public async Task<ActionResult> SteamLoginCallbackAsync(string returnUrl = "/", string referrer = "")
         {
             var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
 
@@ -85,7 +88,7 @@ namespace MentorInterface.Controllers
             }
             else
             {
-                return await RegisterSteamUserAsync(loginInfo, returnUrl);
+                return await RegisterSteamUserAsync(loginInfo, returnUrl, referrer);
             }
         }
 
@@ -99,7 +102,7 @@ namespace MentorInterface.Controllers
         /// <param name="loginInfo">Steam Login Info</param>
         /// <param name="returnUrl">Return Url</param>
         /// <returns></returns>
-        private async Task<ActionResult> RegisterSteamUserAsync(ExternalLoginInfo loginInfo, string returnUrl = "/")
+        private async Task<ActionResult> RegisterSteamUserAsync(ExternalLoginInfo loginInfo, string returnUrl = "/", string referrer = "")
         {
             ClaimsIdentity loginIdentity = loginInfo.Principal.Identity as ClaimsIdentity;
 
@@ -119,6 +122,23 @@ namespace MentorInterface.Controllers
             {
                 _logger.LogError(e, "Failed to create new user from Steam Community URL");
                 return StatusCode(500);
+            }
+
+            // Attach the Referer, if present
+
+            if (!string.IsNullOrEmpty(referrer))
+            {
+                long steamId;
+                bool success = long.TryParse(referrer, out steamId);
+                if (success)
+                {
+                    newUser.RefererSteamId = steamId;
+                    _logger.LogInformation($"New user [ {newUser.SteamId} ] was referred by [ {referrer} ]");
+                }
+                else
+                {
+                    _logger.LogError($"Failed to assign referrer [ {referrer } ] to new ApplicationUser [ {newUser.SteamId} ]");
+                }
             }
 
             // Attempt to add the new user to the connected data store.
