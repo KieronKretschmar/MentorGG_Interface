@@ -114,7 +114,7 @@ namespace MentorInterface.Paddle
                 HttpMethod.Post,
                 "api/2.1/product/create_coupon");
 
-            var expiryDate = DateTime.Now + TimeSpan.FromDays(7);
+            var expiryDate = DateTime.Now + TimeSpan.FromDays(365);
             CreateCouponRequest couponRequest = new CreateCouponRequest
             {
                 VendorId = _vendorId,
